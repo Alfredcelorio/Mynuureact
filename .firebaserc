@@ -1,0 +1,17 @@
+{
+  "projects": {
+    "default": "",
+    "mn-mynuuweb": "fullaccezz-2756a"
+  },
+  "targets": {
+    "fullaccezz-2756a": {
+      "hosting": {
+        "mn": [
+          "mn-mynuu",
+          "mn.mynuutheapp"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

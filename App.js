@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import firebase from 'firebase'; // Using the Firebase SDK provided by Expo
-import { AuthContext } from './path_to_your_context'; // Assuming you have a context for authentication
+
+// TODO: Replace the below import with the actual path to your authentication context
+import { AuthContext } from './path_to_your_context';
 
 const AdminScreen = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const navigation = useNavigation();
-  const { user, signOut } = useContext(AuthContext); // Assuming you have a context handling authentication
+  const { user, signOut } = useContext(AuthContext);
 
   useEffect(() => {
     // Logic similar to initState
@@ -15,7 +16,6 @@ const AdminScreen = () => {
   }, []);
 
   const _buildDrawer = (role) => {
-    // This will be a mock of the drawer, you can further implement using `react-navigation` Drawer
     return (
       <View style={styles.drawerContainer}>
         {role !== 'Staff' && (
@@ -34,16 +34,15 @@ const AdminScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* App Bar */}
       <View style={styles.appBar}>
         <TouchableOpacity onPress={() => { /* Logic to open drawer */ }}>
+          {/* TODO: Replace the below image path with the actual path to your icon */}
           <Image source={require('./path_to_your_icon.png')} />
         </TouchableOpacity>
+        {/* TODO: Replace the below image path with the actual path to your logo */}
         <Image source={require('./path_to_your_logo.png')} style={styles.logo} />
-        {_buildPopupMenuButton('Staff')} {/* example role passed */}
+        {_buildPopupMenuButton('Staff')}
       </View>
-
-      {/* Page Content */}
       <View style={styles.content}>
         {/* Display the page based on currentPage state */}
       </View>
@@ -57,7 +56,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
   },
   appBar: {
-    height: 60, // or whatever height you want
+    height: 60,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
