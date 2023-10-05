@@ -8,7 +8,7 @@ export default function LoginScr({ navigation }) {
   };
 
   const handleStartOver = () => {
-    navigation.navigate('Welcome'); 
+    navigation.navigate('WelcomeScreen'); 
   };
 
   return (
