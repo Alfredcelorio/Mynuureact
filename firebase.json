@@ -1,0 +1,36 @@
+{
+  "hosting": {
+    "site": "",
+    "public": "build",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "headers": [ {
+      "source": "**/*.@(js|css)",
+      "headers": [ {
+        "key": "Cache-Control",
+        "value": "no-store, max-age=120"
+      } ]
+    }, {
+      "source": "**/*.@(jpg|jpeg|gif|png|svg|ico)",
+      "headers": [ {
+        "key": "Cache-Control",
+        "value" : "no-store, max-age=604800"
+      } ]
+    }],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html",
+        "dynamicLinks": true
+      }
+    ],
+    "cleanUrls": true,
+
+    "trailingSlash": false,
+
+    "appAssociation": "AUTO"
+  }
+}
