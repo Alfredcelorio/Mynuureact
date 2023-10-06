@@ -16,13 +16,24 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier":"com.mynuutheapp.MynuuAppReg"
+      "bundleIdentifier": "com.mynuutheapp.MynuuAppReg",
+      "config": {
+        "googleSignIn": {
+          "reservedClientId": "286050939937-8euod7ujq8uq1ktqb4pmdjd5hbhsek41.apps.googleusercontent.com"
+        }
+      }
     },
     "android": {
-      "package":"com.mynuutheapp.MynuuAppReg",
+      "package": "com.mynuutheapp.MynuuAppReg",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "config": {
+        "googleSignIn": {
+          "apiKey": "YOUR_ANDROID_API_KEY",
+          "certificateHash": "YOUR_ANDROID_CERTIFICATE_HASH"
+        }
       }
     },
     "web": {
@@ -30,4 +41,3 @@
     }
   }
 }
-

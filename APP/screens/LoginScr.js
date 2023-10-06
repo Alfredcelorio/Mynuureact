@@ -2,23 +2,17 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 
 export default function LoginScr({ navigation }) {
-  const handleGoogleLogin = () => {
-    // Logic to handle Google login goes here
-    console.log("Google login pressed");
-  };
 
-  const handleStartOver = () => {
-    navigation.navigate('WelcomeScreen'); 
+  const handleLogin = () => {
+    console.log("Login pressed");
+    // Add your login logic here if needed
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.welcomeText}>Lets Rock and Roll</Text>
-      <TouchableOpacity style={styles.googleLoginButton} onPress={handleGoogleLogin}>
-        <Text style={styles.buttonText}>Log in with Google</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.startOverButton} onPress={handleStartOver}>
-        <Text style={styles.buttonText}>Start Over</Text>
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Log in</Text>
       </TouchableOpacity>
     </View>
   );
@@ -37,15 +31,17 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  googleLoginButton: {
+  loginButton: {
     position: 'absolute',
-    bottom: 50,    // Push it closer to the bottom
-    left: '5%',   // Center it horizontally with 90% width
-    width: '90%', // Set width to 90% of the screen
+    bottom: '20%',  // Position it 20% from the bottom
+    left: '5%',    // Center it horizontally with 90% width
+    width: '90%',  // Set width to 90% of the screen
     padding: 15,
-    backgroundColor: '#4285F4',
+    backgroundColor: '#000',  // Black background
+    borderColor: '#FFF',      // White border
+    borderWidth: 1,           // Width of the border
     borderRadius: 10,
-    alignItems: 'center',
+    alignItems: 'center', 
   },
   buttonText: {
     color: '#fff',
@@ -54,7 +50,7 @@ const styles = StyleSheet.create({
   },
   startOverButton: {
     position: 'absolute', // Position it absolutely
-    bottom: 120,  // Position it just above the googleLoginButton
+    bottom: 120,  // Position it just above the loginButton
     left: '5%',  // Center it horizontally with 90% width
     width: '90%',
     padding: 15,
@@ -62,5 +58,4 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-
 });
