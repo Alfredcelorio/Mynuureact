@@ -10,7 +10,7 @@ export default function LoginScr({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>Lets Rock and Roll</Text>
+      <Text style={styles.welcomeText}>Lets Rock and Roll!</Text>
       <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <Text style={styles.buttonText}>Log in</Text>
       </TouchableOpacity>
