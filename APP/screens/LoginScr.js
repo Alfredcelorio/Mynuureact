@@ -5,10 +5,7 @@ export default function LoginScr({ navigation }) {
 
   const handleLogin = () => {
     console.log("Login pressed");
-    //OAuth client created for ios, android and web
-   //web 286050939937-mr6d95mcbsop05lii7qk3jve2ldjs4fg.apps.googleusercontent.com
-   //ios 286050939937-8euod7ujq8uq1ktqb4pmdjd5hbhsek41.apps.googleusercontent.com
-  //android 286050939937-d79lhlsek38tr84id25e4v2rqplpvn9o.apps.googleusercontent.com// Add your login logic here if needed
+    navigation.navigate('Mainmenu');
   };
 
   return (
