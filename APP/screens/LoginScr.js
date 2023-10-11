@@ -27,10 +27,14 @@ const styles = StyleSheet.create({
     paddingVertical: 50,
   },
   welcomeText: {
-    fontSize: 52,
+    fontFamily: 'Metropolis-SemiBold',
+    fontSize: 24,
+    fontWeight: '600',
+    lineHeight: 29,
+    letterSpacing: -0.25437501072883606,
+    textAlign: 'left',
     color: '#fff',
-    fontWeight: 'bold',
-  },
+},
   loginButton: {
     position: 'absolute',
     bottom: '20%',  // Position it 20% from the bottom
