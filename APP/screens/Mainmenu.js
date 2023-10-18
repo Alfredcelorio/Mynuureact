@@ -56,7 +56,7 @@ const Mainmenu = () => {
         </View>
       </LinearGradient>
       <View style={styles.topBar}>
-        <Text style={styles.headerText}> Hello,</Text>
+        <Text style={styles.headerText}> Welcome to Cantina la 20,</Text>
       </View>
       <View style={styles.searchBarContainer}>
         <Text style={styles.headerText}> This is your drink menu</Text>

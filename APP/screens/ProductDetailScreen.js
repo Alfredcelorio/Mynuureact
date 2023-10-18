@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Image, StyleSheet, Text, TouchableOpacity, ScrollView, useWindowDimensions } from 'react-native';
+import { View, Image, StyleSheet, Text, ScrollView, useWindowDimensions, SafeAreaView, TouchableOpacity, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 
@@ -11,7 +11,11 @@ Animatable.initializeRegistryWithDefinitions({
 });
 
 const TypingText = Animatable.createAnimatableComponent(Text);
-const TypingView = Animatable.createAnimatableComponent(View);
+
+const imageUris = [
+  'https://images.prismic.io/claseazul/54230971-073d-4a3f-a19e-5b33cf618281_Reposado-NBI.png?auto=compress,format&rect=12,0,507,1559&w=532&h=1636',
+  // Add more image URLs here
+];
 
 const ProductScreen = () => {
   const navigation = useNavigation();
@@ -23,8 +27,6 @@ const ProductScreen = () => {
     const delay = 1000; // You can adjust this delay according to your preference
     setAnimationDelay(delay);
   }, []);
-
-  const isLandscape = windowWidth > 500;
 
   const productData = {
     name: 'Clase azul',
@@ -40,92 +42,89 @@ const ProductScreen = () => {
       Sku: '123456789',
       Taste: 'Smooth and rich',
       Type: 'Tequila',
-      Varietal: 'Blue Agave',
+      Varietal: 'Blue Agave ',
     },
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
       <TouchableOpacity style={styles.goBackButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.goBackText}>← Go Back</Text>
+        <Text style={styles.goBackText}>← </Text>
       </TouchableOpacity>
+      <Text style={styles.headerText}> Welcome to Cantina la 20,</Text>
+        <View style={styles.contentContainer}>
+          <Image 
+            source={{ uri: 'https://images.prismic.io/claseazul/54230971-073d-4a3f-a19e-5b33cf618281_Reposado-NBI.png?auto=compress,format&rect=12,0,507,1559&w=532&h=1636' }}
+            style={styles.image}
+            resizeMode="contain"
+          />
 
-      <Image 
-        source={{ uri: 'https://images.prismic.io/claseazul/54230971-073d-4a3f-a19e-5b33cf618281_Reposado-NBI.png?auto=compress,format&rect=12,0,507,1559&w=532&h=1636' }}
-        style={styles.image}
-        resizeMode="contain"
-      />
+          <TypingText
+            animation="typingFade"
+            duration={800}
+            delay={animationDelay}
+            style={styles.title}
+          >
+            {productData.name}
+          </TypingText>
 
-      <TypingText
-        animation="typingFade"
-        duration={800}
-        delay={animationDelay}
-        style={styles.title}
-      >
-        {productData.name}
-      </TypingText>
+          <TypingText
+            animation="typingFade"
+            duration={1000}
+            delay={animationDelay + 600} // Add delay for a typing effect
+            style={styles.description}
+          >
+            {productData.description}
+          </TypingText>
 
-      <TypingText
-        animation="typingFade"
-        duration={1000}
-        delay={animationDelay + 600} // Add delay for a typing effect
-        style={styles.description}
-      >
-        {productData.description}
-      </TypingText>
+          <View style={styles.priceContainer}>
+            <TypingText
+              animation="typingFade"
+              duration={4000}
+              delay={animationDelay + 900} // Add delay for a typing effect
+              style={styles.price}
+            >
+              {productData.price}
+            </TypingText>
+          </View>
 
-      <View style={styles.priceContainer}>
-        <TypingText
-          animation="typingFade"
-          duration={2000}
-          delay={animationDelay + 900} // Add delay for a typing effect
-          style={styles.price}
-        >
-          {productData.price}
-        </TypingText>
-      </View>
-
-      <TypingView // Apply fade-in effect to the entire additional info container
-        animation="typingFade"
-        duration={1000} // Adjust the duration according to your preference
-        delay={animationDelay + 1200} // Add delay for a typing effect
-        style={styles.additionalInfoContainer} // Apply styles to the TypingView component
-      >
-        <ScrollView>
-          {Object.entries(productData.additionalInfo).map(([key, value]) => (
-            <View style={styles.additionalInfoItem} key={key}>
-              <Text style={styles.additionalInfoLabel}>{key}</Text>
-              <Text style={styles.additionalInfoValue}>{value}</Text>
-            </View>
-          ))}
-        </ScrollView>
-      </TypingView>
-    </ScrollView>
+          <View style={styles.additionalInfoContainer}>
+            {Object.entries(productData.additionalInfo).map(([key, value]) => (
+              <View style={styles.additionalInfoItem} key={key}>
+                <Text style={styles.additionalInfoLabel}>{key}</Text>
+                <Text style={styles.additionalInfoValue}>{value}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: 'black',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'black', // Set background color to black
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    width: '98%', 
+  },
+  contentContainer: {
     paddingHorizontal: 20,
-  },
-  goBackButton: {
-    position: 'absolute',
-    top: 50,
-    left: 40,
-  },
-  goBackText: {
-    fontSize: 20,
-    fontWeight: '500',
-    color: 'white', // Set text color to white
+    paddingBottom: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   image: {
-    width: 300,
-    height: 500,
-    marginTop: 70,
+    width: '100%', // Take full width of the parent container
+    height: 300, // Set a fixed height or adjust as needed
+    marginTop: 100,
   },
   title: {
     fontFamily: 'Metropolis-Medium',
@@ -135,7 +134,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.25437501072883606,
     textAlign: 'left',
     marginTop: 20,
-    color: 'white', // Set text color to white
+    color: 'white',
   },
   description: {
     fontFamily: 'Metropolis-Bold',
@@ -144,30 +143,33 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     textAlign: 'left',
     marginTop: 10,
-    color: 'white', // Set text color to white
+    color: 'white',
   },
   priceContainer: {
-    width: 115,
+    width: '100%',
     height: 28,
     borderWidth: 1,
-    justifyContent: 'flex-start', // Align text to the left
-    alignItems: 'flex-start', // Align text to the left
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
     marginTop: 20,
-},
-price: {
+  },
+  price: {
     fontFamily: 'Metropolis-SemiBold',
     fontSize: 28,
     fontWeight: '600',
     lineHeight: 28,
     letterSpacing: 0,
     textAlign: 'left',
-    color: 'white', // Set text color to white
-},
+    color: 'white',
+  },
   additionalInfoContainer: {
     marginTop: 20,
     width: '100%',
-    paddingHorizontal: 20,
+    borderWidth: 1, // Set border width
+    borderColor: 'white', // Set border color
+    padding: 10, // Optional padding inside the border
   },
+  
   additionalInfoItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -177,47 +179,26 @@ price: {
     fontFamily: 'Metropolis-Bold',
     fontSize: 16,
     fontWeight: '500',
-    color: 'white', // Set text color to white
+    color: 'white',
   },
   additionalInfoValue: {
     fontFamily: 'Metropolis-Regular',
     fontSize: 16,
     fontWeight: '400',
-    color: 'white', // Set text color to white
+    color: 'white',
   },
-  reservationButton: {
+  goBackButton: {
     position: 'absolute',
-    bottom: '5%',
-    width: '90%',
-    padding: 15,
-    backgroundColor: 'white', // Set background color to white
-    borderColor: 'black', // Set border color to black
-    borderWidth: 1,
-    borderRadius: 10,
-    alignItems: 'center',
+    top: 20,
+    left: 20,
+    zIndex: 1, 
+    
   },
-  reservationButtonText: {
-    fontFamily: 'Metropolis-ExtraBold',
-    color: 'black', // Set text color to black
-    fontSize: 20,
+  goBackText: {
+    fontSize: 30, // Adjusted font size
     fontWeight: '500',
-  },
-  content: {
-    flexDirection: 'column', // Vertical layout by default
-    alignItems: 'center', // Align items vertically in the center
-  },
-  landscapeContent: {
-    flexDirection: 'row', // Horizontal layout for landscape mode
-    alignItems: 'flex-start', // Align items to the left
-  },
-  imageContainer: {
-    flex: 1, // Take 50% of the available width in landscape mode
-    justifyContent: 'flex-start', // Align child items to the start (left) of the container
-  },
-  textContainer: {
-    flex: 1, // Take 50% of the available width in landscape mode
-    paddingHorizontal: 20,
-  },
+    color: 'white',
+  }
 });
 
 export default ProductScreen;
