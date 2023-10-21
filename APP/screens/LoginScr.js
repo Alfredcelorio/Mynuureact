@@ -5,9 +5,9 @@ import { login } from '../config/api/auth';
 export default function LoginScr({ navigation }) {
 
   const handleLogin = async () => {
-    const sendLogin = await login('Mynuutheapp@gmail.com', 'alvaro0220');
-    console.log('LOGIN: ', sendLogin)
-    // navigation.navigate('Mainmenu');
+    //const sendLogin = await login('Mynuutheapp@gmail.com', 'alvaro0220');
+    //console.log('LOGIN: ', sendLogin)
+     navigation.navigate('Mainmenu');
   };
 
   return (
