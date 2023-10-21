@@ -5,6 +5,7 @@ import LoginScr from "../screens/LoginScr";
 import FutureScreen from "../screens/FutureScreen";
 import Mainmenu from "../screens/Mainmenu";
 import ProductDetailScreen from '../screens/ProductDetailScreen'; 
+import CustomDropdown from "../screens/CustomDropdown";
 
 const Stack = createStackNavigator();
 
@@ -58,6 +59,14 @@ export default function AppNavigator() {
           headerShown: false
         }}
       />
+       <Stack.Screen  
+        name="CustomDropdown"
+        component={CustomDropdown}
+        options={{
+          headerShown: false
+        }}
+      />
+      
     </Stack.Navigator>
   );
 }
