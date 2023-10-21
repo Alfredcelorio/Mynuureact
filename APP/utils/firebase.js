@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore/lite';
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: 'AIzaSyDwgsxUPOO1Vsq6aoLTfRgUD-jWQGr67-s',
   authDomain: 'mn-mynuu.firebaseapp.com',
   databaseURL: 'https://fullaccezz-2756a-default-rtdb.firebaseio.com',

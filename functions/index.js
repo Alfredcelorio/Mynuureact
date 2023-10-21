@@ -13,6 +13,7 @@ admin.initializeApp({
 
 const routes = [
     require("./api/routes/initialApi"),
+    require("./api/routes/auth"),
 ];
 
 app.use(cors());
