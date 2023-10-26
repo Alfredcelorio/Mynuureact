@@ -116,14 +116,14 @@ const styles = StyleSheet.create({
     width: '98%', 
   },
   contentContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 40,
     paddingBottom: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
   image: {
     width: '100%', // Take full width of the parent container
-    height: 300, // Set a fixed height or adjust as needed
+    height: 400, // Set a fixed height or adjust as needed
     marginTop: 100,
   },
   title: {

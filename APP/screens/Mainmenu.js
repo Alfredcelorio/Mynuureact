@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TextInput, Image, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TextInput, Image, ScrollView, Dimensions, TouchableOpacity, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 
-const { width } = Dimensions.get('window');
+const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
+
 
 const Product = ({ title, description, price, navigation }) => (
   <View style={styles.productContainer}>
@@ -21,6 +22,8 @@ const Product = ({ title, description, price, navigation }) => (
     <Text style={styles.productPrice}>{price}</Text>
   </View>
 );
+
+const isIpad = Platform.OS === 'ios' && (windowWidth >= 768 || windowHeight >= 768);
 
 const Mainmenu = () => {
   const navigation = useNavigation();
@@ -61,8 +64,8 @@ const Mainmenu = () => {
       <View style={styles.searchBarContainer}>
         <Text style={styles.headerText}> This is your drink menu</Text>
         <TouchableOpacity style={styles.buttonContainer} onPress={() => navigation.navigate('CustomDropdown')}>
-  <Text style={styles.buttonText}>Change menu</Text>
-</TouchableOpacity>
+          <Text style={styles.buttonText}>Change menu</Text>
+        </TouchableOpacity>
         <TextInput
           style={styles.searchBar}
           placeholder="Search..."
@@ -84,7 +87,6 @@ const Mainmenu = () => {
         ))}
       </ScrollView>
       {/* Button component */}
-      
     </SafeAreaView>
   );
 };
@@ -93,11 +95,11 @@ const styles = StyleSheet.create({
   productContainer: {
     marginBottom: 20,
     alignItems: 'center',
-    width: width * 0.5 - 16,
+    width: isIpad ? windowWidth * 0.7 : windowWidth * 0.5, // Adjust width for iPad using windowWidth
   },
   productImage: {
-    width: 263,
-    height: 174,
+    width: isIpad ? 320 : 263, // Adjust width for iPad
+    height: isIpad ? 232 : 174, // Adjust height for iPad
   },
   productTitle: {
     fontSize: 14,
@@ -173,11 +175,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: '#FFF',
   },
-  imageWrapper: {
-    width: 263,
-    height: 174,
-    overflow: 'hidden',
-  },
+
   buttonContainer: {
     backgroundColor: 'black',
     padding: 10,
