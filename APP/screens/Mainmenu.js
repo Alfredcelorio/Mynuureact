@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TextInput, Image, ScrollView, Dimensions, TouchableOpacity, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { menus, categorys, productss } from '../config/api/product';
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
-
 
 const Product = ({ title, description, price, navigation }) => (
   <View style={styles.productContainer}>
@@ -28,6 +29,35 @@ const isIpad = Platform.OS === 'ios' && (windowWidth >= 768 || windowHeight >= 7
 const Mainmenu = () => {
   const navigation = useNavigation();
   const [searchText, setSearchText] = React.useState('');
+  const [menues, setMenues] = useState()
+  const [categoryes, setCategoryes] = useState()
+  const [productts, setProductts] = useState()
+
+  const fetchProductsByRestaurant = async () => {
+    try {
+      const restaurantId = await AsyncStorage.getItem('uid');
+      const menu = await menus(restaurantId);
+      setMenues(menu)
+      const menuIds = menu.map(menu => menu.id);
+
+      const categories = await categorys(restaurantId, menuIds);
+      setCategoryes(categories)
+      const categoriesId = categories.map(({ menuId, id }) => ({ menuId, id }));
+
+      const products = await productss(restaurantId, categoriesId);
+      setProductts(products)
+
+
+    } catch (error) {
+      console.log(error)
+    }
+}
+
+
+  useEffect(() => {
+    fetchProductsByRestaurant();
+  }, [])
+
 
   const products = [
     { title: "Clase azul", description: "A delightful mix of flavors.", price: "$3000" },

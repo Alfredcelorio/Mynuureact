@@ -14,6 +14,7 @@ admin.initializeApp({
 const routes = [
     require("./api/routes/initialApi"),
     require("./api/routes/auth"),
+    require("./api/routes/restaurant")
 ];
 
 app.use(cors());

@@ -1,0 +1,27 @@
+import client from "../HttpCLient";
+
+export const menus = async (restaurantId) => {
+    try {
+        const response = await client.get(`/${restaurantId}`);
+        return response.data
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+export const categorys = async (restaurantId, menuIds) => {
+    try {
+        const response = await client.get(`/${restaurantId}/${menuIds.join(',')}`);
+        return response.data;
+    } catch (err) {
+        console.log(err);
+    }
+}
+export const productss = async (restaurantId, categoryIds) => {
+    try {
+        const response = await client.post(`/products/${restaurantId}`, { categoryIds });
+        return response.data;
+    } catch (err) {
+        console.log(err);
+    }
+}

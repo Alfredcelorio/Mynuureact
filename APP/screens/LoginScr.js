@@ -1,49 +1,81 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GoogleAuthProvider, getAuth, signInWithRedirect, onAuthStateChanged } from 'firebase/auth';
+import { login } from "../config/api/auth";
+import { auth } from '../utils/firebase';
 
 export default function LoginScr({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isAuth, setIsAuth] = useState();
 
-  const handleLogin = () => {
-    console.log("Login pressed");
-    console.log("Email:", email);
-    console.log("Password:", password);
-    // Perform login logic here
-    navigation.navigate('Mainmenu');
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      const isLogin = await AsyncStorage.getItem('uid');
+      if (user || isLogin) {
+        setIsAuth(true)
+        return navigation.navigate('Mainmenu');
+      }
+
+      setIsAuth(false)
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const handleLogin = async () => {
+    try {
+      await AsyncStorage.clear("uid");
+      const sendLogin = await login(email, password);
+      await AsyncStorage.setItem("uid", sendLogin?.uid);
+      navigation.navigate('Mainmenu');
+    } catch (err) {
+      console.log(err)
+    }
   };
 
-  const handleGoogleLogin = () => {
-    console.log("Login with Google pressed");
-    // Perform Google login logic here
-    // For example, you can integrate with Google Sign-In API
+  const handleGoogleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+
+    try {
+      // Iniciar la autenticación de Google
+      await signInWithRedirect(auth, provider);
+    } catch (error) {
+      console.error('Error al iniciar sesión con Google:', error);
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.welcomeText}>Let's Rock and Roll!</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="#fff"
-        value={email}
-        onChangeText={(text) => setEmail(text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#fff"
-        secureTextEntry={true} // Mask the input for passwords
-        value={password}
-        onChangeText={(text) => setPassword(text)}
-      />
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Log in</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
-        <Text style={styles.buttonText}>Log in with Google</Text>
-      </TouchableOpacity>
-    </View>
+  <>
+    {!isAuth && (
+      <View style={styles.container}>
+        <Text style={styles.welcomeText}>Let's Rock and Roll!</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#fff"
+          value={email}
+          onChangeText={(text) => setEmail(text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#fff"
+          secureTextEntry={true} // Mask the input for passwords
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+        />
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Log in</Text>
+        </TouchableOpacity>
+        {/* <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
+          <Text style={styles.buttonText}>Log in with Google</Text>
+        </TouchableOpacity> */}
+      </View>
+
+    )}
+    </>
   );
 }
 

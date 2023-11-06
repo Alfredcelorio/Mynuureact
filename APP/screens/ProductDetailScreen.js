@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Image, StyleSheet, Text, ScrollView, useWindowDimensions, SafeAreaView, TouchableOpacity, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { menus, categories, products } from '../config/api/product';
 
 Animatable.initializeRegistryWithDefinitions({
   typingFade: {
@@ -21,6 +23,7 @@ const ProductScreen = () => {
   const navigation = useNavigation();
   const windowWidth = useWindowDimensions().width;
   const [animationDelay, setAnimationDelay] = useState(0);
+  const [menus, setMenus] = useState();
 
   useEffect(() => {
     // Set a delay before the animation starts (for a typing effect)
