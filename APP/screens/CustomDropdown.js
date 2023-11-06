@@ -1,19 +1,68 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { menusApi } from "../config/api/product";
 
 const MenuScreen = ({ navigation }) => {
-  const menus = ['Drink Menu', 'Wine List', 'Beers', 'Cocktails'];
+  const [menus, setMenus] = useState([]);
+  const flatListRef = useRef(null);
+  const initialIndex = useRef(0);
+
+  const fetchMenusInit = async () => {
+    const uidRestaurant = await AsyncStorage.getItem("uid");
+    console.log(uidRestaurant)
+    const allMenus = await menusApi(uidRestaurant);
+    setMenus(allMenus);
+  };
+
+  useEffect(() => {
+    fetchMenusInit();
+  }, []);
+
+  const handleMenus = async (menuId) => {
+    const menuUser = await AsyncStorage.getItem("menuId");
+    console.log(menuUser)
+    if (menuUser) {
+      await AsyncStorage.removeItem("menuId");
+    }
+    await AsyncStorage.setItem("menuId", menuId);
+    navigation.navigate('Mainmenu', { menuChanged: true });
+  };
+
+  const scrollNext = () => {
+    initialIndex.current = (initialIndex.current + 1) % menus.length;
+    flatListRef.current.scrollToIndex({
+      animated: true,
+      index: initialIndex.current,
+    });
+  };
+
+  const renderItem = ({ item, index }) => (
+    <TouchableOpacity style={styles.menuItem} onPress={() => handleMenus(item.id)}>
+      <Text style={styles.menuItemText}>{item.name}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.backButtonText}>X</Text>
+      <FlatList
+        ref={flatListRef}
+        data={menus}
+        keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
+        renderItem={renderItem}
+        onEndReached={scrollNext}
+        onEndReachedThreshold={0.1}
+        style={{
+          marginTop: 100
+        }}
+      />
+      <TouchableOpacity
+        style={styles.goBackButton}
+        onPress={() => navigation.goBack()}
+      >
+        <Text style={styles.goBackButtonText}>X</Text>
       </TouchableOpacity>
-      {menus.map((menu, index) => (
-        <Text key={index} style={styles.text}>
-          {menu}
-        </Text>
-      ))}
     </View>
   );
 };
@@ -21,24 +70,28 @@ const MenuScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000', // Black background
+    backgroundColor: "#000",
   },
-  text: {
-    fontSize: 36,
-    marginBottom: 100,
-    color: '#FFF', // White font color
-  },
-  backButton: {
-    position: 'absolute',
-    top: 50,
+  goBackButton: {
+    position: "absolute",
+    bottom: 700,
     left: 20,
-    padding: 10,
+    zIndex: 1,
   },
-  backButtonText: {
+  goBackButtonText: {
     fontSize: 24,
-    color: '#FFF', // White font color for back button
+    color: "#FFF",
+  },
+  menuItem: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: 100,
+    marginVertical: 10,
+    top: 20
+  },
+  menuItemText: {
+    fontSize: 24,
+    color: "#FFF",
   },
 });
 

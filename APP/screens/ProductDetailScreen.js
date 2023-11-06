@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { menus, categories, products } from '../config/api/product';
+import { useRoute } from '@react-navigation/native';
 
 Animatable.initializeRegistryWithDefinitions({
   typingFade: {
@@ -21,9 +22,23 @@ const imageUris = [
 
 const ProductScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const windowWidth = useWindowDimensions().width;
   const [animationDelay, setAnimationDelay] = useState(0);
   const [menus, setMenus] = useState();
+  const { productData } = route.params;
+
+  const filteredProductData = {
+    ABV: productData.abv || "",
+    body: productData.body || "",
+    brand: productData.brand || "",
+    countryState: productData.countryState || "",
+    region: productData.region || "",
+    sku: productData.sku || "",
+    taste: productData.taste || "",
+    type: productData.type || "",
+    varietal: productData.varietal || "",
+  };
 
   useEffect(() => {
     // Set a delay before the animation starts (for a typing effect)
@@ -31,26 +46,7 @@ const ProductScreen = () => {
     setAnimationDelay(delay);
   }, []);
 
-  const productData = {
-    name: 'Clase azul',
-    description: 'Clase Azul Tequila Reposado is a symbol of Mexican tradition and culture. Made with slow-cooked 100% Blue Weber Agave, our ultra-premium reposado tequila is unique and incomparable.',
-    price: '$3000',
-    // Additional information based on the type of liquor
-    additionalInfo: {
-      ABV: '40%', // Alcohol by volume
-      Body: 'Full-bodied',
-      Brand: 'Clase Azul',
-      CountryState: 'Mexico',
-      Region: 'Jalisco',
-      Sku: '123456789',
-      Taste: 'Smooth and rich',
-      Type: 'Tequila',
-      Varietal: 'Blue Agave ',
-    },
-  };
-
   return (
-    
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
       <TouchableOpacity style={styles.goBackButton} onPress={() => navigation.goBack()}>
@@ -59,7 +55,7 @@ const ProductScreen = () => {
       <Text style={styles.headerText}> Welcome to Cantina la 20,</Text>
         <View style={styles.contentContainer}>
           <Image 
-            source={{ uri: 'https://images.prismic.io/claseazul/54230971-073d-4a3f-a19e-5b33cf618281_Reposado-NBI.png?auto=compress,format&rect=12,0,507,1559&w=532&h=1636' }}
+            source={{ uri: productData.image }}
             style={styles.image}
             resizeMode="contain"
           />
@@ -94,7 +90,7 @@ const ProductScreen = () => {
           </View>
 
           <View style={styles.additionalInfoContainer}>
-            {Object.entries(productData.additionalInfo).map(([key, value]) => (
+            {Object.entries(filteredProductData).map(([key, value]) => (
               <View style={styles.additionalInfoItem} key={key}>
                 <Text style={styles.additionalInfoLabel}>{key}</Text>
                 <Text style={styles.additionalInfoValue}>{value}</Text>
@@ -116,17 +112,17 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    width: '98%', 
+    width: '100%',
   },
   contentContainer: {
-    paddingHorizontal: 40,
+    paddingHorizontal: 0,
     paddingBottom: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
   image: {
-    width: '100%', // Take full width of the parent container
-    height: 400, // Set a fixed height or adjust as needed
+    width: '100%',
+    height: 400,
     marginTop: 100,
   },
   title: {
@@ -168,9 +164,9 @@ const styles = StyleSheet.create({
   additionalInfoContainer: {
     marginTop: 20,
     width: '100%',
-    borderWidth: 1, // Set border width
-    borderColor: 'white', // Set border color
-    padding: 10, // Optional padding inside the border
+    borderWidth: 1,
+    borderColor: 'white',
+    padding: 10,
   },
   
   additionalInfoItem: {
@@ -192,16 +188,17 @@ const styles = StyleSheet.create({
   },
   goBackButton: {
     position: 'absolute',
-    top: 20,
-    left: 20,
-    zIndex: 1, 
-    
+    top: 70,
+    right: 1,
+    left: -10,
+    zIndex: 100,
+    padding: 10,
   },
   goBackText: {
-    fontSize: 30, // Adjusted font size
+    fontSize: 30,
     fontWeight: '500',
     color: 'white',
-  }
+  },
 });
 
 export default ProductScreen;

@@ -56,10 +56,22 @@ app.post("/products/:restaurantId", async (req, res) => {
     const restaurantId = req.params.restaurantId;
     const { categoryIds } = req.body;
 
-    const data = [];
+    const productsByCategory = {};
 
     for (const category of categoryIds) {
       const { menuId, id } = category;
+
+      const categorySnapshot = await db
+        .collection("categories")
+        .where("restaurantId", "==", restaurantId)
+        .where("menuId", "==", menuId)
+        .get();
+
+      let categoryName = "Categoría Desconocida"; 
+      if (!categorySnapshot.empty) {
+        categoryName = categorySnapshot.docs[0].data().name;
+      }
+
       const querySnapshot = await db
         .collection("products")
         .where("restaurantId", "==", restaurantId)
@@ -67,15 +79,28 @@ app.post("/products/:restaurantId", async (req, res) => {
         .where("categoryId", "==", id)
         .get();
 
+      const categoryProducts = [];
       querySnapshot.forEach((doc) => {
-        data.push(doc.data());
+        categoryProducts.push(doc.data());
+      });
+
+      productsByCategory[id] = { categoryName, categoryProducts };
+    }
+
+    const orderedProducts = [];
+    for (const categoryId in productsByCategory) {
+      orderedProducts.push({
+        categoryId,
+        categoryName: productsByCategory[categoryId].categoryName,
+        products: productsByCategory[categoryId].categoryProducts,
       });
     }
 
-    res.status(200).json(data);
+    res.status(200).json(orderedProducts);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 };

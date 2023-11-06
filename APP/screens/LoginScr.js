@@ -14,11 +14,11 @@ export default function LoginScr({ navigation }) {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       const isLogin = await AsyncStorage.getItem('uid');
       if (user || isLogin) {
-        setIsAuth(true)
+        setIsAuth(false)
         return navigation.navigate('Mainmenu');
       }
 
-      setIsAuth(false)
+      setIsAuth(true)
     });
 
     return unsubscribe;
@@ -26,7 +26,10 @@ export default function LoginScr({ navigation }) {
 
   const handleLogin = async () => {
     try {
-      await AsyncStorage.clear("uid");
+      const userLogin = await AsyncStorage.getItem('uid');
+      if (userLogin) {
+        await AsyncStorage.removeItem("uid");
+      }
       const sendLogin = await login(email, password);
       await AsyncStorage.setItem("uid", sendLogin?.uid);
       navigation.navigate('Mainmenu');
@@ -48,7 +51,7 @@ export default function LoginScr({ navigation }) {
 
   return (
   <>
-    {!isAuth && (
+    {isAuth ? (
       <View style={styles.container}>
         <Text style={styles.welcomeText}>Let's Rock and Roll!</Text>
         <TextInput
@@ -74,6 +77,8 @@ export default function LoginScr({ navigation }) {
         </TouchableOpacity> */}
       </View>
 
+    ) : (
+      <></>
     )}
     </>
   );

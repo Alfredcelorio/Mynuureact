@@ -1,6 +1,6 @@
 import client from "../HttpCLient";
 
-export const menus = async (restaurantId) => {
+export const menusApi = async (restaurantId) => {
     try {
         const response = await client.get(`/${restaurantId}`);
         return response.data
@@ -9,7 +9,7 @@ export const menus = async (restaurantId) => {
     }
 }
 
-export const categorys = async (restaurantId, menuIds) => {
+export const categoriesApi = async (restaurantId, menuIds) => {
     try {
         const response = await client.get(`/${restaurantId}/${menuIds.join(',')}`);
         return response.data;
@@ -17,7 +17,7 @@ export const categorys = async (restaurantId, menuIds) => {
         console.log(err);
     }
 }
-export const productss = async (restaurantId, categoryIds) => {
+export const productsApi = async (restaurantId, categoryIds) => {
     try {
         const response = await client.post(`/products/${restaurantId}`, { categoryIds });
         return response.data;

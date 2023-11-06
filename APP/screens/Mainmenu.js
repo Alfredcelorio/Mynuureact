@@ -1,88 +1,94 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TextInput, Image, ScrollView, Dimensions, TouchableOpacity, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { menus, categorys, productss } from '../config/api/product';
+import { menusApi, categoriesApi, productsApi } from '../config/api/product';
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
 
-const Product = ({ title, description, price, navigation }) => (
+const Product = ({ productData, image, title, description, price, navigation }) => 
+{
+  console.log(description)
+  return (
   <View style={styles.productContainer}>
     <View style={styles.imageWrapper}>
-      <TouchableOpacity onPress={() => navigation.navigate('ProductDetail')}>
+      <TouchableOpacity onPress={() => navigation.navigate('ProductDetail', { productData })}>
         <Image
-          source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/fullaccezz-2756a.appspot.com/o/products%2FBelle%20Glos%22Las%20Alturas%22.jpg?alt=media&token=1920d397-9cc3-4a74-bc29-bcfa11aa815e' }}
+          source={{ uri: image }}
           style={styles.productImage}
           resizeMode="cover"
         />
       </TouchableOpacity>
     </View>
     <Text style={styles.productTitle}>{title}</Text>
-    <Text style={styles.productDescription}>{description}</Text>
-    <Text style={styles.productPrice}>{price}</Text>
+    {description && (
+      <Text style={styles.productDescription}>{description}</Text>
+    )}
+    <Text style={styles.productPrice}>{price}$</Text>
   </View>
-);
+  )
+};
 
 const isIpad = Platform.OS === 'ios' && (windowWidth >= 768 || windowHeight >= 768);
 
 const Mainmenu = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const [searchText, setSearchText] = React.useState('');
   const [menues, setMenues] = useState()
   const [categoryes, setCategoryes] = useState()
   const [productts, setProductts] = useState()
+  const [menuChanged, setMenuChanged] = useState(false);
+  const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
 
   const fetchProductsByRestaurant = async () => {
     try {
+      console.log('ENTRA')
+      const selectMenu = await AsyncStorage.getItem("menuId");
       const restaurantId = await AsyncStorage.getItem('uid');
-      const menu = await menus(restaurantId);
+      const menu = await menusApi(restaurantId);
       setMenues(menu)
       const menuIds = menu.map(menu => menu.id);
+      const onlyOneMenus = selectMenu ? [selectMenu] : [menuIds?.[0]]
 
-      const categories = await categorys(restaurantId, menuIds);
+      const categories = await categoriesApi(restaurantId, onlyOneMenus);
       setCategoryes(categories)
       const categoriesId = categories.map(({ menuId, id }) => ({ menuId, id }));
 
-      const products = await productss(restaurantId, categoriesId);
+      const products = await productsApi(restaurantId, categoriesId);
       setProductts(products)
-
+      console.log(products)
+      setData(products);
+      setFilteredData(products);
 
     } catch (error) {
       console.log(error)
     }
-}
+  }
 
+  useEffect(() => {
+    if (route.params && route.params.menuChanged) {
+      fetchProductsByRestaurant();
+      setMenuChanged(false);
+    }
+  }, [route.params])
 
   useEffect(() => {
     fetchProductsByRestaurant();
   }, [])
 
+  useEffect(() => {
+    const filtered = data.map(category => {
+      const filteredProducts = category.products.filter(product =>
+        product.name.toLowerCase().includes(searchText.toLowerCase())
+      );
+      return { ...category, products: filteredProducts };
+    });
 
-  const products = [
-    { title: "Clase azul", description: "A delightful mix of flavors.", price: "$3000" },
-    { title: "Clase azul", description: "A delightful mix of flavors.", price: "$3000" },
-    { title: "Clase azul", description: "A delightful mix of flavors.", price: "$3000" },
-    { title: "Clase azul", description: "A delightful mix of flavors.", price: "$3000" },
-    // .. (You can add more products here if needed)
-  ];
-
-  const categories = [
-    { name: 'Featured Items', products: products },
-    { name: 'Vodka', products: products },
-    { name: 'Whiskey', products: products },
-    { name: 'Rum', products: products }
-  ];
-
-  const filteredCategories = categories.filter(category => {
-    if (category.name.toLowerCase().includes(searchText.toLowerCase())) {
-      return true;
-    }
-    return category.products.some(product =>
-      product.title.toLowerCase().includes(searchText.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchText.toLowerCase())
-    );
-  });
+    setFilteredData(filtered);
+  }, [searchText, data]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -101,25 +107,24 @@ const Mainmenu = () => {
           <Text style={styles.buttonText}>Change menu</Text>
         </TouchableOpacity>
         <TextInput
-          style={styles.searchBar}
-          placeholder="Search..."
-          placeholderTextColor="#aaa"
-          value={searchText}
-          onChangeText={setSearchText}
-        />
+            style={styles.searchBar}
+            placeholder="Search..."
+            placeholderTextColor="#aaa"
+            value={searchText}
+            onChangeText={setSearchText}
+          />
       </View>
-        {filteredCategories.map((category, index) => (
+        {filteredData?.map((category, index) => (
           <View key={index}>
-            <Text style={styles.categoryText}>{category.name}</Text>
+            <Text style={styles.categoryText}>{category.categoryName}</Text>
             <View style={styles.productRow}>
               {category.products.map((product, i) => (
-                <Product key={i} title={product.title} description={product.description} price={product.price} navigation={navigation} />
+                <Product key={i} productData={product} image={product.image} title={product.name} description={product.description} price={product.price} navigation={navigation} />
               ))}
             </View>
           </View>
         ))}
       </ScrollView>
-      {/* Button component */}
     </SafeAreaView>
   );
 };
@@ -203,16 +208,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     margin: 5,   // Add a bit of margin at the top to separate from the image
     color: '#FFF',
+    marginTop: 10,
   },
   productDescription: {
     fontSize: 12,
     marginHorizontal: 5,   // Add a bit of margin at the top to separate from the title
     color: '#FFF',
+    marginTop: 3,
   },
   productPrice: {
     fontSize: 12,
     marginHorizontal: 5,
     color: '#FFF',
+    marginTop: 3,
   },
   buttonContainer: {
     backgroundColor: 'black',
