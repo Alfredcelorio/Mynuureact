@@ -64,7 +64,7 @@ const Mainmenu = () => {
     { title: "Clase azul", description: "A delightful mix of flavors.", price: "$3000" },
     { title: "Clase azul", description: "A delightful mix of flavors.", price: "$3000" },
     { title: "Clase azul", description: "A delightful mix of flavors.", price: "$3000" },
-    // ... (You can add more products here if needed)
+    // .. (You can add more products here if needed)
   ];
 
   const categories = [
