@@ -145,7 +145,7 @@ const makeContent = async (content, FolderId, folderData, uid, ownerUid, customA
 module.exports.controller = (app) => {
   app.delete("/api/downloads/:folderId", async (req, res) => {
     const { folderId } = req.params;
-    const { user, uid } = req.currentUser;
+    const { user, uid } = req?.currentUser;
     if (!folderId) {
       res.status(500).json({
         success: false,
@@ -193,7 +193,7 @@ module.exports.controller = (app) => {
   app.post("/api/downloads/:folderId", async (req, res) => {
     const { folderId } = req.params;
     const { isbackUp } = req.body;
-    const { user, uid } = req.currentUser;
+    const { user, uid } = req?.currentUser;
     if (!folderId) {
       res.status(500).json({ success: false, message: "fields are missing" });
       return;
@@ -315,7 +315,7 @@ module.exports.controller = (app) => {
   });
   app.post("/api/downloads/:folderId/createInFolder", async (req, res) => {
     const { folderId } = req.params;
-    const { user, uid } = req.currentUser;
+    const { user, uid } = req?.currentUser;
     if (!folderId) {
       res.status(500).json({ success: false, message: "fields are missing" });
       return;
@@ -361,7 +361,7 @@ module.exports.controller = (app) => {
   });
   app.post("/api/downloads/:folderId/restore", async (req, res) => {
     const { folderId } = req.params;
-    const { user, uid } = req.currentUser;
+    const { user, uid } = req?.currentUser;
     if (!folderId) {
       return res.status(500).json({
         success: false,

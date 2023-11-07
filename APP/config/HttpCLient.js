@@ -13,8 +13,8 @@ const client = axios.create({
 });
 
 client.interceptors.request.use(async (config) => {
-  if (!auth.currentUser) return config;
-  const token = await auth.currentUser.getIdToken();
+  if (!auth?.currentUser) return config;
+  const token = await auth?.currentUser?.getIdToken();
   config.headers.Authorization = `${token}`;
   return config;
 });

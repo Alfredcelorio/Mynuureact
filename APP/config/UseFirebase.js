@@ -6,7 +6,9 @@ import "firebase/compat/auth";
 import "firebase/compat/firestore";
 import { firebaseConfig } from "../utils/firebase";
 import { getStorage } from "firebase/storage";
-import { getAuth } from "firebase/auth";
+import { getAuth, setPersistence, getReactNativePersistence, initializeAuth } from "firebase/auth";
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+
 
 let firebaseApp;
 
@@ -16,7 +18,6 @@ if (firebase.apps.length === 0) {
 
 export const db = firebase.firestore();
 export const storage = getStorage(firebaseApp);
-export const auth = getAuth();
 
 const firebaseContext = createContext();
 export function ProviderFirebaseAuth({ children }) {

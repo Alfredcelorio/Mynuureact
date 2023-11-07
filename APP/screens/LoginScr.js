@@ -8,12 +8,13 @@ import { auth } from '../utils/firebase';
 export default function LoginScr({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isAuth, setIsAuth] = useState();
+  const [isAuth, setIsAuth] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       const isLogin = await AsyncStorage.getItem('uid');
-      if (user || isLogin) {
+      const userEmail = await AsyncStorage.getItem('email');
+      if (user || (isLogin && userEmail)) {
         setIsAuth(false)
         return navigation.navigate('Mainmenu');
       }
@@ -27,11 +28,14 @@ export default function LoginScr({ navigation }) {
   const handleLogin = async () => {
     try {
       const userLogin = await AsyncStorage.getItem('uid');
-      if (userLogin) {
+      const userEmail = await AsyncStorage.getItem('email');
+      if (userLogin && userEmail) {
         await AsyncStorage.removeItem("uid");
+        await AsyncStorage.removeItem("email");
       }
       const sendLogin = await login(email, password);
       await AsyncStorage.setItem("uid", sendLogin?.uid);
+      await AsyncStorage.setItem("email", sendLogin?.email);
       navigation.navigate('Mainmenu');
     } catch (err) {
       console.log(err)

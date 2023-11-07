@@ -1,22 +1,27 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import AppNavigator from './APP/navigation/index';
-import AppLoading from 'expo-app-loading';
+import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 
-
 export default function App() {
-  const [fontLoaded, setFontLoaded] = React.useState(false);
+  useEffect(() => {
+    async function loadAppResources() {
+      try {
+        await loadFonts();
+      } catch (error) {
+        console.warn(error);
+      } finally {
+        setTimeout(() => {
+          if (SplashScreen.hideAsync()) {
+            SplashScreen.hideAsync();
+          }
+        }, 2000);
+      }
+    }
 
-  if (!fontLoaded) {
-    return (
-      <AppLoading
-        startAsync={loadFonts}
-        onFinish={() => setFontLoaded(true)}
-        onError={console.warn}
-      />
-    );
-  }
+    loadAppResources();
+  }, []);
 
   return (
     <NavigationContainer>

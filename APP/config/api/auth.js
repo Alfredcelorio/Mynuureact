@@ -12,3 +12,16 @@ export const login = async (email, password) => {
         console.log(err);
     }
 }
+
+export const restaurantApi = async (email, id) => {
+    try {
+        const obj = {
+            email,
+            id
+        }
+        const response = await client.post('/findUserByEmailAndId', obj);
+        return response.data
+    } catch (err) {
+        console.log(err);
+    }
+}

@@ -10,7 +10,6 @@ const MenuScreen = ({ navigation }) => {
 
   const fetchMenusInit = async () => {
     const uidRestaurant = await AsyncStorage.getItem("uid");
-    console.log(uidRestaurant)
     const allMenus = await menusApi(uidRestaurant);
     setMenus(allMenus);
   };
@@ -21,7 +20,6 @@ const MenuScreen = ({ navigation }) => {
 
   const handleMenus = async (menuId) => {
     const menuUser = await AsyncStorage.getItem("menuId");
-    console.log(menuUser)
     if (menuUser) {
       await AsyncStorage.removeItem("menuId");
     }
