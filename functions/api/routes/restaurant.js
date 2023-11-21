@@ -65,6 +65,8 @@ app.post("/products/:restaurantId", async (req, res) => {
         .collection("categories")
         .where("restaurantId", "==", restaurantId)
         .where("menuId", "==", menuId)
+        .where("status", "==", true)
+        .orderBy('position', 'asc')
         .get();
 
       let categoryName = "Categoría Desconocida"; 
@@ -77,12 +79,16 @@ app.post("/products/:restaurantId", async (req, res) => {
         .where("restaurantId", "==", restaurantId)
         .where("menuId", "==", menuId)
         .where("categoryId", "==", id)
+        .where("status", "==", true)
+        .orderBy('position', 'asc')
         .get();
 
       const categoryProducts = [];
       querySnapshot.forEach((doc) => {
         categoryProducts.push(doc.data());
       });
+
+      console.log(categoryProducts)
 
       productsByCategory[id] = { categoryName, categoryProducts };
     }

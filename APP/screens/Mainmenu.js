@@ -11,12 +11,21 @@ import {
   TouchableOpacity,
   Platform,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { menusApi, categoriesApi, productsApi } from "../config/api/product";
 import { restaurantApi } from "../config/api/auth";
+import {
+  getCategories,
+  getFavProducts,
+  getProductsByMenu,
+  updateLikedProducts,
+} from "../services/productsList/products";
+import { getMenus } from "../services/productsList/menus";
+import { getRestaurant } from "../services/productsList/restaurant";
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
 
@@ -28,8 +37,6 @@ const Product = ({
   price,
   navigation,
 }) => {
-  
-  console.log("FILTRO: ", productData);
   return (
     <View style={styles.productContainer}>
       {productData.length !== 0 ? (
@@ -67,46 +74,100 @@ const Mainmenu = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const [searchText, setSearchText] = React.useState("");
+  const [searchProductsByCat, setSearchProductsByCat] = useState('');
+  const [searchValue, setSearchValue] = useState('');
   const [restaurant, setRestaurant] = useState({});
-  const [menues, setMenues] = useState();
-  const [categoryes, setCategoryes] = useState();
-  const [productts, setProductts] = useState();
-  const [menuChanged, setMenuChanged] = useState(false);
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [productsByCat, setProductsByCat] = useState();
+  const [selectedMenu, setSelectedMenu] = useState();
+  const [categories, setCategories] = useState();
+  const [menus, setMenus] = useState();
+  const [isModalVisible, setIsModalVisible] = useState(true);
 
-  const fetchProductsByRestaurant = async () => {
-    try {
-      setIsLoading(true);
-      const selectMenu = await AsyncStorage.getItem("menuId");
-      const restaurantId = await AsyncStorage.getItem("uid");
-      const menu = await menusApi(restaurantId);
-      setMenues(menu);
-      const menuIds = menu.map((menu) => menu.id);
-      const onlyOneMenus = selectMenu ? [selectMenu] : [menuIds?.[0]];
+  const toggleMenuVisibility = () => {
+    setIsModalVisible(!isModalVisible);
+  };
 
-      const categories = await categoriesApi(restaurantId, onlyOneMenus);
-      setCategoryes(categories);
-      const categoriesId = categories.map(({ menuId, id }) => ({ menuId, id }));
-
-      const products = await productsApi(restaurantId, categoriesId);
-      setProductts(products);
-      setData(products);
-      setFilteredData(products);
-      setIsLoading(false);
-    } catch (error) {
-      console.log(error);
-    }
+  const handleMenuSelect = (menu) => {
+    setSelectedMenu(menu.id);
+    setIsModalVisible(false);
   };
 
   useEffect(() => {
+    (async () => {
+      const email = await AsyncStorage.getItem("email");
+      const [data] = await getRestaurant(email);
+
+      if (data) {
+        if (data?.fontFamily) {
+          document.querySelector("body").style.fontFamily = data?.fontFamily;
+        }
+
+        setRestaurant(data);
+      }
+    })();
+  }, [])
+
+  useEffect(() => {
+    (async () => {
+      const email = await AsyncStorage.getItem("email");
+      const [data] = await getRestaurant(email);
+
+      if (data) {
+        if (data?.fontFamily) {
+          document.querySelector("body").style.fontFamily = data?.fontFamily;
+        }
+
+        const allMenus = await getMenus(data?.id);
+        const allCategories = await getCategories(data?.id);
+
+        setMenus(allMenus);
+        setCategories(allCategories);
+      }
+    })();
+  }, [route.name, productsByCat]);
+
+  useEffect(() => {
+    if (selectedMenu && categories) {
+      (async () => {
+        const selectMenuSave = await AsyncStorage.getItem("menuId");
+        const restaurantId = await AsyncStorage.getItem("uid");
+        console.log(selectedMenu)
+        const data = await getProductsByMenu(selectedMenu);
+
+        const productsByCategories = categories.reduce((value, nextItem) => {
+          const products = data.filter(
+            (item) => item?.categoryId === nextItem?.id
+          );
+
+          products.sort((a, b) => {
+            if (a.position > b.position) return 1;
+            if (a.position < b.position) return -1;
+            return 0;
+          });
+
+          const category = { ...nextItem, products };
+          if (category.products.length) value.push(category);
+
+          return value;
+        }, []);
+
+        setProductsByCat(productsByCategories);
+        setIsLoading(false);
+      })();
+    }
+    // eslint-disable-next-line
+  }, [selectedMenu]);
+
+  /* useEffect(() => {
     if (route.params && route.params.menuChanged) {
       setIsLoading(true);
       fetchProductsByRestaurant();
       setMenuChanged(false);
     }
-  }, [route.params]);
+  }, [route.params]); */
 
   useEffect(() => {
     const initViewRestaurant = async () => {
@@ -123,91 +184,171 @@ const Mainmenu = () => {
 
     initViewRestaurant();
     setIsLoading(true);
-    fetchProductsByRestaurant();
   }, []);
 
-  useEffect(() => {
-    const filtered = data.map((category) => {
-      const filteredProducts = category.products.filter((product) =>
-        product.name.toLowerCase().includes(searchText.toLowerCase())
-      );
-      
-      if (filteredProducts.length > 0) {
-        return { ...category, products: filteredProducts };
-      }
-      
-      return null;
-    });
-  
-    setFilteredData(filtered.filter(Boolean));
-  }, [searchText, data]);
+
+  const handleSearchChange = (target) => {
+    const value = target;
+    const val = value.toLowerCase();
+
+    setSearchValue(value.trimStart());
+
+    if (value.trim() !== ''.toLowerCase) {
+      const data = productsByCat.reduce((acc, nextCat) => {
+        const fp = nextCat.products.filter((item) => item.name.toLowerCase().includes(val));
+
+        if (fp.length) {
+          fp.sort((a, b) => {
+            if (a.positionInCategory > b.positionInCategory) return 1;
+            if (a.positionInCategory < b.positionInCategory) return -1;
+            return 0;
+          });
+          acc.push({ ...nextCat, products: fp });
+        }
+
+        return acc;
+      }, []);
+
+      setSearchProductsByCat(data);
+    } else setSearchProductsByCat(undefined);
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <LinearGradient colors={["#000", "white"]} style={styles.gradient}>
-        <View style={styles.logoContainer}>
-          <View style={styles.logoWrapper}>
-            <Image
-              source={{
-                uri: `${restaurant.logo}?random=${Math.random()}`,
-              }}
-              style={styles.logo}
+    <>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={toggleMenuVisibility}
+      >
+        <View style={styles.menuModalContainer}>
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <ScrollView
+              contentContainerStyle={styles.menuModalContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {menus?.map((menu, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => handleMenuSelect(menu)}
+                  style={styles.menuItemContainer}
+                >
+                  <Text style={styles.menuItemText}>{menu.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+      <SafeAreaView style={styles.container}>
+        <LinearGradient colors={["#000", "white"]} style={styles.gradient}>
+          <View style={styles.logoContainer}>
+            <View style={styles.logoWrapper}>
+              <Image
+                source={{
+                  uri: `${restaurant.logo}`,
+                }}
+                style={styles.logo}
+              />
+            </View>
+          </View>
+        </LinearGradient>
+        <ScrollView>
+          <View style={styles.topBar}>
+            <Text style={styles.headerText}>
+              Welcome to {restaurant?.restaurantName}
+            </Text>
+          </View>
+          <View style={styles.searchBarContainer}>
+            <Text style={styles.headerText}> This is your drink menu</Text>
+            <TouchableOpacity
+              style={styles.buttonContainer}
+              onPress={toggleMenuVisibility}
+            >
+              <Text style={styles.buttonText}>Change menu</Text>
+            </TouchableOpacity>
+            <TextInput
+              style={styles.searchBar}
+              placeholder="Search..."
+              placeholderTextColor="#aaa"
+              value={searchValue}
+              onChangeText={(e) => handleSearchChange(e)}
             />
           </View>
-        </View>
-      </LinearGradient>
-      <ScrollView>
-        <View style={styles.topBar}>
-          <Text style={styles.headerText}>
-            Welcome to {restaurant?.restaurantName}
-          </Text>
-        </View>
-        <View style={styles.searchBarContainer}>
-          <Text style={styles.headerText}> This is your drink menu</Text>
-          <TouchableOpacity
-            style={styles.buttonContainer}
-            onPress={() => navigation.navigate("CustomDropdown")}
-          >
-            <Text style={styles.buttonText}>Change menu</Text>
-          </TouchableOpacity>
-          <TextInput
-            style={styles.searchBar}
-            placeholder="Search..."
-            placeholderTextColor="#aaa"
-            value={searchText}
-            onChangeText={setSearchText}
-          />
-        </View>
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#FFF" />
-          </View>
-        ) : (
-          filteredData?.map((category, index) => (
-            <View key={index}>
-              <Text style={styles.categoryText}>{category.categoryName}</Text>
-              <View style={styles.productRow}>
-                {category.products?.map((product, i) => (
-                  <Product
-                    key={i}
-                    productData={product}
-                    image={product.image}
-                    title={product.name}
-                    description={product.description}
-                    price={product.price}
-                    navigation={navigation}
-                  />
-                ))}
-              </View>
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#FFF" />
             </View>
-          ))
-        )}
-      </ScrollView>
-    </SafeAreaView>
+          ) : searchProductsByCat !== '' ? (
+            searchProductsByCat.map((category, index) => (
+              <View key={index}>
+                <Text style={styles.categoryText}>{category.name}</Text>
+                <View style={styles.productRow}>
+                  {category.products?.map((product, i) => (
+                    <Product
+                      key={i}
+                      productData={product}
+                      image={product.image}
+                      title={product.name}
+                      description={product.description}
+                      price={product.price}
+                      navigation={navigation}
+                    />
+                  ))}
+                </View>
+              </View>
+            ))
+          ) : (
+            productsByCat?.map((category, index) => (
+              <View key={index}>
+                <Text style={styles.categoryText}>{category.name}</Text>
+                <View style={styles.productRow}>
+                  {category.products?.map((product, i) => (
+                    <Product
+                      key={i}
+                      productData={product}
+                      image={product.image}
+                      title={product.name}
+                      description={product.description}
+                      price={product.price}
+                      navigation={navigation}
+                    />
+                  ))}
+                </View>
+              </View>
+            ))
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
+  menuModalContainer: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#000",
+  },
+  menuModalContent: {
+    backgroundColor: "#000",
+    padding: 20,
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  menuItemContainer: {
+    marginBottom: 75,
+    marginHorizontal: 100,
+  },
+  menuItemText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFF",
+  },
   container: {
     flex: 1,
     backgroundColor: "#000",
