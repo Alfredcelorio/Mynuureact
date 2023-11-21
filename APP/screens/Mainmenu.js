@@ -16,13 +16,10 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { menusApi, categoriesApi, productsApi } from "../config/api/product";
 import { restaurantApi } from "../config/api/auth";
 import {
   getCategories,
-  getFavProducts,
   getProductsByMenu,
-  updateLikedProducts,
 } from "../services/productsList/products";
 import { getMenus } from "../services/productsList/menus";
 import { getRestaurant } from "../services/productsList/restaurant";
@@ -73,12 +70,9 @@ const isIpad =
 const Mainmenu = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const [searchText, setSearchText] = React.useState("");
   const [searchProductsByCat, setSearchProductsByCat] = useState('');
   const [searchValue, setSearchValue] = useState('');
   const [restaurant, setRestaurant] = useState({});
-  const [data, setData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [productsByCat, setProductsByCat] = useState();
   const [selectedMenu, setSelectedMenu] = useState();
@@ -91,6 +85,7 @@ const Mainmenu = () => {
   };
 
   const handleMenuSelect = (menu) => {
+    setIsLoading(true);
     setSelectedMenu(menu.id);
     setIsModalVisible(false);
   };
@@ -132,9 +127,6 @@ const Mainmenu = () => {
   useEffect(() => {
     if (selectedMenu && categories) {
       (async () => {
-        const selectMenuSave = await AsyncStorage.getItem("menuId");
-        const restaurantId = await AsyncStorage.getItem("uid");
-        console.log(selectedMenu)
         const data = await getProductsByMenu(selectedMenu);
 
         const productsByCategories = categories.reduce((value, nextItem) => {
@@ -160,14 +152,6 @@ const Mainmenu = () => {
     }
     // eslint-disable-next-line
   }, [selectedMenu]);
-
-  /* useEffect(() => {
-    if (route.params && route.params.menuChanged) {
-      setIsLoading(true);
-      fetchProductsByRestaurant();
-      setMenuChanged(false);
-    }
-  }, [route.params]); */
 
   useEffect(() => {
     const initViewRestaurant = async () => {
