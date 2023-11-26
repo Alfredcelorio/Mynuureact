@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Dimensions, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { menusApi } from "../config/api/product";
+
+
 
 const MenuScreen = ({ navigation }) => {
   const [menus, setMenus] = useState([]);
@@ -52,7 +54,8 @@ const MenuScreen = ({ navigation }) => {
         onEndReached={scrollNext}
         onEndReachedThreshold={0.1}
         style={{
-          marginTop: 100
+          marginTop: 200,
+
         }}
       />
       <TouchableOpacity
@@ -88,8 +91,8 @@ const styles = StyleSheet.create({
     top: 20
   },
   menuItemText: {
-    fontSize: 24,
-    color: "#FFF",
+  fontSize: 58,
+  color: "#FFF",
   },
 });
 

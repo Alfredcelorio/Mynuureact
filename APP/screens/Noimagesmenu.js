@@ -26,7 +26,6 @@ import { getRestaurant } from "../services/productsList/restaurant";
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
 
-
 const Product = ({
   productData,
   image,
@@ -83,14 +82,14 @@ const Mainmenu = () => {
   const [menus, setMenus] = useState();
   const [isModalVisible, setIsModalVisible] = useState(true);
 
-
   const toggleMenuVisibility = () => {
     setIsModalVisible(!isModalVisible);
   };
 
-  const navigateToNoimagesmenu = () => {
-    navigation.navigate('Noimagesmenu'); // Use the name of your route defined in your stack navigator
+  const navigateToNoImageMenu = () => {
+    navigation.navigate('NoImageMenu'); // Use the name of your route defined in your stack navigator
   };
+
 
   const handleMenuSelect = (menu) => {
     setIsLoading(true);
@@ -99,7 +98,6 @@ const Mainmenu = () => {
     setSearchValue(''); // Reset the search input
     setSearchProductsByCat(''); // Reset the search results
   };
-
 
 
   useEffect(() => {
@@ -257,20 +255,22 @@ const Mainmenu = () => {
               Welcome to {restaurant?.restaurantName}
             </Text>
           </View>
+          <TouchableOpacity
+        onPress={navigateToNoImageMenu}
+        style={styles.noImageButton}
+      >
+        <Text style={styles.noImageButtonText}>Go to No Image Menu</Text>
+      </TouchableOpacity>
           <View style={styles.searchBarContainer}>
             <Text style={styles.headerText}>This is your drink menu</Text>
+            
             <TouchableOpacity
               style={styles.buttonContainer}
               onPress={toggleMenuVisibility}
             >
               <Text style={styles.buttonText}>Change menu</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-        onPress={navigateToNoimagesmenu}
-        style={styles.Noimagesbutton}
-      >
-        <Text style={styles.noImageButtonText}>List</Text>
-      </TouchableOpacity>
+            
             <TextInput
               style={styles.searchBar}
               placeholder="Search..."
@@ -424,11 +424,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: "hidden",
   },
-  productImage: {
-    width: "100%",
-    height: isIpad ? 500: 280,
-    marginTop: 10,
-  },
+
   productTitle: {
     fontSize: isIpad ? 28 : 16,
     fontWeight: "bold",
@@ -458,17 +454,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  noImageButton: {
-    padding: 10,
-    backgroundColor: '#333', // Example color
-    borderRadius: 5,
-    margin: 10,
-    alignSelf: 'center', // Center button in the screen
-  },
-  noImageButtonText: {
-    color: 'white',
-    fontSize: 16,
   },
 });
 

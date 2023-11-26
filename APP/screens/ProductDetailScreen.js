@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Image, StyleSheet, Text, ScrollView, useWindowDimensions, SafeAreaView, TouchableOpacity, FlatList } from 'react-native';
+import {Dimensions, Platform, View, Image, StyleSheet, Text, ScrollView,  SafeAreaView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { menus, categories, products } from '../config/api/product';
 import { useRoute } from '@react-navigation/native';
+
+const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
+
+const isIpad =
+  Platform.OS === 'ios' &&
+  ((windowWidth >= 768 && windowHeight >= 1024) || // iPad Pro 12.9" or similar
+   (windowWidth >= 768 && windowHeight >= 768));
+
 
 Animatable.initializeRegistryWithDefinitions({
   typingFade: {
@@ -13,6 +21,7 @@ Animatable.initializeRegistryWithDefinitions({
   },
 });
 
+
 const TypingText = Animatable.createAnimatableComponent(Text);
 
 const imageUris = [
@@ -20,13 +29,14 @@ const imageUris = [
   // Add more image URLs here
 ];
 
+
 const ProductScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const windowWidth = useWindowDimensions().width;
   const [animationDelay, setAnimationDelay] = useState(0);
   const [menus, setMenus] = useState();
   const { productData } = route.params;
+
 
   const filteredProductData = {
     ABV: productData.abv || "",
@@ -40,11 +50,14 @@ const ProductScreen = () => {
     varietal: productData.varietal || "",
   };
 
+
   useEffect(() => {
     // Set a delay before the animation starts (for a typing effect)
     const delay = 1000; // You can adjust this delay according to your preference
     setAnimationDelay(delay);
   }, []);
+
+  
 
   return (
     <SafeAreaView style={styles.container}>
@@ -54,13 +67,7 @@ const ProductScreen = () => {
       </TouchableOpacity>
       <Text style={styles.headerText}> Welcome to Cantina la 20,</Text>
         <View style={styles.contentContainer}>
-          <Image 
-            source={{ uri: productData.image }}
-            style={styles.image}
-            resizeMode="contain"
-          />
-
-          <TypingText
+         <TypingText
             animation="typingFade"
             duration={800}
             delay={animationDelay}
@@ -68,6 +75,11 @@ const ProductScreen = () => {
           >
             {productData.name}
           </TypingText>
+          <Image 
+            source={{ uri: productData.image }}
+            style={styles.image}
+            resizeMode="contain"
+          />
 
           <TypingText
             animation="typingFade"
@@ -107,12 +119,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'black',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: "100%",
+    height: "100%",
+    paddingHorizontal: 20, 
   },
   scrollContainer: {
     flexGrow: 1,
-    width: '100%',
+    width: "100%",
+
   },
   contentContainer: {
     paddingHorizontal: 0,
@@ -122,17 +136,17 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 400,
+    height:  isIpad ?  600 : 300,
     marginTop: 100,
   },
   title: {
     fontFamily: 'Metropolis-Medium',
-    fontSize: 24,
+    fontSize:  isIpad ?   40 : 20,
     fontWeight: '600',
-    lineHeight: 29,
+    lineHeight: isIpad ?  48 : 29,
     letterSpacing: -0.25437501072883606,
     textAlign: 'left',
-    marginTop: 20,
+    marginTop: 70,
     color: 'white',
   },
   description: {
@@ -140,17 +154,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     lineHeight: 20,
-    textAlign: 'left',
-    marginTop: 10,
+    textAlign: 'center',
+    marginTop: 20,
     color: 'white',
   },
   priceContainer: {
     width: '100%',
     height: 28,
     borderWidth: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginTop: 20,
+    paddingHorizontal: 40, 
   },
   price: {
     fontFamily: 'Metropolis-SemiBold',
@@ -188,11 +203,11 @@ const styles = StyleSheet.create({
   },
   goBackButton: {
     position: 'absolute',
-    top: 70,
-    right: 1,
+    top:  isIpad ? 40: 10,
+    right: 15,
     left: -10,
     zIndex: 100,
-    padding: 10,
+    padding: 20,
   },
   goBackText: {
     fontSize: 30,

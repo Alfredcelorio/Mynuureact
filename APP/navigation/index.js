@@ -6,6 +6,7 @@ import FutureScreen from "../screens/FutureScreen";
 import Mainmenu from "../screens/Mainmenu";
 import ProductDetailScreen from '../screens/ProductDetailScreen'; 
 import CustomDropdown from "../screens/CustomDropdown";
+import Noimagesmenu from  "../screens/Noimagesmenu";
 
 const Stack = createStackNavigator();
 
@@ -66,7 +67,15 @@ export default function AppNavigator() {
           headerShown: false
         }}
       />
-      
+
+      <Stack.Screen  
+  name="Noimagesmenu" // Use the same name as in your import if you plan to navigate to this screen.
+  component={Noimagesmenu} // The corrected component reference
+  options={{
+    headerShown: false
+  }}
+/>     
+
     </Stack.Navigator>
   );
 }
