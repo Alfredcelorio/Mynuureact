@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {Dimensions, Platform, View, Image, StyleSheet, Text, ScrollView,  SafeAreaView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { menus, categories, products } from '../config/api/product';
 import { useRoute } from '@react-navigation/native';
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get("window");

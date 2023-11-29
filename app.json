@@ -2,7 +2,7 @@
   "expo": {
     "name": "MynuuAppReg",
     "slug": "MynuuAppReg",
-    "version": "1.0.0",
+    "version": "2.1.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,21 +16,24 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mynuutheapp.MynuuAppReg",
-      "config": {
-      }
+      "bundleIdentifier": "org.name.Nombredelproyecto",
+      "config": {}
     },
     "android": {
-      "package": "com.mynuutheapp.MynuuAppReg",
+      "package": "org.name.Nombredelproyecto",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "config": {
-      }
+      "config": {}
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "6b5a2a1f-aba8-4caf-a710-6450c91c2402"
+      }
     }
   }
 }

@@ -6,8 +6,6 @@ import "firebase/compat/auth";
 import "firebase/compat/firestore";
 import { firebaseConfig } from "../utils/firebase";
 import { getStorage } from "firebase/storage";
-import { getAuth, setPersistence, getReactNativePersistence, initializeAuth } from "firebase/auth";
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 
 let firebaseApp;
