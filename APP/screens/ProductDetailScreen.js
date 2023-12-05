@@ -76,7 +76,7 @@ const ProductScreen = () => {
           <Image 
             source={{ uri: productData.image }}
             style={styles.image}
-            resizeMode="contain"
+            resizeMode="cover"
           />
 
           <TypingText
@@ -128,23 +128,23 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 0,
-    paddingBottom: 20,
+    paddingBottom: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   image: {
     width: '100%',
-    height:  isIpad ?  600 : 300,
-    marginTop: 100,
+    height:  isIpad ?  800 : 500,
+    marginTop: 10,
   },
   title: {
     fontFamily: 'Metropolis-Medium',
-    fontSize:  isIpad ?   40 : 20,
-    fontWeight: '600',
+    fontSize:  isIpad ?   60 : 30,
+    fontWeight: 'bold',
     lineHeight: isIpad ?  48 : 29,
     letterSpacing: -0.25437501072883606,
     textAlign: 'left',
-    marginTop: 70,
+    marginTop: 50,
     color: 'white',
   },
   description: {
@@ -201,11 +201,11 @@ const styles = StyleSheet.create({
   },
   goBackButton: {
     position: 'absolute',
-    top:  isIpad ? 40: 10,
+    top:  isIpad ? 40: 2,
     right: 15,
-    left: -10,
+    left: 15,
     zIndex: 100,
-    padding: 20,
+    padding: 10,
   },
   goBackText: {
     fontSize: 30,

@@ -269,7 +269,7 @@ const Mainmenu = () => {
         onPress={navigateToNoimagesmenu}
         style={styles.Noimagesbutton}
       >
-        <Text style={styles.noImageButtonText}>List</Text>
+        <Text style={styles.noImageButtonText}>No images</Text>
       </TouchableOpacity>
             <TextInput
               style={styles.searchBar}
@@ -321,6 +321,12 @@ const Mainmenu = () => {
             ))
           )}
         </ScrollView>
+        <View style={styles.bannerContainer}>
+          <Image
+            source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/fullaccezz-2756a.appspot.com/o/restaurants%2Fmynuu-logo.jpg?alt=media&token=1cc8633b-e0e4-45af-906b-0b1ff10ce090' }}
+            style={styles.bannerImage}
+          />
+        </View>
       </SafeAreaView>
     </>
   );
@@ -330,10 +336,10 @@ const styles = StyleSheet.create({
   menuModalContainer: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#000",
+    backgroundColor: "black",
   },
   menuModalContent: {
-    backgroundColor: "#000",
+    backgroundColor: "black",
     padding: 20,
     width: "100%",
     height: "100%",
@@ -349,12 +355,14 @@ const styles = StyleSheet.create({
     fontSize: isIpad ? 65 : 22,
     fontWeight: "bold",
     color: "#FFF",
+    marginTop: 10,
   },
   container: {
     flex: 1,
     backgroundColor: "#000",
   },
   logoContainer: {
+    backgroundColor: "black",
     alignItems: "center",
     paddingTop: 30,
     paddingBottom: 30,
@@ -386,10 +394,10 @@ const styles = StyleSheet.create({
     lineHeight: 28,
     letterSpacing: -0.165,
     textAlign: "left",
-    marginBottom: 1,
+    marginBottom: 20,
   },
   searchBarContainer: {
-    padding: 10,
+    padding: 5,
   },
   searchBar: {
     height: 40,
@@ -469,6 +477,18 @@ const styles = StyleSheet.create({
   noImageButtonText: {
     color: 'white',
     fontSize: 16,
+  },
+  bannerContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '000000', // Set a background color if needed
+  },
+  bannerImage: {
+    width: '100%',
+    height: 45, // Set the height of the banner
+    resizeMode: 'contain', // or 'cover' depending on your preference
   },
 });
 
