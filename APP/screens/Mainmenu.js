@@ -23,6 +23,8 @@ import {
 } from "../services/productsList/products";
 import { getMenus } from "../services/productsList/menus";
 import { getRestaurant } from "../services/productsList/restaurant";
+import Icon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome or other icon sets
+
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
 
@@ -36,6 +38,7 @@ const Product = ({
   navigation,
 }) => {
   return (
+    
     <View style={styles.productContainer}>
       {productData.length !== 0 ? (
         <>
@@ -211,16 +214,20 @@ const Mainmenu = () => {
 
   return (
     <>
+    
       <Modal
         animationType="slide"
         transparent={true}
         visible={isModalVisible}
         onRequestClose={toggleMenuVisibility}
       >
+        
         <View style={styles.menuModalContainer}>
+          
           <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
+             
             <ScrollView
               contentContainerStyle={styles.menuModalContent}
               showsVerticalScrollIndicator={false}
@@ -239,6 +246,9 @@ const Mainmenu = () => {
         </View>
       </Modal>
       <SafeAreaView style={styles.container}>
+      <TouchableOpacity onPress={toggleMenuVisibility} style={styles.menuIcon}>
+          <Icon name="bars" size={30} color="white" />
+        </TouchableOpacity>
       <ScrollView>   
         <LinearGradient colors={["#000", "white"]} style={styles.gradient}>
           <View style={styles.logoContainer}>
@@ -259,12 +269,7 @@ const Mainmenu = () => {
           </View>
           <View style={styles.searchBarContainer}>
             <Text style={styles.headerText}>This is your drink menu</Text>
-            <TouchableOpacity
-              style={styles.buttonContainer}
-              onPress={toggleMenuVisibility}
-            >
-              <Text style={styles.buttonText}>Change menu</Text>
-            </TouchableOpacity>
+           
             <TouchableOpacity
         onPress={navigateToNoimagesmenu}
         style={styles.Noimagesbutton}
@@ -360,6 +365,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000",
+    height: 40
   },
   logoContainer: {
     backgroundColor: "black",
@@ -489,6 +495,12 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 45, // Set the height of the banner
     resizeMode: 'contain', // or 'cover' depending on your preference
+  },
+  menuIcon: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 44 : 5, // Adjust top for iOS status bar
+    left: 10,
+    zIndex: 100,
   },
 });
 

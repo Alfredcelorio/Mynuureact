@@ -7,6 +7,7 @@ import Mainmenu from "../screens/Mainmenu";
 import ProductDetailScreen from '../screens/ProductDetailScreen'; 
 import CustomDropdown from "../screens/CustomDropdown";
 import Noimagesmenu from  "../screens/Noimagesmenu";
+import GeneralSettingsScreen from '../screens/GeneralSettingsScreen';
 
 const Stack = createStackNavigator();
 
@@ -74,7 +75,16 @@ export default function AppNavigator() {
   options={{
     headerShown: false
   }}
-/>     
+/>    
+<Stack.Screen
+  name="GeneralSettings"
+  component={GeneralSettingsScreen}
+  options={{
+    headerShown: true,
+    title: 'General Settings',
+    // Add other options as needed
+  }}
+/> 
 
     </Stack.Navigator>
   );
