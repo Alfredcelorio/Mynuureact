@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
   menuModalContainer: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#000",
+    backgroundColor: "black",
   },
   menuModalContent: {
     backgroundColor: "#000",
@@ -355,6 +355,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
   },
   logoContainer: {
+    backgroundColor: "black",
     alignItems: "center",
     paddingTop: 30,
     paddingBottom: 30,

@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Metropolis-Medium',
     fontSize:  isIpad ?   60 : 30,
     fontWeight: 'bold',
-    lineHeight: isIpad ?  48 : 29,
+    lineHeight: isIpad ?  70 : 29,
     letterSpacing: -0.25437501072883606,
     textAlign: 'left',
     marginTop: 50,
