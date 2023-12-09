@@ -264,11 +264,11 @@ const Mainmenu = () => {
         </LinearGradient>
           <View style={styles.topBar}>
             <Text style={styles.headerText}>
-              Welcome to {restaurant?.restaurantName}
+            Welcome to {restaurant?.restaurantName}
             </Text>
           </View>
           <View style={styles.searchBarContainer}>
-            <Text style={styles.headerText}>This is your drink menu</Text>
+            <Text style={styles.headerText}> This is your drink menu</Text>
            
             <TouchableOpacity
         onPress={navigateToNoimagesmenu}
@@ -341,11 +341,9 @@ const styles = StyleSheet.create({
   menuModalContainer: {
     width: "100%",
     height: "100%",
-    backgroundColor: "black",
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
   },
   menuModalContent: {
-    backgroundColor: "black",
-    padding: 20,
     width: "100%",
     height: "100%",
     justifyContent: "center",
@@ -400,7 +398,7 @@ const styles = StyleSheet.create({
     lineHeight: 28,
     letterSpacing: -0.165,
     textAlign: "left",
-    marginBottom: 20,
+   
   },
   searchBarContainer: {
     padding: 5,
