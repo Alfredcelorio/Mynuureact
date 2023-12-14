@@ -12,6 +12,7 @@ import {
   Platform,
   ActivityIndicator,
   Modal,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -20,14 +21,15 @@ import { restaurantApi } from "../config/api/auth";
 import {
   getCategories,
   getProductsByMenu,
+  updateItem
 } from "../services/productsList/products";
 import { getMenus } from "../services/productsList/menus";
 import { getRestaurant } from "../services/productsList/restaurant";
-import Icon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome or other icon sets
-
+import Icon from "react-native-vector-icons/FontAwesome"; // Import FontAwesome or other icon sets
+import greenCircle from "../../assets/greenCircle.png";
+import redCircle from "../../assets/redCircle.png";
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
-
 
 const Product = ({
   productData,
@@ -35,10 +37,55 @@ const Product = ({
   title,
   description,
   price,
+  status,
+  id,
+  deleteItem,
+  setDeleteItem,
   navigation,
 }) => {
+  const iconName = status ? "checkcircle" : "closecircle";
+  const iconColor = status ? "green" : "red";
+
+  const update = async (id, status) => {
+    try {
+      await updateItem(id, { enabled: !status }, 'products');
+      setDeleteItem(!deleteItem)
+    } catch (error) {
+      throw new Error(error)
+    }
+  }
+
+  const handleIconPress = (title, id, status) => {
+    if (status) {
+      Alert.alert(
+        `Deactivate item ${title}`,
+        "If you deactivate this inventory item, it will disappear from your menu until you activate it again from the administrator.",
+        [
+          {
+            text: "Back",
+            onPress: () => console.log("Back pressed"),
+            style: "cancel",
+          },
+          { text: "Continue", onPress: () => update(id, status) },
+        ]
+      );
+    } else {
+      Alert.alert(
+        `Activate item ${title}`,
+        "If you activate this inventory item, it will appear in your menu.",
+        [
+          {
+            text: "Back",
+            onPress: () => console.log("Back pressed"),
+            style: "cancel",
+          },
+          { text: "Continue", onPress: () => update(id, status) },
+        ]
+      );
+    }
+  };
+
   return (
-    
     <View style={styles.productContainer}>
       {productData.length !== 0 ? (
         <>
@@ -53,6 +100,12 @@ const Product = ({
                 style={styles.productImage}
                 resizeMode="cover"
               />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.statusIconWrapper}
+              onPress={() => handleIconPress(title, id, status)}
+            >
+              <Image source={status ? greenCircle : redCircle} style={{ width: 40, height: 40 }} />
             </TouchableOpacity>
           </View>
           <Text style={styles.productTitle}>{title}</Text>
@@ -69,15 +122,15 @@ const Product = ({
 };
 
 const isIpad =
-  Platform.OS === 'ios' &&
+  Platform.OS === "ios" &&
   ((windowWidth >= 768 && windowHeight >= 1024) || // iPad Pro 12.9" or similar
-   (windowWidth >= 768 && windowHeight >= 768));
+    (windowWidth >= 768 && windowHeight >= 768));
 
 const Mainmenu = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const [searchProductsByCat, setSearchProductsByCat] = useState('');
-  const [searchValue, setSearchValue] = useState('');
+  const [searchProductsByCat, setSearchProductsByCat] = useState("");
+  const [searchValue, setSearchValue] = useState("");
   const [restaurant, setRestaurant] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [productsByCat, setProductsByCat] = useState();
@@ -85,25 +138,24 @@ const Mainmenu = () => {
   const [categories, setCategories] = useState();
   const [menus, setMenus] = useState();
   const [isModalVisible, setIsModalVisible] = useState(true);
-
+  const [deleteItem, setDeleteItem] = useState(false);
 
   const toggleMenuVisibility = () => {
     setIsModalVisible(!isModalVisible);
   };
 
   const navigateToNoimagesmenu = () => {
-    navigation.navigate('Noimagesmenu'); // Use the name of your route defined in your stack navigator
+    setIsModalVisible(true);
   };
 
   const handleMenuSelect = (menu) => {
+    if (menu.id === selectedMenu) return setIsModalVisible(false);
     setIsLoading(true);
     setSelectedMenu(menu.id);
     setIsModalVisible(false);
-    setSearchValue(''); // Reset the search input
-    setSearchProductsByCat(''); // Reset the search results
+    setSearchValue("");
+    setSearchProductsByCat("");
   };
-
-
 
   useEffect(() => {
     (async () => {
@@ -118,7 +170,7 @@ const Mainmenu = () => {
         setRestaurant(data);
       }
     })();
-  }, [])
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -166,7 +218,7 @@ const Mainmenu = () => {
       })();
     }
     // eslint-disable-next-line
-  }, [selectedMenu]);
+  }, [selectedMenu, deleteItem]);
 
   useEffect(() => {
     const initViewRestaurant = async () => {
@@ -177,7 +229,7 @@ const Mainmenu = () => {
         const [objetDestruct] = fetchRest;
         setRestaurant(objetDestruct);
       } catch (err) {
-        console.log(err);
+        throw new Error(err)
       }
     };
 
@@ -185,16 +237,17 @@ const Mainmenu = () => {
     setIsLoading(true);
   }, []);
 
-
   const handleSearchChange = (target) => {
     const value = target;
     const val = value.toLowerCase();
 
     setSearchValue(value.trimStart());
 
-    if (value.trim() !== ''.toLowerCase) {
+    if (value.trim() !== "".toLowerCase) {
       const data = productsByCat.reduce((acc, nextCat) => {
-        const fp = nextCat.products.filter((item) => item.name.toLowerCase().includes(val));
+        const fp = nextCat.products.filter((item) =>
+          item.name.toLowerCase().includes(val)
+        );
 
         if (fp.length) {
           fp.sort((a, b) => {
@@ -214,20 +267,16 @@ const Mainmenu = () => {
 
   return (
     <>
-    
       <Modal
         animationType="slide"
         transparent={true}
         visible={isModalVisible}
         onRequestClose={toggleMenuVisibility}
       >
-        
         <View style={styles.menuModalContainer}>
-          
           <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
-             
             <ScrollView
               contentContainerStyle={styles.menuModalContent}
               showsVerticalScrollIndicator={false}
@@ -246,36 +295,39 @@ const Mainmenu = () => {
         </View>
       </Modal>
       <SafeAreaView style={styles.container}>
-      <TouchableOpacity onPress={toggleMenuVisibility} style={styles.menuIcon}>
+        <TouchableOpacity
+          onPress={toggleMenuVisibility}
+          style={styles.menuIcon}
+        >
           <Icon name="bars" size={30} color="white" />
         </TouchableOpacity>
-      <ScrollView>   
-        <LinearGradient colors={["#000", "white"]} style={styles.gradient}>
-          <View style={styles.logoContainer}>
-            <View style={styles.logoWrapper}>
-              <Image
-                source={{
-                  uri: `${restaurant.logo}`,
-                }}
-                style={styles.logo}
-              />
+        <ScrollView>
+          <LinearGradient colors={["#000", "white"]} style={styles.gradient}>
+            <View style={styles.logoContainer}>
+              <View style={styles.logoWrapper}>
+                <Image
+                  source={{
+                    uri: `${restaurant.logo}`,
+                  }}
+                  style={styles.logo}
+                />
+              </View>
             </View>
-          </View>
-        </LinearGradient>
+          </LinearGradient>
           <View style={styles.topBar}>
             <Text style={styles.headerText}>
-            Welcome to {restaurant?.restaurantName}
+              Welcome to {restaurant?.restaurantName}
             </Text>
           </View>
           <View style={styles.searchBarContainer}>
             <Text style={styles.headerText}> This is your drink menu</Text>
-           
+
             <TouchableOpacity
-        onPress={navigateToNoimagesmenu}
-        style={styles.Noimagesbutton}
-      >
-        <Text style={styles.noImageButtonText}>No images</Text>
-      </TouchableOpacity>
+              onPress={navigateToNoimagesmenu}
+              style={styles.buttonContainerChange}
+            >
+              <Text style={styles.noImageButtonText}>Change menu</Text>
+            </TouchableOpacity>
             <TextInput
               style={styles.searchBar}
               placeholder="Search..."
@@ -288,7 +340,7 @@ const Mainmenu = () => {
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#FFF" />
             </View>
-          ) : searchProductsByCat !== '' ? (
+          ) : searchProductsByCat !== "" ? (
             searchProductsByCat.map((category, index) => (
               <View key={index}>
                 <Text style={styles.categoryText}>{category.name}</Text>
@@ -300,6 +352,10 @@ const Mainmenu = () => {
                       image={product.image}
                       title={product.name}
                       price={product.price}
+                      status={product.enabled}
+                      deleteItem={deleteItem}
+                      setDeleteItem={setDeleteItem}
+                      id={product.id}
                       navigation={navigation}
                     />
                   ))}
@@ -318,6 +374,10 @@ const Mainmenu = () => {
                       image={product.image}
                       title={product.name}
                       price={product.price}
+                      status={product.enabled}
+                      deleteItem={deleteItem}
+                      setDeleteItem={setDeleteItem}
+                      id={product.id}
                       navigation={navigation}
                     />
                   ))}
@@ -328,7 +388,9 @@ const Mainmenu = () => {
         </ScrollView>
         <View style={styles.bannerContainer}>
           <Image
-            source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/fullaccezz-2756a.appspot.com/o/restaurants%2Fmynuu-logo.jpg?alt=media&token=1cc8633b-e0e4-45af-906b-0b1ff10ce090' }}
+            source={{
+              uri: "https://firebasestorage.googleapis.com/v0/b/fullaccezz-2756a.appspot.com/o/restaurants%2Fmynuu-logo.jpg?alt=media&token=1cc8633b-e0e4-45af-906b-0b1ff10ce090",
+            }}
             style={styles.bannerImage}
           />
         </View>
@@ -363,7 +425,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000",
-    height: 40
+    height: 40,
   },
   logoContainer: {
     backgroundColor: "black",
@@ -384,6 +446,13 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     zIndex: 101,
   },
+  buttonContainerChange: {
+    backgroundColor: "black",
+    padding: 10,
+    borderRadius: 10,
+    margin: 5,
+    alignItems: "center",
+  },
   topBar: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -398,7 +467,6 @@ const styles = StyleSheet.create({
     lineHeight: 28,
     letterSpacing: -0.165,
     textAlign: "left",
-   
   },
   searchBarContainer: {
     padding: 5,
@@ -438,7 +506,7 @@ const styles = StyleSheet.create({
   },
   productImage: {
     width: "100%",
-    height: isIpad ? 500: 280,
+    height: isIpad ? 500 : 280,
     marginTop: 10,
   },
   productTitle: {
@@ -448,9 +516,9 @@ const styles = StyleSheet.create({
     color: "#FFF",
     marginTop: 10,
   },
-  
+
   productPrice: {
-    fontSize:  isIpad ? 20 : 14,
+    fontSize: isIpad ? 20 : 14,
     marginHorizontal: 5,
     color: "#FFF",
     marginTop: 3,
@@ -473,32 +541,38 @@ const styles = StyleSheet.create({
   },
   noImageButton: {
     padding: 10,
-    backgroundColor: '#333', // Example color
+    backgroundColor: "#333", // Example color
     borderRadius: 5,
     margin: 10,
-    alignSelf: 'center', // Center button in the screen
+    alignSelf: "center", // Center button in the screen
   },
   noImageButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
   },
   bannerContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '000000', // Set a background color if needed
+    backgroundColor: "000000", // Set a background color if needed
   },
   bannerImage: {
-    width: '100%',
+    width: "100%",
     height: 45, // Set the height of the banner
-    resizeMode: 'contain', // or 'cover' depending on your preference
+    resizeMode: "contain", // or 'cover' depending on your preference
   },
   menuIcon: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 44 : 5, // Adjust top for iOS status bar
+    position: "absolute",
+    top: Platform.OS === "ios" ? 44 : 45, // Adjust top for iOS status bar
     left: 10,
     zIndex: 100,
+  },
+  statusIconWrapper: {
+    position: "absolute",
+    top: 15,
+    right: 5,
+    padding: 10,
   },
 });
 

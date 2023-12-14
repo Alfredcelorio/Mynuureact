@@ -172,7 +172,7 @@ const Mainmenu = () => {
         const [objetDestruct] = fetchRest;
         setRestaurant(objetDestruct);
       } catch (err) {
-        console.log(err);
+        throw new Error(err)
       }
     };
 

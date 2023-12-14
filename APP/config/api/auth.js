@@ -9,7 +9,7 @@ export const login = async (email, password) => {
         const response = await client.post('/login', obj);
         return response.data
     } catch (err) {
-        console.log(err);
+        throw new Error(err)
     }
 }
 
@@ -22,6 +22,6 @@ export const restaurantApi = async (email, id) => {
         const response = await client.post('/findUserByEmailAndId', obj);
         return response.data
     } catch (err) {
-        console.log(err);
+        throw new Error(err)
     }
 }
