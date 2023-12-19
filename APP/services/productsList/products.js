@@ -55,7 +55,6 @@ export const getProductsByMenu = async (menuId) => {
     const docs = query(
       collection(db, "products"),
       where("deleted", "==", false),
-      where("enabled", "==", true),
       where("menuId", "==", menuId)
     );
     const productDocs = await getDocs(docs);
@@ -78,5 +77,14 @@ export const updateLikedProducts = async (data) => {
     return null;
   } catch (error) {
     return null;
+  }
+};
+
+export const updateItem = async (id, obj, collections) => {
+  try {
+    const docs = await updateDoc(doc(collection(db, collections), id), obj);
+    return docs
+  } catch (error) {
+    throw new Error(error)
   }
 };

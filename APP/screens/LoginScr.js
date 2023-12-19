@@ -1,44 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleAuthProvider, signInWithRedirect, onAuthStateChanged } from 'firebase/auth';
 import { login } from "../config/api/auth";
 import { auth } from '../utils/firebase';
+import { AuthContext } from '../context/context';
 
 export default function LoginScr({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isAuth, setIsAuth] = useState(true);
+  const { handleLogin } = useContext(AuthContext);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      const isLogin = await AsyncStorage.getItem('uid');
-      const userEmail = await AsyncStorage.getItem('email');
-      if (user || (isLogin && userEmail)) {
-        setIsAuth(false)
-        return navigation.navigate('Mainmenu');
-      }
-
-      setIsAuth(true)
-    });
-
-    return unsubscribe;
-  }, []);
-
-  const handleLogin = async () => {
+  const login = async () => {
     try {
-      const userLogin = await AsyncStorage.getItem('uid');
-      const userEmail = await AsyncStorage.getItem('email');
-      if (userLogin && userEmail) {
-        await AsyncStorage.removeItem("uid");
-        await AsyncStorage.removeItem("email");
-      }
-      const sendLogin = await login(email, password);
-      await AsyncStorage.setItem("uid", sendLogin?.uid);
-      await AsyncStorage.setItem("email", sendLogin?.email);
+      await handleLogin(email, password) 
       navigation.navigate('Mainmenu');
     } catch (err) {
-      console.log(err)
+      throw new Error(err)
+      throw new Error(err)
     }
   };
 
@@ -49,7 +29,7 @@ export default function LoginScr({ navigation }) {
       // Iniciar la autenticación de Google
       await signInWithRedirect(auth, provider);
     } catch (error) {
-      console.error('Error al iniciar sesión con Google:', error);
+      throw new Error(error)
     }
   };
 
@@ -73,7 +53,7 @@ export default function LoginScr({ navigation }) {
           value={password}
           onChangeText={(text) => setPassword(text)}
         />
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <TouchableOpacity style={styles.loginButton} onPress={() => login(email, password)}>
           <Text style={styles.buttonText}>Log in</Text>
         </TouchableOpacity>
         {/* <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>

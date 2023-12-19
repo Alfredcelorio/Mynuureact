@@ -5,7 +5,7 @@ export const menusApi = async (restaurantId) => {
         const response = await client.get(`/${restaurantId}`);
         return response.data
     } catch (err) {
-        console.log(err);
+        throw new Error(err)
     }
 }
 
@@ -14,7 +14,7 @@ export const categoriesApi = async (restaurantId, menuIds) => {
         const response = await client.get(`/${restaurantId}/${menuIds.join(',')}`);
         return response.data;
     } catch (err) {
-        console.log(err);
+        throw new Error(err)
     }
 }
 export const productsApi = async (restaurantId, categoryIds) => {
@@ -22,6 +22,6 @@ export const productsApi = async (restaurantId, categoryIds) => {
         const response = await client.post(`/products/${restaurantId}`, { categoryIds });
         return response.data;
     } catch (err) {
-        console.log(err);
+        throw new Error(err)
     }
 }

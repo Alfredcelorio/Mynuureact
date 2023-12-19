@@ -88,8 +88,6 @@ app.post("/products/:restaurantId", async (req, res) => {
         categoryProducts.push(doc.data());
       });
 
-      console.log(categoryProducts)
-
       productsByCategory[id] = { categoryName, categoryProducts };
     }
 
