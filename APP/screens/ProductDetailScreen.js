@@ -78,7 +78,6 @@ const ProductScreen = () => {
             style={styles.image}
             resizeMode="cover"
           />
-
           <TypingText
             animation="typingFade"
             duration={1000}
@@ -134,7 +133,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height:  isIpad ?  800 : 500,
+    height: isIpad ? windowHeight * 0.7 : windowHeight * 0.6,
     marginTop: 10,
   },
   title: {
@@ -178,7 +177,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     width: '100%',
     borderWidth: 1,
-    borderColor: 'white',
+    
     padding: 10,
   },
   
