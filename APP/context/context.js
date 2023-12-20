@@ -16,11 +16,19 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      const isLogin = await AsyncStorage.getItem('uid');
-      const userEmail = await AsyncStorage.getItem('email');
-      if (user || (isLogin && userEmail)) {
-        setCurrentUser(user);
-        setLoading(false);
+      try {
+        const isLogin = await AsyncStorage.getItem('uid');
+        const userEmail = await AsyncStorage.getItem('email');
+        console.log('AUTH: ', auth)
+        console.log('userEmail: ', userEmail)
+        console.log('isLogin: ', isLogin)
+        if (user && (isLogin && userEmail)) {
+          console.log('enter')
+          setCurrentUser(user);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.log(err)
       }
     });
 
