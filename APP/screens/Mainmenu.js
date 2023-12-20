@@ -175,18 +175,22 @@ const Mainmenu = () => {
   useEffect(() => {
     (async () => {
       const email = await AsyncStorage.getItem("email");
-      const [data] = await getRestaurant(email);
-
-      if (data) {
-        if (data?.fontFamily) {
-          document.querySelector("body").style.fontFamily = data?.fontFamily;
-        }
-
-        const allMenus = await getMenus(data?.id);
-        const allCategories = await getCategories(data?.id);
-
-        setMenus(allMenus);
-        setCategories(allCategories);
+      try {
+        const [data] = await getRestaurant(email);
+  
+        if (data) {
+          if (data?.fontFamily) {
+            document.querySelector("body").style.fontFamily = data?.fontFamily;
+          }
+  
+          const allMenus = await getMenus(data?.id);
+          const allCategories = await getCategories(data?.id);
+  
+          setMenus(allMenus);
+          setCategories(allCategories);
+      }
+      } catch (err) {
+        console.log('ERR:', err)
       }
     })();
   }, [route.name, productsByCat]);
@@ -307,7 +311,7 @@ const Mainmenu = () => {
               <View style={styles.logoWrapper}>
                 <Image
                   source={{
-                    uri: `${restaurant.logo}`,
+                    uri: `${restaurant?.logo}`,
                   }}
                   style={styles.logo}
                 />
