@@ -61,6 +61,17 @@ export default function AppNavigator() {
         }}
       />
       <Stack.Screen
+        name="GuessPages"
+        component={currentUser ? DrawerNavigator : LoginScr}
+        options={{
+          headerShown: false,
+          drawerLabel: "GuessPages",
+          drawerIcon: () => (
+            <MaterialCommunityIcons name="home" size={20} color="#808080" />
+          ),
+        }}
+      />
+      <Stack.Screen
         name="ProductDetail"
         component={currentUser ? ProductDetailScreen : LoginScr}
         options={{ header: () => <Header/> }}

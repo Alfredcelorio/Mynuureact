@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleAuthProvider, signInWithRedirect, onAuthStateChanged } from 'firebase/auth';
+import Toast from 'react-native-toast-message';
 import { login } from "../config/api/auth";
 import { auth } from '../utils/firebase';
 import { AuthContext } from '../context/context';
@@ -10,14 +11,28 @@ export default function LoginScr({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isAuth, setIsAuth] = useState(true);
+  const [isLoading, setIsLoading] = useState(false)
   const { handleLogin } = useContext(AuthContext);
 
   const login = async () => {
+    setIsLoading(true);
     try {
       await handleLogin(email, password) 
       navigation.navigate('Mainmenu');
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Access granted',
+      });
+      setIsLoading(false)
     } catch (err) {
-      throw new Error(err)
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Incorrect username or password',
+      });
+      setIsLoading(false);
+      throw new Error(err.message)
     }
   };
 
@@ -36,6 +51,7 @@ export default function LoginScr({ navigation }) {
   <>
     {isAuth ? (
       <View style={styles.container}>
+        <Toast setRef={(ref) => Toast.setRef(ref)} />
         <Text style={styles.welcomeText}>Let's Rock and Roll!</Text>
         <TextInput
           style={styles.input}
@@ -52,9 +68,13 @@ export default function LoginScr({ navigation }) {
           value={password}
           onChangeText={(text) => setPassword(text)}
         />
-        <TouchableOpacity style={styles.loginButton} onPress={() => login(email, password)}>
-          <Text style={styles.buttonText}>Log in</Text>
-        </TouchableOpacity>
+        {isLoading ? (
+          <ActivityIndicator size="large" color="#808080" />
+        ) : (
+          <TouchableOpacity style={styles.loginButton} onPress={() => login(email, password)}>
+            <Text style={styles.buttonText}>Log in</Text>
+          </TouchableOpacity>
+        )}
         {/* <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
           <Text style={styles.buttonText}>Log in with Google</Text>
         </TouchableOpacity> */}

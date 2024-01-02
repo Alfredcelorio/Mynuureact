@@ -17,6 +17,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import Toast from 'react-native-toast-message';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { restaurantApi } from "../config/api/auth";
 import {
@@ -59,9 +60,19 @@ const Product = ({
         handleSearchChange(searchValue);
       }
       setTimeout(() => {
+        Toast.show({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Update full',
+        });
         setUpdateLoading(false);
       }, 1001);
     } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Error when trying to update item status',
+      });
       throw new Error(error);
     }
   };
@@ -528,6 +539,8 @@ const Mainmenu = () => {
           />
         </View>
       </SafeAreaView>
+      <Toast setRef={(ref) => Toast.setRef(ref)} />
+
     </>
   );
 };

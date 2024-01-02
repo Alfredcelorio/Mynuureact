@@ -16,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // pages
 import Mainmenu from "../screens/Mainmenu";
 import LoginScr from "../screens/LoginScr";
+import GuessPages from '../screens/GuessPages';
 // context
 import { AuthContext } from '../context/context';
 // firebase
@@ -99,6 +100,17 @@ const DrawerNavigator = () => {
           ),
         }}
         component={Mainmenu}
+      />
+      <Drawer.Screen
+        name="GuessPages"
+        options={{
+          drawerLabel: "Guess",
+          title: "Guess",
+          drawerIcon: () => (
+            <SimpleLineIcons name="home" size={20} color="#808080" />
+          ),
+        }}
+        component={GuessPages}
       />
       <Drawer.Screen
         name="Logout"
