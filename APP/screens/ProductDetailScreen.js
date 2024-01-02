@@ -60,9 +60,6 @@ const ProductScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <TouchableOpacity style={styles.goBackButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.goBackText}>← </Text>
-      </TouchableOpacity>
       <Text style={styles.headerText}> Welcome to Cantina la 20,</Text>
         <View style={styles.contentContainer}>
          <TypingText

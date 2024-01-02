@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
   Modal,
   Alert,
+  FlatList,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -21,7 +22,7 @@ import { restaurantApi } from "../config/api/auth";
 import {
   getCategories,
   getProductsByMenu,
-  updateItem
+  updateItem,
 } from "../services/productsList/products";
 import { getMenus } from "../services/productsList/menus";
 import { getRestaurant } from "../services/productsList/restaurant";
@@ -39,21 +40,31 @@ const Product = ({
   price,
   status,
   id,
-  deleteItem,
   setDeleteItem,
+  searchValue,
+  handleSearchChange,
+  loadingStatus,
+  setLoadingStatus,
   navigation,
 }) => {
-  const iconName = status ? "checkcircle" : "closecircle";
-  const iconColor = status ? "green" : "red";
-
-  const update = async (id, status) => {
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const update = async (title, id, status) => {
+    setUpdateLoading(true);
+    setLoadingStatus(true);
     try {
-      await updateItem(id, { enabled: !status }, 'products');
-      setDeleteItem(!deleteItem)
+      await updateItem(id, { enabled: !status }, "products");
+      setDeleteItem((prevDeleteItem) => !prevDeleteItem);
+
+      if (searchValue) {
+        handleSearchChange(searchValue);
+      }
+      setTimeout(() => {
+        setUpdateLoading(false);
+      }, 1001);
     } catch (error) {
-      throw new Error(error)
+      throw new Error(error);
     }
-  }
+  };
 
   const handleIconPress = (title, id, status) => {
     if (status) {
@@ -66,7 +77,7 @@ const Product = ({
             onPress: () => console.log("Back pressed"),
             style: "cancel",
           },
-          { text: "Continue", onPress: () => update(id, status) },
+          { text: "Continue", onPress: () => update(title, id, status) },
         ]
       );
     } else {
@@ -79,7 +90,7 @@ const Product = ({
             onPress: () => console.log("Back pressed"),
             style: "cancel",
           },
-          { text: "Continue", onPress: () => update(id, status) },
+          { text: "Continue", onPress: () => update(title, id, status) },
         ]
       );
     }
@@ -101,12 +112,21 @@ const Product = ({
                 resizeMode="cover"
               />
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.statusIconWrapper}
-              onPress={() => handleIconPress(title, id, status)}
-            >
-              <Image source={status ? greenCircle : redCircle} style={{ width: 40, height: 40 }} />
-            </TouchableOpacity>
+            {!updateLoading ? (
+              <TouchableOpacity
+                style={styles.statusIconWrapper}
+                onPress={() => handleIconPress(title, id, status)}
+              >
+                <Image
+                  source={status ? greenCircle : redCircle}
+                  style={{ width: 20, height: 20 }}
+                />
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.loadingStatus}>
+                <ActivityIndicator size="large" color="#808080" />
+              </View>
+            )}
           </View>
           <Text style={styles.productTitle}>{title}</Text>
           {description && (
@@ -129,7 +149,7 @@ const isIpad =
 const Mainmenu = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const [searchProductsByCat, setSearchProductsByCat] = useState("");
+  const [searchProductsByCat, setSearchProductsByCat] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [restaurant, setRestaurant] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -139,6 +159,9 @@ const Mainmenu = () => {
   const [menus, setMenus] = useState();
   const [isModalVisible, setIsModalVisible] = useState(true);
   const [deleteItem, setDeleteItem] = useState(false);
+  const [searchFilter, setSearchFilter] = useState("");
+  const [loadingStatus, setLoadingStatus] = useState(false);
+  const [page, setPage] = useState(1);
 
   const toggleMenuVisibility = () => {
     setIsModalVisible(!isModalVisible);
@@ -177,29 +200,28 @@ const Mainmenu = () => {
       const email = await AsyncStorage.getItem("email");
       try {
         const [data] = await getRestaurant(email);
-  
+
         if (data) {
           if (data?.fontFamily) {
             document.querySelector("body").style.fontFamily = data?.fontFamily;
           }
-  
+
           const allMenus = await getMenus(data?.id);
           const allCategories = await getCategories(data?.id);
-  
+
           setMenus(allMenus);
           setCategories(allCategories);
-      }
+        }
       } catch (err) {
-        console.log('ERR:', err)
+        console.log("ERR:", err);
       }
     })();
-  }, [route.name, productsByCat]);
+  }, [route.name, productsByCat, deleteItem, productsByCat]);
 
   useEffect(() => {
     if (selectedMenu && categories) {
       (async () => {
         const data = await getProductsByMenu(selectedMenu);
-
         const productsByCategories = categories.reduce((value, nextItem) => {
           const products = data.filter(
             (item) => item?.categoryId === nextItem?.id
@@ -217,12 +239,19 @@ const Mainmenu = () => {
           return value;
         }, []);
 
-        setProductsByCat(productsByCategories);
-        setIsLoading(false);
+        setTimeout(() => {
+          setProductsByCat(productsByCategories);
+        }, 500);
+        setTimeout(() => {
+          if (searchFilter !== "") {
+            handleSearchChange(searchFilter);
+          }
+          setIsLoading(false);
+          setLoadingStatus(false);
+        }, 800);
       })();
     }
-    // eslint-disable-next-line
-  }, [selectedMenu, deleteItem]);
+  }, [selectedMenu, deleteItem, loadingStatus, isLoading]);
 
   useEffect(() => {
     const initViewRestaurant = async () => {
@@ -233,7 +262,7 @@ const Mainmenu = () => {
         const [objetDestruct] = fetchRest;
         setRestaurant(objetDestruct);
       } catch (err) {
-        throw new Error(err)
+        throw new Error(err);
       }
     };
 
@@ -241,8 +270,42 @@ const Mainmenu = () => {
     setIsLoading(true);
   }, []);
 
+  const handleSearchEnd = () => {
+    if (selectedMenu && categories) {
+      (async () => {
+        const data = await getProductsByMenu(selectedMenu);
+        const productsByCategories = categories?.reduce((value, nextItem) => {
+          const products = data?.filter(
+            (item) => item?.categoryId === nextItem?.id
+          );
+
+          products.sort((a, b) => {
+            if (a.position > b.position) return 1;
+            if (a.position < b.position) return -1;
+            return 0;
+          });
+
+          const category = { ...nextItem, products };
+          if (category.products.length) value.push(category);
+
+          return value;
+        }, []);
+
+        setProductsByCat((prevData) => [...prevData, ...productsByCategories]);
+        setPage((prevPage) => prevPage + 1);
+      })();
+    }
+  };
+
   const handleSearchChange = (target) => {
-    const value = target;
+    if (target === "") {
+      setSearchFilter(target);
+      setSearchValue("");
+      setSearchProductsByCat([]);
+      return handleSearchEnd();
+    }
+    setSearchFilter(target);
+    const value = target || searchFilter;
     const val = value.toLowerCase();
 
     setSearchValue(value.trimStart());
@@ -264,7 +327,6 @@ const Mainmenu = () => {
 
         return acc;
       }, []);
-
       setSearchProductsByCat(data);
     } else setSearchProductsByCat(undefined);
   };
@@ -299,53 +361,54 @@ const Mainmenu = () => {
         </View>
       </Modal>
       <SafeAreaView style={styles.container}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={toggleMenuVisibility}
           style={styles.menuIcon}
         >
           <Icon name="bars" size={30} color="white" />
-        </TouchableOpacity>
-        <ScrollView>
-          <LinearGradient colors={["#000", "white"]} style={styles.gradient}>
-            <View style={styles.logoContainer}>
-              <View style={styles.logoWrapper}>
-                <Image
-                  source={{
-                    uri: `${restaurant?.logo}`,
-                  }}
-                  style={styles.logo}
-                />
-              </View>
-            </View>
-          </LinearGradient>
-          <View style={styles.topBar}>
-            <Text style={styles.headerText}>
-              Welcome to {restaurant?.restaurantName}
-            </Text>
-          </View>
-          <View style={styles.searchBarContainer}>
-            <Text style={styles.headerText}> This is your drink menu</Text>
+        </TouchableOpacity> */}
 
-            <TouchableOpacity
-              onPress={navigateToNoimagesmenu}
-              style={styles.buttonContainerChange}
-            >
-              <Text style={styles.noImageButtonText}>Change menu</Text>
-            </TouchableOpacity>
-            <TextInput
-              style={styles.searchBar}
-              placeholder="Search..."
-              placeholderTextColor="#aaa"
-              value={searchValue}
-              onChangeText={(e) => handleSearchChange(e)}
-            />
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#FFF" />
           </View>
-          {isLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#FFF" />
+        ) : searchProductsByCat.length !== 0 ? (
+          <ScrollView>
+            <LinearGradient colors={["#000", "white"]} style={styles.gradient}>
+              <View style={styles.logoContainer}>
+                <View style={styles.logoWrapper}>
+                  <Image
+                    source={{
+                      uri: `${restaurant?.logo}`,
+                    }}
+                    style={styles.logo}
+                  />
+                </View>
+              </View>
+            </LinearGradient>
+            <View style={styles.topBar}>
+              <Text style={styles.headerText}>
+                Welcome to {restaurant?.restaurantName}
+              </Text>
             </View>
-          ) : searchProductsByCat !== "" ? (
-            searchProductsByCat.map((category, index) => (
+            <View style={styles.searchBarContainer}>
+              <Text style={styles.headerText}> This is your drink menu</Text>
+
+              <TouchableOpacity
+                onPress={navigateToNoimagesmenu}
+                style={styles.buttonContainerChange}
+              >
+                <Text style={styles.noImageButtonText}>Change menu</Text>
+              </TouchableOpacity>
+              <TextInput
+                style={styles.searchBar}
+                placeholder="Search..."
+                placeholderTextColor="#aaa"
+                value={searchValue}
+                onChangeText={(e) => handleSearchChange(e)}
+              />
+            </View>
+            {searchProductsByCat.map((category, index) => (
               <View key={index}>
                 <Text style={styles.categoryText}>{category.name}</Text>
                 <View style={styles.productRow}>
@@ -360,18 +423,79 @@ const Mainmenu = () => {
                       deleteItem={deleteItem}
                       setDeleteItem={setDeleteItem}
                       id={product.id}
+                      searchValue={searchValue}
+                      handleSearchChange={handleSearchChange}
                       navigation={navigation}
+                      loadingStatus={loadingStatus}
+                      setLoadingStatus={setLoadingStatus}
                     />
                   ))}
                 </View>
               </View>
-            ))
-          ) : (
-            productsByCat?.map((category, index) => (
+            ))}
+          </ScrollView>
+        ) : (
+          <FlatList
+            data={
+              searchProductsByCat.length !== 0
+                ? searchProductsByCat
+                : productsByCat
+            }
+            keyExtractor={(item, index) => index.toString()}
+            onEndReached={handleSearchEnd}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={() =>
+              isLoading ? <ActivityIndicator /> : null
+            }
+            ListHeaderComponent={() => (
+              <>
+                <LinearGradient
+                  colors={["#000", "white"]}
+                  style={styles.gradient}
+                >
+                  <View style={styles.logoContainer}>
+                    <View style={styles.logoWrapper}>
+                      <Image
+                        source={{
+                          uri: `${restaurant?.logo}`,
+                        }}
+                        style={styles.logo}
+                      />
+                    </View>
+                  </View>
+                </LinearGradient>
+                <View style={styles.topBar}>
+                  <Text style={styles.headerText}>
+                    Welcome to {restaurant?.restaurantName}
+                  </Text>
+                </View>
+                <View style={styles.searchBarContainer}>
+                  <Text style={styles.headerText}>
+                    {" "}
+                    This is your drink menu
+                  </Text>
+
+                  <TouchableOpacity
+                    onPress={navigateToNoimagesmenu}
+                    style={styles.buttonContainerChange}
+                  >
+                    <Text style={styles.noImageButtonText}>Change menu</Text>
+                  </TouchableOpacity>
+                  <TextInput
+                    style={styles.searchBar}
+                    placeholder="Search..."
+                    placeholderTextColor="#aaa"
+                    value={searchValue}
+                    onChangeText={(e) => handleSearchChange(e)}
+                  />
+                </View>
+              </>
+            )}
+            renderItem={({ item, index }) => (
               <View key={index}>
-                <Text style={styles.categoryText}>{category.name}</Text>
+                <Text style={styles.categoryText}>{item.name}</Text>
                 <View style={styles.productRow}>
-                  {category.products?.map((product, i) => (
+                  {item.products?.map((product, i) => (
                     <Product
                       key={i}
                       productData={product}
@@ -382,14 +506,19 @@ const Mainmenu = () => {
                       deleteItem={deleteItem}
                       setDeleteItem={setDeleteItem}
                       id={product.id}
+                      searchValue={searchValue}
+                      handleSearchChange={handleSearchChange}
                       navigation={navigation}
+                      loadingStatus={loadingStatus}
+                      setLoadingStatus={setLoadingStatus}
                     />
                   ))}
                 </View>
               </View>
-            ))
-          )}
-        </ScrollView>
+            )}
+          />
+        )}
+
         <View style={styles.bannerContainer}>
           <Image
             source={{
@@ -573,6 +702,12 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   statusIconWrapper: {
+    position: "absolute",
+    top: 15,
+    right: 5,
+    padding: 10,
+  },
+  loadingStatus: {
     position: "absolute",
     top: 15,
     right: 5,

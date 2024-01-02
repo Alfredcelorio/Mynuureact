@@ -18,7 +18,6 @@ export default function LoginScr({ navigation }) {
       navigation.navigate('Mainmenu');
     } catch (err) {
       throw new Error(err)
-      throw new Error(err)
     }
   };
 

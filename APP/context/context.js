@@ -1,8 +1,12 @@
-import { createContext, useState, useEffect } from 'react';
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createContext, useState, useEffect } from "react";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getItemsByConditionGuest } from "../services/auth/auth";
-import { auth } from '../utils/firebase';
+import { auth } from "../utils/firebase";
 
 export const AuthContext = createContext();
 
@@ -17,18 +21,15 @@ export const AuthProvider = ({ children }) => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
-        const isLogin = await AsyncStorage.getItem('uid');
-        const userEmail = await AsyncStorage.getItem('email');
-        console.log('AUTH: ', auth)
-        console.log('userEmail: ', userEmail)
-        console.log('isLogin: ', isLogin)
-        if (user && (isLogin && userEmail)) {
-          console.log('enter')
+        const isLogin = await AsyncStorage.getItem("uid");
+        const userEmail = await AsyncStorage.getItem("email");
+        if (user && isLogin && userEmail) {
+          setUser(user);
           setCurrentUser(user);
           setLoading(false);
         }
       } catch (err) {
-        console.log(err)
+        console.log(err);
       }
     });
 
@@ -37,30 +38,40 @@ export const AuthProvider = ({ children }) => {
 
   const handleLogin = async (email, password) => {
     try {
-      const userLogin = await AsyncStorage.getItem('uid');
-      const userEmail = await AsyncStorage.getItem('email');
-      
+      const userLogin = await AsyncStorage.getItem("uid");
+      const userEmail = await AsyncStorage.getItem("email");
+
       if (userLogin && userEmail) {
         await AsyncStorage.removeItem("uid");
         await AsyncStorage.removeItem("email");
       }
-  
-      const responseLogin = await signInWithEmailAndPassword(auth, email, password);
+
+      const responseLogin = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       setUser(responseLogin?.user);
       setUserID(responseLogin?.user?.uid);
-      await AsyncStorage.setItem('token', responseLogin?.user?.uid);
-      const admin = await getItemsByConditionGuest(email, 'restaurants', 'email'); 
+      await AsyncStorage.setItem("token", responseLogin?.user?.uid);
+      const admin = await getItemsByConditionGuest(
+        email,
+        "restaurants",
+        "email"
+      );
       setValidationInv(false);
       await AsyncStorage.setItem("uid", admin?.[0]?.id);
       await AsyncStorage.setItem("email", admin?.[0]?.email);
       setCurrentUser(admin?.[0]);
     } catch (err) {
-      throw new Error(err)
+      throw new Error(err);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, handleLogin }}>
+    <AuthContext.Provider
+      value={{ currentUser, setCurrentUser, handleLogin, user }}
+    >
       {children}
     </AuthContext.Provider>
   );
