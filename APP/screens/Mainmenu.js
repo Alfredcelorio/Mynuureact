@@ -549,7 +549,7 @@ const styles = StyleSheet.create({
   menuModalContainer: {
     width: "100%",
     height: "100%",
-    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    backgroundColor: "black",
   },
   menuModalContent: {
     width: "100%",

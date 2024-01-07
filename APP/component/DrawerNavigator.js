@@ -55,7 +55,7 @@ const DrawerNavigator = () => {
                   fontSize: 22,
                   marginVertical: 6,
                   fontWeight: "bold",
-                  color: "#111",
+                  color: "white",
                 }}
               >
                 {user?.displayName}
@@ -63,7 +63,7 @@ const DrawerNavigator = () => {
               <Text
                 style={{
                   fontSize: 16,
-                  color: "#111",
+                  color: "white",
                 }}
               >
                 {user?.email}
@@ -75,18 +75,18 @@ const DrawerNavigator = () => {
       }}
       screenOptions={{
         drawerStyle: {
-          backgroundColor: "#fff",
+          backgroundColor: "black",
           width: 250,
         },
         headerStyle: {
           backgroundColor: "black",
         },
-        headerTintColor: "#fff",
+        headerTintColor: "white",
         headerTitleStyle: {
           fontWeight: "bold",
         },
         drawerLabelStyle: {
-          color: "#111",
+          color: "white",
         },
       }}
     >
@@ -104,8 +104,8 @@ const DrawerNavigator = () => {
       <Drawer.Screen
         name="GuessPages"
         options={{
-          drawerLabel: "Guess",
-          title: "Guess",
+          drawerLabel: "Guests",
+          title: "Guests",
           drawerIcon: () => (
             <SimpleLineIcons name="home" size={20} color="#808080" />
           ),

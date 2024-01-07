@@ -61,11 +61,11 @@ export default function AppNavigator() {
         }}
       />
       <Stack.Screen
-        name="GuessPages"
+        name="GuestPages"
         component={currentUser ? DrawerNavigator : LoginScr}
         options={{
           headerShown: false,
-          drawerLabel: "GuessPages",
+          drawerLabel: "GuestPages",
           drawerIcon: () => (
             <MaterialCommunityIcons name="home" size={20} color="#808080" />
           ),
