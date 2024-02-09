@@ -73,7 +73,7 @@ export default function AppNavigator() {
         }}
       />
       <Stack.Screen
-        name="ProductDetail"
+        name="item"
         component={currentUser ? ProductDetailScreen : LoginScr}
         options={{ header: () => <Header/> }}
       />

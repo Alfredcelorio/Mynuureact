@@ -1,21 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import {Dimensions, Platform, View, Image, StyleSheet, Text, ScrollView,  SafeAreaView, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import * as Animatable from 'react-native-animatable';
+import React, { useEffect } from 'react';
 import { useRoute } from '@react-navigation/native';
+import {Dimensions, Platform, View, Image, StyleSheet, Text, SafeAreaView } from 'react-native';
+import * as Animatable from 'react-native-animatable';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { NavigationContainer } from '@react-navigation/native';
+import Item from '../component/tabnavegation/Item';
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
-
-
 
 const isIpad =
   Platform.OS === 'ios' &&
   ((windowWidth >= 768 && windowHeight >= 1024) || // iPad Pro 12.9" or similar
    (windowWidth >= 768 && windowHeight >= 768));
-
-
 
 Animatable.initializeRegistryWithDefinitions({
   typingFade: {
@@ -28,11 +23,14 @@ const TopTab = createMaterialTopTabNavigator();
 
 const InventoryScreen = () => <View><Text>Inventory Screen</Text></View>;
 const SettingsScreen = () => <View><Text>Settings Screen</Text></View>;
-const ItemDetailScreen = () => <View><Text>Item detail screen</Text></View>;
+const HistoryScreen = () => <View><Text>History Screen</Text></View>;
 
 function TopTabNavigator() {
+  const route = useRoute();
+  const { productData } = route.params;
   return (
     <TopTab.Navigator
+      initialRouteName="Item"
       screenOptions={{
         tabBarActiveTintColor: 'white',
         tabBarInactiveTintColor: 'gray',
@@ -40,101 +38,21 @@ function TopTabNavigator() {
         tabBarIndicatorStyle: { backgroundColor: 'white' },
       }}
     >
-      <TopTab.Screen name="Item" component={ItemDetailScreen} />
+      <TopTab.Screen name="Item">
+        {props => <Item {...props} productData={productData} />}
+      </TopTab.Screen>
       <TopTab.Screen name="Inventory" component={InventoryScreen} />
       <TopTab.Screen name="Settings" component={SettingsScreen} />
-      <TopTab.Screen name="History" component={SettingsScreen} />
-      {/* Add more screens as tabs here */}
+      <TopTab.Screen name="History" component={HistoryScreen} />
     </TopTab.Navigator>
   );
 }
 
-
-const TypingText = Animatable.createAnimatableComponent(Text);
-
-
-
-
 const ProductScreen = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
-  const [animationDelay, setAnimationDelay] = useState(0);
-  const [menus, setMenus] = useState();
-  const { productData } = route.params;
-
-
-  const filteredProductData = {
-    ABV: productData.abv || "",
-    body: productData.body || "",
-    brand: productData.brand || "",
-    countryState: productData.countryState || "",
-    region: productData.region || "",
-    sku: productData.sku || "",
-    taste: productData.taste || "",
-    type: productData.type || "",
-    varietal: productData.varietal || "",
-  };
-
-
-  useEffect(() => {
-    // Set a delay before the animation starts (for a typing effect)
-    const delay = 1000; // You can adjust this delay according to your preference
-    setAnimationDelay(delay);
-  }, []);
-
-  
-
   return (
-    
       <SafeAreaView style={styles.container}>
         <TopTabNavigator />
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.contentContainer}>
-            <TypingText
-              animation="typingFade"
-              duration={800}
-              delay={animationDelay}
-              style={styles.title}
-            >
-              {productData.name}
-            </TypingText>
-            <Image
-              source={{ uri: productData.image }}
-              style={styles.image}
-              resizeMode="contain"
-            />
-            <TypingText
-              animation="typingFade"
-              duration={1000}
-              delay={animationDelay + 600}
-              style={styles.description}
-            >
-              {productData.description}
-            </TypingText>
-            <View style={styles.priceContainer}>
-              <TypingText
-                animation="typingFade"
-                duration={4000}
-                delay={animationDelay + 900}
-                style={styles.price}
-              >
-                {productData.price}
-              </TypingText>
-              <View style={styles.additionalInfoContainer}>
-              {Object.entries(filteredProductData).map(([key, value]) => (
-              <View style={styles.additionalInfoItem} key={key}>
-                <Text style={styles.additionalInfoLabel}>{key}</Text>
-                <Text style={styles.additionalInfoValue}>{value}</Text>
-              </View>
-              ))}
-              </View>
-            </View>
-            
-           
-          </View>
-        </ScrollView>
       </SafeAreaView>
-  
   );
 };
 

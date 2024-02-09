@@ -114,7 +114,7 @@ const Product = ({
           <View style={styles.imageWrapper}>
             <TouchableOpacity
               onPress={() =>
-                navigation.navigate("ProductDetail", { productData })
+                navigation.navigate("item", { productData })
               }
             >
               <Image
