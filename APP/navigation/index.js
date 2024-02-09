@@ -9,6 +9,7 @@ import Mainmenu from "../screens/Mainmenu";
 import ProductDetailScreen from "../screens/ProductDetailScreen";
 import CustomDropdown from "../screens/CustomDropdown";
 import Noimagesmenu from "../screens/Noimagesmenu";
+import GuestProfile from "../screens/GuestProfile";
 import GeneralSettingsScreen from "../screens/GeneralSettingsScreen";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { TouchableOpacity, StyleSheet } from "react-native";
@@ -91,6 +92,14 @@ export default function AppNavigator() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+       name="GuestProfile"
+       component={GuestProfile}
+       options={{
+       headerShown: true, // You can configure the header as needed
+       title: "Guest Profile", // Set the title for the screen
+        }}
+/>
       <Stack.Screen
         name="GeneralSettings"
         component={GeneralSettingsScreen}

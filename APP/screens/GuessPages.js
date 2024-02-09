@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { View, Text, FlatList, StyleSheet, Platform } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Platform, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 // Sample data for guests
 const guests = [
@@ -46,12 +47,22 @@ export default function GuestPages() {
     setShow(!show); // Toggle visibility of the picker
   };
 
+  const navigation = useNavigation();
+
+
   const renderItem = ({ item }) => (
-    <View style={styles.itemContainer}>
-      <Text style={styles.timeText}>{item.time}</Text>
-      <Text style={styles.nameText}>{item.name}</Text>
-    </View>
+    <TouchableOpacity
+      onPress={() => {
+        navigation.navigate('GuestProfile', { guestName: item.name }); // Navigate to the GuestProfile screen with guestName as a parameter
+      }}
+    >
+      <View style={styles.itemContainer}>
+        <Text style={styles.timeText}>{item.time}</Text>
+        <Text style={styles.nameText}>{item.name}</Text>
+      </View>
+    </TouchableOpacity>
   );
+  
 
   return (
     <View style={styles.container}>

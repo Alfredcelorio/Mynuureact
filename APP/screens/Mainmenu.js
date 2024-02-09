@@ -483,7 +483,7 @@ const Mainmenu = () => {
                 <View style={styles.searchBarContainer}>
                   <Text style={styles.headerText}>
                     {" "}
-                    This is your drink menu
+                    This is your inventory
                   </Text>
 
                   <TouchableOpacity
@@ -703,11 +703,7 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: "000000", // Set a background color if needed
   },
-  bannerImage: {
-    width: "100%",
-    height: 45, // Set the height of the banner
-    resizeMode: "contain", // or 'cover' depending on your preference
-  },
+
   menuIcon: {
     position: "absolute",
     top: Platform.OS === "ios" ? 44 : 45, // Adjust top for iOS status bar
@@ -728,4 +724,7 @@ const styles = StyleSheet.create({
   },
 });
 
+// add # of bottles/ servings lets
+// clean guestProfile maybe use a template?
+//invenotry screen? just like the screenshot from turo
 export default Mainmenu;

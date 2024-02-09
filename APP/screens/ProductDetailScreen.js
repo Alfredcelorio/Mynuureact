@@ -3,13 +3,18 @@ import {Dimensions, Platform, View, Image, StyleSheet, Text, ScrollView,  SafeAr
 import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import { useRoute } from '@react-navigation/native';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { NavigationContainer } from '@react-navigation/native';
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
+
+
 
 const isIpad =
   Platform.OS === 'ios' &&
   ((windowWidth >= 768 && windowHeight >= 1024) || // iPad Pro 12.9" or similar
    (windowWidth >= 768 && windowHeight >= 768));
+
 
 
 Animatable.initializeRegistryWithDefinitions({
@@ -19,13 +24,35 @@ Animatable.initializeRegistryWithDefinitions({
   },
 });
 
+const TopTab = createMaterialTopTabNavigator();
+
+const InventoryScreen = () => <View><Text>Inventory Screen</Text></View>;
+const SettingsScreen = () => <View><Text>Settings Screen</Text></View>;
+const ItemDetailScreen = () => <View><Text>Item detail screen</Text></View>;
+
+function TopTabNavigator() {
+  return (
+    <TopTab.Navigator
+      screenOptions={{
+        tabBarActiveTintColor: 'white',
+        tabBarInactiveTintColor: 'gray',
+        tabBarStyle: { backgroundColor: 'black' },
+        tabBarIndicatorStyle: { backgroundColor: 'white' },
+      }}
+    >
+      <TopTab.Screen name="Item" component={ItemDetailScreen} />
+      <TopTab.Screen name="Inventory" component={InventoryScreen} />
+      <TopTab.Screen name="Settings" component={SettingsScreen} />
+      <TopTab.Screen name="History" component={SettingsScreen} />
+      {/* Add more screens as tabs here */}
+    </TopTab.Navigator>
+  );
+}
+
 
 const TypingText = Animatable.createAnimatableComponent(Text);
 
-const imageUris = [
-  'https://images.prismic.io/claseazul/54230971-073d-4a3f-a19e-5b33cf618281_Reposado-NBI.png?auto=compress,format&rect=12,0,507,1559&w=532&h=1636',
-  // Add more image URLs here
-];
+
 
 
 const ProductScreen = () => {
@@ -58,126 +85,94 @@ const ProductScreen = () => {
   
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <Text style={styles.headerText}> Welcome to Cantina la 20,</Text>
-        <View style={styles.contentContainer}>
-         <TypingText
-            animation="typingFade"
-            duration={800}
-            delay={animationDelay}
-            style={styles.title}
-          >
-            {productData.name}
-          </TypingText>
-          <Image 
-            source={{ uri: productData.image }}
-            style={styles.image}
-            resizeMode="cover"
-          />
-          <TypingText
-            animation="typingFade"
-            duration={1000}
-            delay={animationDelay + 600} // Add delay for a typing effect
-            style={styles.description}
-          >
-            {productData.description}
-          </TypingText>
-
-          <View style={styles.priceContainer}>
+    
+      <SafeAreaView style={styles.container}>
+        <TopTabNavigator />
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.contentContainer}>
             <TypingText
               animation="typingFade"
-              duration={4000}
-              delay={animationDelay + 900} // Add delay for a typing effect
-              style={styles.price}
+              duration={800}
+              delay={animationDelay}
+              style={styles.title}
             >
-              {productData.price}
+              {productData.name}
             </TypingText>
-          </View>
-
-          <View style={styles.additionalInfoContainer}>
-            {Object.entries(filteredProductData).map(([key, value]) => (
+            <Image
+              source={{ uri: productData.image }}
+              style={styles.image}
+              resizeMode="contain"
+            />
+            <TypingText
+              animation="typingFade"
+              duration={1000}
+              delay={animationDelay + 600}
+              style={styles.description}
+            >
+              {productData.description}
+            </TypingText>
+            <View style={styles.priceContainer}>
+              <TypingText
+                animation="typingFade"
+                duration={4000}
+                delay={animationDelay + 900}
+                style={styles.price}
+              >
+                {productData.price}
+              </TypingText>
+              <View style={styles.additionalInfoContainer}>
+              {Object.entries(filteredProductData).map(([key, value]) => (
               <View style={styles.additionalInfoItem} key={key}>
                 <Text style={styles.additionalInfoLabel}>{key}</Text>
                 <Text style={styles.additionalInfoValue}>{value}</Text>
               </View>
-            ))}
+              ))}
+              </View>
+            </View>
+            
+           
           </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+  
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'black',
-    width: "100%",
-    height: "100%",
-    paddingHorizontal: 20, 
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    width: "100%",
-
-  },
-  contentContainer: {
-    paddingHorizontal: 0,
-    paddingBottom: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   image: {
     width: '100%',
-    height: isIpad ? windowHeight * 0.7 : windowHeight * 0.6,
+    height: 320,
+    resizeMode: 'contain',
     marginTop: 10,
   },
   title: {
-    fontFamily: 'Metropolis-Medium',
-    fontSize:  isIpad ?   60 : 30,
-    fontWeight: 'bold',
-    lineHeight: isIpad ?  70 : 29,
-    letterSpacing: -0.25437501072883606,
-    textAlign: 'left',
-    marginTop: 50,
-    color: 'white',
-  },
-  description: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '500',
-    lineHeight: 20,
-    textAlign: 'center',
-    marginTop: 20,
     color: 'white',
-  },
-  priceContainer: {
-    width: '100%',
-    height: 28,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     marginTop: 20,
-    paddingHorizontal: 40, 
+    textAlign: 'center',
   },
   price: {
-    fontFamily: 'Metropolis-SemiBold',
-    fontSize: 28,
-    fontWeight: '600',
-    lineHeight: 28,
-    letterSpacing: 0,
-    textAlign: 'left',
+    fontSize: 19,
+    fontWeight: '400',
     color: 'white',
+    marginTop: 10,
+    textAlign: 'center',
   },
   additionalInfoContainer: {
-    marginTop: 20,
     width: '100%',
-    borderWidth: 1,
-    
-    padding: 10,
+    marginTop: 20,
+    borderWidth: 2,
+    borderColor: 'white', // bold border color
+    padding: 14,
   },
-  
+
   additionalInfoItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -197,7 +192,7 @@ const styles = StyleSheet.create({
   },
   goBackButton: {
     position: 'absolute',
-    top:  isIpad ? 40: 2,
+    top: isIpad ? 40 : 2,
     right: 15,
     left: 15,
     zIndex: 100,
