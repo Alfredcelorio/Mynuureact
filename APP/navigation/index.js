@@ -6,6 +6,7 @@ import WelcomeScreen from "../screens/WelcomeScreen";
 import LoginScr from "../screens/LoginScr";
 import FutureScreen from "../screens/FutureScreen";
 import Mainmenu from "../screens/Mainmenu";
+import BarDashboard from "../screens/BarDashboard";
 import ProductDetailScreen from "../screens/ProductDetailScreen";
 import CustomDropdown from "../screens/CustomDropdown";
 import Noimagesmenu from "../screens/Noimagesmenu";
@@ -67,6 +68,17 @@ export default function AppNavigator() {
         options={{
           headerShown: false,
           drawerLabel: "GuestPages",
+          drawerIcon: () => (
+            <MaterialCommunityIcons name="home" size={20} color="#808080" />
+          ),
+        }}
+      />
+      <Stack.Screen
+        name="BarDashboard"
+        component={currentUser ? DrawerNavigator : LoginScr}
+        options={{
+          headerShown: false,
+          drawerLabel: "BarDashboard",
           drawerIcon: () => (
             <MaterialCommunityIcons name="home" size={20} color="#808080" />
           ),
