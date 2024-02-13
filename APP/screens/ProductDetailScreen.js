@@ -4,6 +4,9 @@ import {Dimensions, Platform, View, Image, StyleSheet, Text, SafeAreaView } from
 import * as Animatable from 'react-native-animatable';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import Item from '../component/tabnavegation/Item';
+import History from '../component/tabnavegation/History';
+import Settings from '../component/tabnavegation/Settings';
+import Inventory from '../component/tabnavegation/Invetory';
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
 
@@ -41,9 +44,9 @@ function TopTabNavigator() {
       <TopTab.Screen name="Item">
         {props => <Item {...props} productData={productData} />}
       </TopTab.Screen>
-      <TopTab.Screen name="Inventory" component={InventoryScreen} />
-      <TopTab.Screen name="Settings" component={SettingsScreen} />
-      <TopTab.Screen name="History" component={HistoryScreen} />
+      <TopTab.Screen name="Inventory" component={Inventory} />
+      <TopTab.Screen name="Settings" component={Settings} />
+      <TopTab.Screen name="History" component={History} />
     </TopTab.Navigator>
   );
 }
