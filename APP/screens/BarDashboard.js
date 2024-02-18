@@ -20,7 +20,14 @@ export default function App() {
 
   const addPurchase = () => {
     const monthKey = formatMonthKey(currentMonth);
-    const updatedPurchases = { ...purchases, [monthKey]: [...(purchases[monthKey] || []), Number(newPurchase)] };
+    const purchaseWithDate = {
+      amount: Number(newPurchase),
+      date: new Date().toLocaleDateString() // Stores the current date as a string
+    };
+    const updatedPurchases = {
+      ...purchases,
+      [monthKey]: [...(purchases[monthKey] || []), purchaseWithDate]
+    };
     setPurchases(updatedPurchases);
     setNewPurchase('');
   };
@@ -28,7 +35,8 @@ export default function App() {
   const calculateBarCostPercentage = () => {
     const totalSales = weeklySales.reduce((acc, curr) => acc + Number(curr), 0);
     const monthKey = formatMonthKey(currentMonth);
-    const totalPurchases = purchases[monthKey]?.reduce((acc, curr) => acc + curr, 0) || 0;
+    // Update this line to sum the amount property of each purchase
+    const totalPurchases = purchases[monthKey]?.reduce((acc, purchase) => acc + purchase.amount, 0) || 0;
     if (totalSales > 0 && totalPurchases > 0) {
       const percentage = (totalPurchases / totalSales) * 100;
       setBarCostPercentage(percentage.toFixed(2));
@@ -46,7 +54,8 @@ export default function App() {
 
   const getTotalPurchasesForMonth = () => {
     const monthKey = formatMonthKey(currentMonth);
-    return purchases[monthKey]?.reduce((acc, curr) => acc + curr, 0) || 0;
+    // Sum up the amount for each purchase in the given month
+    return purchases[monthKey]?.reduce((acc, purchase) => acc + purchase.amount, 0) || 0;
   };
 
   const deletePurchase = (index) => {
@@ -104,15 +113,15 @@ export default function App() {
           <Text style={styles.totalPurchasesText}>Total Purchases: ${getTotalPurchasesForMonth().toFixed(2)}</Text>
           <Text style={styles.purchasesHeader}>Purchases:</Text>
           {purchases[formatMonthKey(currentMonth)]?.map((purchase, index) => (
-            <View key={index} style={styles.purchaseItemContainer}>
-              <Text style={styles.purchaseItem}>
-                {`Purchase ${index + 1}: $${purchase.toFixed(2)}`}
+          <View key={index} style={styles.purchaseItemContainer}>
+             <Text style={styles.purchaseItem}>
+              {`Purchase ${index + 1}: $${purchase.amount.toFixed(2)} on ${purchase.date}`}
               </Text>
-              <TouchableOpacity onPress={() => deletePurchase(index)} style={styles.deleteButton}>
-                <Text style={styles.deleteButtonText}>Delete</Text>
-              </TouchableOpacity>
+             <TouchableOpacity onPress={() => deletePurchase(index)} style={styles.deleteButton}>
+           <Text style={styles.deleteButtonText}>Delete</Text>
+           </TouchableOpacity>
             </View>
-          ))}
+              ))}
         </View>
       </ScrollView>
     </NativeBaseProvider>

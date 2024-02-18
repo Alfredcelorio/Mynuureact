@@ -170,7 +170,6 @@ const SettingsScreen = () => {
         <TouchableOpacity onPress={changeImage} style={styles.changeImageButton}>
           <Text style={styles.changeImageButtonText}>Change Image</Text>
         </TouchableOpacity>
-       
       </ScrollView>
     </SafeAreaView>
   );
