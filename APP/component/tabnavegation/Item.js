@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import {Dimensions, Platform, View, Image, StyleSheet, Text, ScrollView,  SafeAreaView } from 'react-native';
+import {Dimensions, Platform, View, Image, StyleSheet, Text, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { useRoute } from '@react-navigation/native';
+
+
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
 
@@ -94,6 +96,7 @@ const Item = ({ productData }) => {
            
           </View>
         </ScrollView>
+      
       </SafeAreaView>
   
   );
@@ -164,6 +167,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: 'white',
   },
+
+  
 });
 
 export default Item;

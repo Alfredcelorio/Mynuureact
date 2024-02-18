@@ -1,318 +1,197 @@
 import React, { useState } from "react";
-import { StyleSheet, TouchableOpacity, TextInput, ActionSheetIOS, Modal } from "react-native";
-import DraggableFlatList from "react-native-draggable-flatlist";
-import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
-import { Box, Text, Center, Input, NativeBaseProvider, Button, View  } from 'native-base';
+import { StyleSheet, ScrollView, View, TextInput, Button, Text, TouchableOpacity } from "react-native";
+import { NativeBaseProvider } from 'native-base';
 import { ProgressCircle } from 'react-native-svg-charts';
 
-const TaskProgressChart = ({ completedTasks, totalTasks }) => {
-    const percentageCompleted = (completedTasks / totalTasks) * 100;
-    return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginBottom: 100, marginTop: 100 }}>
-            <ProgressCircle
-                style={{ height: 400, width: '80%' }}
-                progress={percentageCompleted / 100}
-                progressColor='green'
-                strokeWidth={35}
-            />
-            <Text style={styles.percentagePosition} color="white" fontSize="4xl" fontWeight="bold" textAlign="center">
-                {`20%`}
-            </Text>
-        </View>
-    );
-};
-
-const initialChecklists = [
-    { id: '1', name: 'Checklist 1', tasks: [{ key: '1', label: 'Hello', completed: false }] },
-];
+// Helper function to format month keys
+const formatMonthKey = date => `${date.getFullYear()}-${date.getMonth() + 1}`;
 
 export default function App() {
-    const [checklists, setChecklists] = useState(initialChecklists);
-    const [activeChecklistId, setActiveChecklistId] = useState('1');
-    const [newTask, setNewTask] = useState('');
-    const [editingKey, setEditingKey] = useState(null);
-    const [editingValue, setEditingValue] = useState('');
-    const [modalVisible, setModalVisible] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [purchases, setPurchases] = useState({});
+  const [newPurchase, setNewPurchase] = useState('');
+  const [weeklySales, setWeeklySales] = useState(Array(4).fill(''));
+  const [barCostPercentage, setBarCostPercentage] = useState(null);
 
-    const getActiveChecklist = () => {
-        return checklists.find(cl => cl.id === activeChecklistId) || checklists[0];
+  const handleAddWeeklySale = (index, value) => {
+    const updatedSales = weeklySales.map((sale, saleIndex) => saleIndex === index ? value : sale);
+    setWeeklySales(updatedSales);
+  };
+
+  const addPurchase = () => {
+    const monthKey = formatMonthKey(currentMonth);
+    const updatedPurchases = { ...purchases, [monthKey]: [...(purchases[monthKey] || []), Number(newPurchase)] };
+    setPurchases(updatedPurchases);
+    setNewPurchase('');
+  };
+
+  const calculateBarCostPercentage = () => {
+    const totalSales = weeklySales.reduce((acc, curr) => acc + Number(curr), 0);
+    const monthKey = formatMonthKey(currentMonth);
+    const totalPurchases = purchases[monthKey]?.reduce((acc, curr) => acc + curr, 0) || 0;
+    if (totalSales > 0 && totalPurchases > 0) {
+      const percentage = (totalPurchases / totalSales) * 100;
+      setBarCostPercentage(percentage.toFixed(2));
+    } else {
+      alert('Please enter valid numbers for all purchases and weekly sales.');
     }
+  };
 
-    const toggleCompletion = (key) => {
-        const updatedChecklists = checklists.map(cl => {
-            if (cl.id === activeChecklistId) {
-                return {
-                    ...cl,
-                    tasks: cl.tasks.map(task =>
-                        task.key === key ? { ...task, completed: !task.completed } : task
-                    )
-                };
-            }
-            return cl;
-        });
-        setChecklists(updatedChecklists);
-    };
+  const changeMonth = (direction) => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + direction));
+    // Optionally reset sales data for the new month
+    setWeeklySales(Array(4).fill(''));
+    setBarCostPercentage(null); // Reset percentage calculation for new month
+  };
 
-    const addNewTask = () => {
-        if (newTask.trim().length > 0) {
-            const updatedChecklists = checklists.map(cl => {
-                if (cl.id === activeChecklistId) {
-                    return {
-                        ...cl,
-                        tasks: [
-                            ...cl.tasks,
-                            { key: Date.now().toString(), label: newTask, completed: false }
-                        ]
-                    };
-                }
-                return cl;
-            });
-            setChecklists(updatedChecklists);
-            setNewTask('');
-        }
-    };
+  const getTotalPurchasesForMonth = () => {
+    const monthKey = formatMonthKey(currentMonth);
+    return purchases[monthKey]?.reduce((acc, curr) => acc + curr, 0) || 0;
+  };
 
-    const deleteTask = (key) => {
-        const updatedChecklists = checklists.map(cl => {
-            if (cl.id === activeChecklistId) {
-                return {
-                    ...cl,
-                    tasks: cl.tasks.filter(task => task.key !== key)
-                };
-            }
-            return cl;
-        });
-        setChecklists(updatedChecklists);
-    };
+  const deletePurchase = (index) => {
+    const monthKey = formatMonthKey(currentMonth);
+    const updatedPurchases = purchases[monthKey].filter((_, purchaseIndex) => purchaseIndex !== index);
+    setPurchases({ ...purchases, [monthKey]: updatedPurchases });
+  };
 
-    const startEditing = (key, label) => {
-        setEditingKey(key);
-        setEditingValue(label);
-    };
-
-    const finishEditing = () => {
-        const updatedChecklists = checklists.map(cl => {
-            if (cl.id === activeChecklistId) {
-                return {
-                    ...cl,
-                    tasks: cl.tasks.map(task =>
-                        task.key === editingKey ? { ...task, label: editingValue } : task
-                    )
-                };
-            }
-            return cl;
-        });
-        setChecklists(updatedChecklists);
-        setEditingKey(null);
-        setEditingValue('');
-    };
-
-    const addNewChecklist = () => {
-        const newId = Date.now().toString();
-        const newChecklistName = `Checklist ${checklists.length + 1}`;
-        setChecklists(prevChecklists => [
-            ...prevChecklists,
-            { id: newId, name: newChecklistName, tasks: [] }
-        ]);
-        setActiveChecklistId(newId);
-    };
-
-    const showActionSheet = () => {
-        let options = checklists.map(cl => cl.name);
-        options.push("Add a Checklist");
-        options.push("Cancel");
-
-        let cancelButtonIndex = options.length - 1;
-
-        ActionSheetIOS.showActionSheetWithOptions(
-            {
-                options,
-                cancelButtonIndex,
-                userInterfaceStyle: 'dark',
-            },
-            buttonIndex => {
-                if (buttonIndex === options.length - 2) {
-                    addNewChecklist();
-                } else if (buttonIndex !== cancelButtonIndex) {
-                    setActiveChecklistId(checklists[buttonIndex].id);
-                }
-            },
-        );
-    };
-
-    const activeChecklist = getActiveChecklist();
-    const completedTasks = activeChecklist.tasks.filter(task => task.completed).length;
-
-    const renderLeftActions = (progress, dragX, item) => {
-        return (
-            <Box flexDirection="row" height={50} backgroundColor="black">
-                <TouchableOpacity onPress={() => startEditing(item.key, item.label)} style={styles.editBox}>
-                    <Text style={styles.editText}>Edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => deleteTask(item.key)} style={styles.deleteBox}>
-                    <Text style={styles.deleteText}>Delete</Text>
-                </TouchableOpacity>
-            </Box>
-        );
-    };
-
-    const renderItem = ({ item, drag, isActive }) => {
-        if (editingKey === item.key) {
-            return (
-                <TextInput
-                    style={styles.input}
-                    value={editingValue}
-                    onChangeText={setEditingValue}
-                    onBlur={finishEditing}
-                    autoFocus
-                />
-            );
-        }
-
-        return (
-            <Swipeable renderRightActions={(progress, dragX) => renderLeftActions(progress, dragX, item)}>
-                <TouchableOpacity
-                    onLongPress={drag}
-                    onPress={() => toggleCompletion(item.key)}
-                    style={[
-                        styles.rowItem,
-                        { backgroundColor: isActive ? "red" : item.completed ? 'green' : 'black' },
-                    ]}
-                >
-                    <Text style={styles.text}>{item.label}</Text>
-                </TouchableOpacity>
-            </Swipeable>
-        );
-    };
-
-    return (
-        <NativeBaseProvider> 
-            <GestureHandlerRootView style={styles.container}> 
-            <Center flex={1}>
-          <Text color="white" fontSize="5xl" bold>
-            Bar Cost
-          </Text>
-        </Center>
-                <TaskProgressChart completedTasks={completedTasks} totalTasks={activeChecklist.tasks.length} />
-                <View style={styles.taskListContainer}>
-                    <DraggableFlatList
-                        data={activeChecklist.tasks}
-                        onDragEnd={({ data }) => {
-                            const updatedChecklists = checklists.map(cl => {
-                                if (cl.id === activeChecklistId) {
-                                    return { ...cl, tasks: data };
-                                }
-                                return cl;
-                            });
-                            setChecklists(updatedChecklists);
-                        }}
-                        keyExtractor={(item) => item.key}
-                        renderItem={renderItem}
-                        contentContainerStyle={{ backgroundColor: 'black' }}
-                    />
-                </View>
-                <View style={styles.footer}>
-                <Button
-  onPress={() => {/* handle add sales */}}
-  variant="outline"
-  colorScheme="222" // This uses the 'secondary' color scheme from the theme
-  style={styles.button}>
-  Add Sales
-</Button>
-
-<Button
-  onPress={() => {/* handle add purchases */}}
-  colorScheme= "#222" // This uses the 'primary' color scheme from the theme
-  _text={{ color: 'white' }} // Text color, often white is used for better readability on solid buttons
-  style={styles.button}>
-  Add Purchases
-</Button>
-
-                  </View>
-                
-            </GestureHandlerRootView>
-        </NativeBaseProvider>
-    );
+  return (
+    <NativeBaseProvider>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.container}>
+          <Text style={styles.header}>Bar Cost Calculator</Text>
+          <Text style={styles.resultText}>
+                Bar Cost Percentage: {barCostPercentage}%
+              </Text>
+              <ProgressCircle
+                style={styles.progressCircle}
+                progress={Number(barCostPercentage) / 100}
+                progressColor="green"
+                startAngle={-Math.PI * 0.8}
+                endAngle={Math.PI * 0.8}
+                strokeWidth={14}
+              />
+          <View style={styles.monthNavigation}>
+            <Button title="Prev" onPress={() => changeMonth(-1)} color="#3498db" />
+            <Text style={styles.monthLabel}>{currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</Text>
+            <Button title="Next" onPress={() => changeMonth(1)} color="#3498db" />
+          </View>
+          <TextInput
+            style={styles.input}
+            onChangeText={setNewPurchase}
+            value={newPurchase}
+            placeholder="Enter New Purchase"
+            placeholderTextColor="#7f8c8d"
+            keyboardType="numeric"
+          />
+          <Button title="Add Purchase" onPress={addPurchase} color="#3498db" />
+          {weeklySales.map((sale, index) => (
+            <TextInput
+              key={index}
+              style={styles.input}
+              onChangeText={(value) => handleAddWeeklySale(index, value)}
+              value={sale}
+              placeholder={`Enter Sales for Week ${index + 1}`}
+              keyboardType="numeric"
+            />
+          ))}
+          <Button title="Calculate Cost Percentage" onPress={calculateBarCostPercentage} color="#3498db" />
+          {barCostPercentage !== null && (
+            <>
+            
+            </>
+          )}
+          <Text style={styles.totalPurchasesText}>Total Purchases: ${getTotalPurchasesForMonth().toFixed(2)}</Text>
+          <Text style={styles.purchasesHeader}>Purchases:</Text>
+          {purchases[formatMonthKey(currentMonth)]?.map((purchase, index) => (
+            <View key={index} style={styles.purchaseItemContainer}>
+              <Text style={styles.purchaseItem}>
+                {`Purchase ${index + 1}: $${purchase.toFixed(2)}`}
+              </Text>
+              <TouchableOpacity onPress={() => deletePurchase(index)} style={styles.deleteButton}>
+                <Text style={styles.deleteButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </NativeBaseProvider>
+  );
 }
 
 const styles = StyleSheet.create({
-
-  
-    container: {
-        flex: 1,
-        backgroundColor: 'black',
-    },
-
-    percentagePosition: {
-        position: 'absolute',
-    },
-    rowItem: {
-        height: 50,
-        width: '100%',
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    text: {
-        color: "white",
-        fontSize: 18,
-        fontWeight: "bold",
-        textAlign: "center",
-    },
-    footer: {
-        paddingBottom: 10,
-        backgroundColor: 'black',
-    },
-    deleteBox: {
-        backgroundColor: 'black',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: 100,
-        height: 50,
-    },
-    deleteText: {
-        color: 'white',
-        paddingHorizontal: 10,
-        fontWeight: 'bold',
-    },
-    editBox: {
-        backgroundColor: 'black',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: 100,
-        height: 50,
-    },
-    editText: {
-        color: 'white',
-        paddingHorizontal: 10,
-        fontWeight: 'bold',
-    },
-    input: {
-        height: 50,
-        marginTop: 10,
-        paddingHorizontal: 10,
-        fontSize: 18,
-        color: 'white',
-        backgroundColor: 'black',
-    },
-    addButton: {
-        width: '95%',
-        alignSelf: 'center',
-        marginBottom: 20
-    },
-    taskListContainer: {
-        flex: 1,
-    },
-    footer: {
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      padding: 10,
-      paddingBottom: 20, // Consider safe area insets for devices with a bottom notch
-      backgroundColor: 'black', // Change as per your design
-    },
-    button: {
-    width: '100%',
-    marginTop: 10,
+  scrollView: {
+    backgroundColor: '#000', // Black background
+  },
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#000', // Black background
+  },
+  header: {
+    fontSize: 20,
+    color: '#3498db', // Blue text
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  monthNavigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  monthLabel: {
+    fontSize: 16,
+    color: '#3498db', // Blue text
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
     marginBottom: 10,
-    
-    },
+    padding: 10,
+    fontSize: 16,
+    color: '#fff', // White text for input
+    backgroundColor: '#333', // Darker background for input
+  },
+  resultText: {
+    marginTop: 20,
+    fontSize: 18,
+    color: '#3498db', // Blue text
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  progressCircle: {
+    height: 200,
+    marginVertical: 20,
+  },
+  totalPurchasesText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#3498db', // Blue text
+    marginBottom: 10,
+  },
+  purchasesHeader: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#3498db', // Blue text
+  },
+  purchaseItemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  purchaseItem: {
+    fontSize: 14,
+    color: '#fff', // White text
+  },
+  deleteButton: {
+    backgroundColor: '#e74c3c', // Red color for delete button
+    padding: 5,
+    borderRadius: 5,
+  },
+  deleteButtonText: {
+    color: 'black', // White text for delete button
+  },
 });

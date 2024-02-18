@@ -409,8 +409,14 @@ const Mainmenu = () => {
                 onPress={navigateToNoimagesmenu}
                 style={styles.buttonContainerChange}
               >
-                <Text style={styles.noImageButtonText}>Change menu</Text>
+                <Text style={styles.noImageButtonText}>Change meu</Text>
               </TouchableOpacity>
+              <TouchableOpacity
+  onPress={() => navigation.navigate('Scaninventory')} // Use the correct screen name
+  style={styles.buttonContainer}
+>
+  <Text style={styles.buttonText}>Scan Inventory</Text>
+</TouchableOpacity>
               <TextInput
                 style={styles.searchBar}
                 placeholder="Search..."
@@ -486,12 +492,23 @@ const Mainmenu = () => {
                     This is your inventory
                   </Text>
 
-                  <TouchableOpacity
-                    onPress={navigateToNoimagesmenu}
-                    style={styles.buttonContainerChange}
-                  >
-                    <Text style={styles.noImageButtonText}>Change menu</Text>
-                  </TouchableOpacity>
+                  <View style={styles.buttonsContainer}>
+  {/* Change Menu Button */}
+  <TouchableOpacity
+    onPress={navigateToNoimagesmenu}
+    style={[styles.button, { marginRight: 8 }]} // Add marginRight for spacing between buttons
+  >
+    <Text style={styles.buttonText}>Change Menu</Text>
+  </TouchableOpacity>
+
+  {/* Scan Inventory Button */}
+  <TouchableOpacity
+  onPress={() => navigation.navigate('Scaninventory')} // Use the correct screen name
+  style={styles.buttonContainer}
+>
+  <Text style={styles.buttonText}>Scan Inventory</Text>
+</TouchableOpacity>
+</View>
                   <TextInput
                     style={styles.searchBar}
                     placeholder="Search..."
@@ -722,6 +739,41 @@ const styles = StyleSheet.create({
     right: 5,
     padding: 10,
   },
+  topBarButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingRight: 10, // Adjust padding as necessary
+  },
+  buttonContainer: {
+    backgroundColor: 'black',
+    padding: 10,
+    borderRadius: 10,
+    margin: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#FFF',
+    fontSize: 15,
+  },
+ 
+    buttonsContainer: {
+      flexDirection: 'row', // Aligns buttons horizontally
+      justifyContent: 'center', // Aligns container to the right
+      padding: 10, // Adjust padding as needed
+    },
+    button: {
+      backgroundColor: '#000', // Button background color
+      padding: 10,
+      borderRadius: 5, // Rounded corners
+      alignItems: 'center', // Center text horizontally
+    },
+    buttonText: {
+      color: '#FFF', // Text color
+    },
+
+  
+  
 });
 
 // add # of bottles/ servings lets

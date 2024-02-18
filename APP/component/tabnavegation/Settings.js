@@ -22,6 +22,12 @@ const SettingsScreen = () => {
     // For example, you could post these settings to a server, or save them locally
   };
 
+  const changeImage = () => {
+    // Implement your logic for changing the image here
+    console.log('Change image logic goes here');
+    // For example, set a new image URL or open an image picker
+  };
+
   return (
     <SafeAreaView style={styles.container}>
        <View style={styles.header}>
@@ -161,6 +167,9 @@ const SettingsScreen = () => {
             thumbColor={availability ? "#f5dd4b" : "#f4f3f4"}
           />
         </View>
+        <TouchableOpacity onPress={changeImage} style={styles.changeImageButton}>
+          <Text style={styles.changeImageButtonText}>Change Image</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -212,6 +221,18 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   saveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+  },
+  changeImageButton: {
+    backgroundColor: 'blue', // Or any color that fits your design
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: 'center', // Center the text inside the button
+    marginTop: 20, // Add some margin at the top
+  },
+  changeImageButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
   },

@@ -268,7 +268,7 @@ const Mainmenu = () => {
               style={styles.buttonContainer}
               onPress={toggleMenuVisibility}
             >
-              <Text style={styles.buttonText}>Change menu</Text>
+              <Text style={styles.buttonText}>Change enu</Text>
             </TouchableOpacity>
             
             <TextInput

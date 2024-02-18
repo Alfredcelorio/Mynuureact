@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext } from "../context/context";
 import WelcomeScreen from "../screens/WelcomeScreen";
 import LoginScr from "../screens/LoginScr";
+import Scaninventory from "../screens/Scaninventory";
 import FutureScreen from "../screens/FutureScreen";
 import Mainmenu from "../screens/Mainmenu";
 import BarDashboard from "../screens/BarDashboard";
@@ -22,6 +23,7 @@ const Stack = createStackNavigator();
 export default function AppNavigator() {
   const { currentUser } = useContext(AuthContext);
   return (
+    
     <Stack.Navigator initialRouteName="WelcomeScreen">
       <Stack.Screen
         name="WelcomeScreen"
@@ -37,6 +39,16 @@ export default function AppNavigator() {
           },
         }}
       />
+      <Stack.Screen
+      name="Scaninventory"
+      component={Scaninventory}
+      options={{
+        headerShown: true,
+        title: "Scan Inventory",
+      }}
+    />
+
+  
       <Stack.Screen
         name="FutureScreen"
         component={FutureScreen}
@@ -112,6 +124,7 @@ export default function AppNavigator() {
        title: "Guest Profile", // Set the title for the screen
         }}
 />
+
       <Stack.Screen
         name="GeneralSettings"
         component={GeneralSettingsScreen}
@@ -122,6 +135,7 @@ export default function AppNavigator() {
         }}
       />
     </Stack.Navigator>
+    
   );
 }
 
