@@ -29,14 +29,16 @@ const Item = ({ productData }) => {
 
   const filteredProductData = {
     ABV: productData.abv || "",
-    body: productData.body || "",
-    brand: productData.brand || "",
-    countryState: productData.countryState || "",
-    region: productData.region || "",
-    sku: productData.sku || "",
-    taste: productData.taste || "",
-    type: productData.type || "",
-    varietal: productData.varietal || "",
+    Body: productData.body || "",
+    Brand: productData.brand || "",
+    CountryState: productData.countryState || "",
+    Region: productData.region || "",
+    Sku: productData.sku || "",
+    Taste: productData.taste || "",
+    Type: productData.type || "",
+    Varietal: productData.varietal || "",
+    Servings: productData.servings || "",
+    PurchaseCost: productData.purchaseCost || "",
   };
 
 

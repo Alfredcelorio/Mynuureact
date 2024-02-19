@@ -67,19 +67,20 @@ export default function App() {
   return (
     <NativeBaseProvider>
       <ScrollView style={styles.scrollView}>
-        <View style={styles.container}>
-          <Text style={styles.header}>Bar Cost Calculator</Text>
-          <Text style={styles.resultText}>
-                Bar Cost Percentage: {barCostPercentage}%
-              </Text>
-              <ProgressCircle
-                style={styles.progressCircle}
-                progress={Number(barCostPercentage) / 100}
-                progressColor="green"
-                startAngle={-Math.PI * 0.8}
-                endAngle={Math.PI * 0.8}
-                strokeWidth={14}
-              />
+      <View style={styles.container}>
+        <Text style={styles.header}>Bar Cost Caalculator</Text>
+        <View style={styles.progressContainer}>
+          <ProgressCircle
+            style={styles.progressCircle}
+            progress={Number(barCostPercentage) / 100}
+            progressColor="green"
+            backgroundColor="#141414"
+            strokeWidth={14}
+          />
+          <Text style={styles.percentageText}>
+            {barCostPercentage}%
+          </Text>
+        </View>
           <View style={styles.monthNavigation}>
             <Button title="Prev" onPress={() => changeMonth(-1)} color="#3498db" />
             <Text style={styles.monthLabel}>{currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</Text>
@@ -110,7 +111,9 @@ export default function App() {
             
             </>
           )}
-          <Text style={styles.totalPurchasesText}>Total Purchases: ${getTotalPurchasesForMonth().toFixed(2)}</Text>
+          <Text style={styles.totalPurchasesText}>
+           Total Purchases: ${getTotalPurchasesForMonth().toFixed(2)}
+            </Text>
           <Text style={styles.purchasesHeader}>Purchases:</Text>
           {purchases[formatMonthKey(currentMonth)]?.map((purchase, index) => (
           <View key={index} style={styles.purchaseItemContainer}>
@@ -202,5 +205,20 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     color: 'black', // White text for delete button
+  },
+  progressContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  progressCircle: {
+    height: 200,
+    width: 200, // Ensure the width is the same as the height for a perfect circle
+  },
+  percentageText: {
+    position: 'absolute',
+    fontSize: 48, // Large, bold font size for the percentage text
+    color: 'white', // White color for the percentage text
+    fontWeight: 'bold',
   },
 });

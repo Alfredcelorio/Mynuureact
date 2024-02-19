@@ -15,6 +15,7 @@ const SettingsScreen = () => {
   const [taste, setTaste] = useState('');
   const [type, setType] = useState('');
   const [varietal, setVarietal] = useState('');
+  const [servings, setServings] = useState('');
 
   const saveSettings = () => {
     // Implement your save logic here
@@ -64,6 +65,17 @@ const SettingsScreen = () => {
             value={purchaseCost}
             onChangeText={setPurchaseCost}
             placeholder="Enter purchase cost"
+            keyboardType="numeric"
+            placeholderTextColor="#ccc"
+          />
+        </View>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>Servings</Text>
+          <TextInput
+            style={styles.settingInput}
+            value={servings}
+            onChangeText={setServings}
+            placeholder="Servings"
             keyboardType="numeric"
             placeholderTextColor="#ccc"
           />
