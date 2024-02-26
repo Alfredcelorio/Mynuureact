@@ -1,116 +1,268 @@
-import React, { useState } from 'react';
-import { StyleSheet, SafeAreaView, ScrollView } from 'react-native';
-import { NativeBaseProvider, Button, VStack, Text, Box, Select, CheckIcon, Icon } from 'native-base';
-import { MaterialIcons } from '@expo/vector-icons';
+import React, { useState, useContext } from "react";
+import {
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
+import {
+  NativeBaseProvider,
+  Button,
+  VStack,
+  Text,
+  Box,
+  Select,
+  CheckIcon,
+  Icon,
+} from "native-base";
+import { MaterialIcons } from "@expo/vector-icons";
+import { Timestamp } from "firebase/firestore";
+import Toast from "react-native-toast-message";
+import { AuthContext } from "../../context/context";
+import {
+  updateItem,
+  getItemsByConditionGuest,
+  createItemCustom,
+} from "../../services/conx/settings";
 
-const InventoryScreen = () => {
-  const [selectedBar, setSelectedBar] = useState('');
-  const [selectedBottles, setSelectedBottles] = useState('');
-  const [selectedServings, setSelectedServings] = useState('');
+const InventoryScreen = ({ productData, id }) => {
+  const { user, routerName, setRouterName } = useContext(AuthContext);
+  const inventoryProd = productData?.inventory?.[0];
+  const [selectedBar, setSelectedBar] = useState(inventoryProd?.chooseBar);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [selectedBottles, setSelectedBottles] = useState(
+    inventoryProd?.numbBottles
+  );
+  const [selectedServings, setSelectedServings] = useState(inventoryProd?.servings || '0');
 
   // Example quantities for selection
   const quantityOptions = Array.from({ length: 20 }, (_, i) => `${i + 1}`);
 
-  const handleUpdateInventory = () => {
-    console.log(`Updating inventory for ${selectedBar}: ${selectedBottles} bottles, ${selectedServings} servings`);
-    // Add logic to update the inventory, such as sending data to a backend server
+  const handleUpdateInventory = async () => {
+    try {
+      setSubmitLoading(true);
+      const time = Timestamp.fromDate(new Date()).toDate();
+      const updatedInventory = {
+        ...inventoryProd,
+        chooseBar: selectedBar,
+        quantity: selectedBottles,
+        servings: selectedServings,
+      };
+
+      const updatedProductData = {
+        ...productData,
+        inventory: [updatedInventory],
+      };
+
+      const logInventory = await getItemsByConditionGuest(
+        productData?.restaurantId,
+        "logInventory",
+        "idRestaurant"
+      );
+
+      const oldData = {};
+      const newData = {};
+
+      if (selectedBar !== inventoryProd?.chooseBar) {
+        oldData.chooseBar = inventoryProd?.chooseBar || null;
+        newData.chooseBar = selectedBar;
+      }
+
+      if (selectedBottles !== inventoryProd?.quantity) {
+        oldData.quantity = inventoryProd?.quantity || null;
+        newData.quantity = selectedBottles;
+      }
+
+      if (selectedServings !== inventoryProd?.servings) {
+        oldData.servings = inventoryProd?.servings || null;
+        newData.servings = selectedServings;
+      }
+
+      const filteredNewData =
+        Object.keys(newData).length !== 0 ? [newData] : [];
+
+      if (logInventory?.length === 0) {
+        const logObjet = {
+          idRestaurant: productData?.restaurantId,
+          log: [
+            {
+              user: user?.displayName,
+              email: user?.email,
+              type: "new product in log - mobile",
+              time,
+              nameItem: productData?.name,
+              idItem: id,
+              newData: filteredNewData,
+              oldData: [],
+            },
+          ],
+        };
+
+        console.log('date2: ', logObjet)
+        await createItemCustom(logObjet, "logInventory");
+      }
+
+      const filteredOldData =
+        Object.keys(oldData).length !== 0 ? [oldData] : [];
+
+      if (logInventory?.length !== 0) {
+        const logObjetUpdate = {
+          idRestaurant: productData?.restaurantId,
+          log: [
+            ...(logInventory[0]?.log || ""),
+            {
+              user: user?.displayName,
+              email: user?.email,
+              type: "edit product - mobile",
+              time,
+              nameItem: productData?.name,
+              idItem: id,
+              newData: filteredNewData,
+              oldData: filteredOldData,
+            },
+          ],
+        };
+
+        console.log('DATA1: ', logObjetUpdate)
+        await updateItem(logInventory[0]?.id, logObjetUpdate, "logInventory");
+      }
+
+
+      console.log('DATA: ', updatedProductData)
+      await updateItem(id, updatedProductData, "products");
+      const updatedProducts = routerName.map((product) =>
+        product === route.name ? route.name : product
+      );
+      setRouterName(updatedProducts);
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Access granted",
+        position: "bottom",
+      });
+      setSubmitLoading(false);
+    } catch (error) {
+      console.log("ERROR: ", error);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: `Something seems to have gone wrong when trying to update the file: ${error.message}`,
+        text2NumberOfLines: 5,
+        position: "bottom",
+      });
+      setSubmitLoading(false);
+    }
   };
 
   return (
-    <NativeBaseProvider>
-      <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scrollView}>
-          <Box style={styles.header}>
-            <Text style={styles.headerText}>Inventory Management</Text>
-          </Box>
-          <VStack space={5} alignItems="center" style={styles.formContainer}>
-            <Select
-              selectedValue={selectedBar}
-              minWidth="90%"
-              accessibilityLabel="Choose Bar"
-              placeholder="Choose Bar"
-              _selectedItem={{
-                bg: "teal.600",
-                endIcon: <CheckIcon size={4} />,
-              }}
-              mt={1}
-              onValueChange={(itemValue) => setSelectedBar(itemValue)}
-            >
-              <Select.Item label="Bar 1" value="bar1" />
-              <Select.Item label="Bar 2" value="bar2" />
-              <Select.Item label="Bar 3" value="bar3" />
-            </Select>
-            <Select
-              selectedValue={selectedBottles}
-              minWidth="90%"
-              accessibilityLabel="Number of Bottles"
-              placeholder="Number of Bottles"
-              _selectedItem={{
-                bg: "teal.600",
-                endIcon: <CheckIcon size={4} />,
-              }}
-              mt={1}
-              onValueChange={(itemValue) => setSelectedBottles(itemValue)}
-            >
-              {quantityOptions.map((value) => (
-                <Select.Item key={value} label={value} value={value} />
-              ))}
-            </Select>
-            <Select
-              selectedValue={selectedServings}
-              minWidth="90%"
-              accessibilityLabel="Number of Servings"
-              placeholder="Number of Servings"
-              _selectedItem={{
-                bg: "teal.600",
-                endIcon: <CheckIcon size={4} />,
-              }}
-              mt={1}
-              onValueChange={(itemValue) => setSelectedServings(itemValue)}
-            >
-              {quantityOptions.map((value) => (
-                <Select.Item key={value} label={value} value={value} />
-              ))}
-            </Select>
-            <Button
-              size="lg"
-              width="90%"
-              onPress={handleUpdateInventory}
-              backgroundColor="#222" // Button color
-              leftIcon={<Icon as={MaterialIcons} name="update" size="sm" color="white" />}
-              _text={{ color: 'white' }}
-            >
-              Update Inventory
-            </Button>
-          </VStack>
-        </ScrollView>
-      </SafeAreaView>
-    </NativeBaseProvider>
+    <>
+      <NativeBaseProvider>
+        <SafeAreaView style={styles.container}>
+          <ScrollView contentContainerStyle={styles.scrollView}>
+            <Box style={styles.header}>
+              <Text style={styles.headerText}>Inventory Management</Text>
+            </Box>
+            <VStack space={5} alignItems="center" style={styles.formContainer}>
+              <Select
+                selectedValue={selectedBar}
+                minWidth="90%"
+                accessibilityLabel="Choose Bar"
+                placeholder="Choose Bar"
+                _selectedItem={{
+                  bg: "teal.600",
+                  endIcon: <CheckIcon size={4} />,
+                }}
+                mt={1}
+                onValueChange={(itemValue) => setSelectedBar(itemValue)}
+              >
+                <Select.Item label="Bar 1" value="bar1" />
+                <Select.Item label="Bar 2" value="bar2" />
+                <Select.Item label="Bar 3" value="bar3" />
+              </Select>
+              <Select
+                selectedValue={selectedBottles}
+                minWidth="90%"
+                accessibilityLabel="Number of Bottles"
+                placeholder="Number of Bottles"
+                _selectedItem={{
+                  bg: "teal.600",
+                  endIcon: <CheckIcon size={4} />,
+                }}
+                mt={1}
+                onValueChange={(itemValue) => setSelectedBottles(itemValue)}
+              >
+                {quantityOptions.map((value) => (
+                  <Select.Item key={value} label={value} value={value} />
+                ))}
+              </Select>
+              <Select
+                selectedValue={selectedServings}
+                minWidth="90%"
+                accessibilityLabel="Number of Servings"
+                placeholder="Number of Servings"
+                _selectedItem={{
+                  bg: "teal.600",
+                  endIcon: <CheckIcon size={4} />,
+                }}
+                mt={1}
+                onValueChange={(itemValue) => setSelectedServings(itemValue)}
+              >
+                {quantityOptions.map((value) => (
+                  <Select.Item key={value} label={value} value={value} />
+                ))}
+              </Select>
+              {submitLoading ? (
+                <ActivityIndicator size="large" color="#808080" />
+              ) : (
+                <Button
+                  size="lg"
+                  width="90%"
+                  onPress={handleUpdateInventory}
+                  backgroundColor="#222" // Button color
+                  leftIcon={
+                    <Icon
+                      as={MaterialIcons}
+                      name="update"
+                      size="sm"
+                      color="white"
+                    />
+                  }
+                  _text={{ color: "white" }}
+                >
+                  Update Inventory
+                </Button>
+              )}
+            </VStack>
+          </ScrollView>
+        </SafeAreaView>
+      </NativeBaseProvider>
+      <Toast setRef={(ref) => Toast.setRef(ref)} />
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   scrollView: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 20,
   },
   header: {
     padding: 20,
-    alignItems: 'center',
-    backgroundColor: '#222',
+    alignItems: "center",
+    backgroundColor: "#222",
   },
   headerText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   formContainer: {
     marginTop: 10,
-    width: '100%',
+    width: "100%",
   },
 });
 

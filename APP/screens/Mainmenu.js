@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { AuthContext } from "../context/context";
 import {
   View,
   Text,
@@ -17,7 +18,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import Toast from 'react-native-toast-message';
+import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { restaurantApi } from "../config/api/auth";
 import {
@@ -61,17 +62,17 @@ const Product = ({
       }
       setTimeout(() => {
         Toast.show({
-          type: 'success',
-          text1: 'Success',
-          text2: 'Update full',
+          type: "success",
+          text1: "Success",
+          text2: "Update full",
         });
         setUpdateLoading(false);
       }, 1001);
     } catch (error) {
       Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'Error when trying to update item status',
+        type: "error",
+        text1: "Error",
+        text2: "Error when trying to update item status",
       });
       throw new Error(error);
     }
@@ -113,9 +114,7 @@ const Product = ({
         <>
           <View style={styles.imageWrapper}>
             <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("item", { productData })
-              }
+              onPress={() => navigation.navigate("item", { productData, id })}
             >
               <Image
                 source={{ uri: image }}
@@ -160,6 +159,8 @@ const isIpad =
 const Mainmenu = () => {
   const navigation = useNavigation();
   const route = useRoute();
+  const [value1, setValue1] = useState(0);
+  const { routerName, setRouterName } = useContext(AuthContext);
   const [searchProductsByCat, setSearchProductsByCat] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [restaurant, setRestaurant] = useState({});
@@ -231,6 +232,8 @@ const Mainmenu = () => {
 
   useEffect(() => {
     if (selectedMenu && categories) {
+      const numb = value1 + 1;
+      
       (async () => {
         const data = await getProductsByMenu(selectedMenu);
         const productsByCategories = categories.reduce((value, nextItem) => {
@@ -252,6 +255,7 @@ const Mainmenu = () => {
 
         setTimeout(() => {
           setProductsByCat(productsByCategories);
+          setValue1(numb)
         }, 500);
         setTimeout(() => {
           if (searchFilter !== "") {
@@ -262,7 +266,7 @@ const Mainmenu = () => {
         }, 800);
       })();
     }
-  }, [selectedMenu, deleteItem, loadingStatus, isLoading]);
+  }, [selectedMenu, deleteItem, loadingStatus, isLoading, routerName]);
 
   useEffect(() => {
     const initViewRestaurant = async () => {
@@ -272,6 +276,7 @@ const Mainmenu = () => {
         const fetchRest = await restaurantApi(email, uid);
         const [objetDestruct] = fetchRest;
         setRestaurant(objetDestruct);
+        handleUpdateProduct()
       } catch (err) {
         throw new Error(err);
       }
@@ -280,6 +285,13 @@ const Mainmenu = () => {
     initViewRestaurant();
     setIsLoading(true);
   }, []);
+
+  const handleUpdateProduct = () => {
+    const updatedProducts = routerName.map((product) =>
+      product === route.name ? route.name : product
+    );
+    setRouterName(updatedProducts)
+  };
 
   const handleSearchEnd = () => {
     if (selectedMenu && categories) {
@@ -412,11 +424,11 @@ const Mainmenu = () => {
                 <Text style={styles.noImageButtonText}>Change meu</Text>
               </TouchableOpacity>
               <TouchableOpacity
-  onPress={() => navigation.navigate('Scaninventory')} // Use the correct screen name
-  style={styles.buttonContainer}
->
-  <Text style={styles.buttonText}>Scan Inventory</Text>
-</TouchableOpacity>
+                onPress={() => navigation.navigate("Scaninventory")} // Use the correct screen name
+                style={styles.buttonContainer}
+              >
+                <Text style={styles.buttonText}>Scan Inventory</Text>
+              </TouchableOpacity>
               <TextInput
                 style={styles.searchBar}
                 placeholder="Search..."
@@ -487,28 +499,25 @@ const Mainmenu = () => {
                   </Text>
                 </View>
                 <View style={styles.searchBarContainer}>
-                  <Text style={styles.headerText}>
-                    {" "}
-                    This is your inventory
-                  </Text>
+                  <Text style={styles.headerText}> This is your inventory</Text>
 
                   <View style={styles.buttonsContainer}>
-  {/* Change Menu Button */}
-  <TouchableOpacity
-    onPress={navigateToNoimagesmenu}
-    style={[styles.button, { marginRight: 8 }]} // Add marginRight for spacing between buttons
-  >
-    <Text style={styles.buttonText}>Change Menu</Text>
-  </TouchableOpacity>
+                    {/* Change Menu Button */}
+                    <TouchableOpacity
+                      onPress={navigateToNoimagesmenu}
+                      style={[styles.button, { marginRight: 8 }]} // Add marginRight for spacing between buttons
+                    >
+                      <Text style={styles.buttonText}>Change Menu</Text>
+                    </TouchableOpacity>
 
-  {/* Scan Inventory Button */}
-  <TouchableOpacity
-  onPress={() => navigation.navigate('Scaninventory')} // Use the correct screen name
-  style={styles.buttonContainer}
->
-  <Text style={styles.buttonText}>Scan Inventory</Text>
-</TouchableOpacity>
-</View>
+                    {/* Scan Inventory Button */}
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate("Scaninventory")} // Use the correct screen name
+                      style={styles.buttonContainer}
+                    >
+                      <Text style={styles.buttonText}>Scan Inventory</Text>
+                    </TouchableOpacity>
+                  </View>
                   <TextInput
                     style={styles.searchBar}
                     placeholder="Search..."
@@ -557,7 +566,6 @@ const Mainmenu = () => {
         </View>
       </SafeAreaView>
       <Toast setRef={(ref) => Toast.setRef(ref)} />
-
     </>
   );
 };
@@ -688,7 +696,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     backgroundColor: "black",
-    padding: 10,
+    padding: Platform.OS === "ios" ? 10 : 5,
     borderRadius: 10,
     margin: 5,
     alignItems: "center",
@@ -740,40 +748,37 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   topBarButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
     paddingRight: 10, // Adjust padding as necessary
   },
-  buttonContainer: {
-    backgroundColor: 'black',
+  /* buttonContainer: {
+    backgroundColor: "black",
     padding: 10,
     borderRadius: 10,
     margin: 5,
-    alignItems: 'center',
-  },
+    alignItems: "center",
+  }, */
   buttonText: {
-    color: '#FFF',
+    color: "#FFF",
     fontSize: 15,
   },
- 
-    buttonsContainer: {
-      flexDirection: 'row', // Aligns buttons horizontally
-      justifyContent: 'center', // Aligns container to the right
-      padding: 10, // Adjust padding as needed
-    },
-    button: {
-      backgroundColor: '#000', // Button background color
-      padding: 10,
-      borderRadius: 5, // Rounded corners
-      alignItems: 'center', // Center text horizontally
-    },
-    buttonText: {
-      color: '#FFF', // Text color
-    },
 
-  
-  
+  buttonsContainer: {
+    flexDirection: "row", // Aligns buttons horizontally
+    justifyContent: "center", // Aligns container to the right
+    padding: 10, // Adjust padding as needed
+  },
+  button: {
+    backgroundColor: "#000", // Button background color
+    padding: 10,
+    borderRadius: 5, // Rounded corners
+    alignItems: "center", // Center text horizontally
+  },
+  buttonText: {
+    color: "#FFF", // Text color
+  },
 });
 
 // add # of bottles/ servings lets

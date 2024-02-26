@@ -7,6 +7,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getItemsByConditionGuest } from "../services/auth/auth";
 import { auth } from "../utils/firebase";
+import { useRoute } from "@react-navigation/native";
 
 export const AuthContext = createContext();
 
@@ -16,6 +17,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState();
   const [userID, setUserID] = useState();
   const [validationInv, setValidationInv] = useState();
+  const [routerName, setRouterName] = useState([]);
 
   useEffect(() => {
     const auth = getAuth();
@@ -70,7 +72,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ currentUser, setCurrentUser, handleLogin, user }}
+      value={{ currentUser, setCurrentUser, handleLogin, user, routerName, setRouterName }}
     >
       {children}
     </AuthContext.Provider>

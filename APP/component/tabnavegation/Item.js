@@ -28,17 +28,17 @@ const Item = ({ productData }) => {
   const [animationDelay, setAnimationDelay] = useState(0);
 
   const filteredProductData = {
-    ABV: productData.abv || "",
-    Body: productData.body || "",
-    Brand: productData.brand || "",
-    CountryState: productData.countryState || "",
-    Region: productData.region || "",
-    Sku: productData.sku || "",
-    Taste: productData.taste || "",
-    Type: productData.type || "",
-    Varietal: productData.varietal || "",
-    Servings: productData.servings || "",
-    PurchaseCost: productData.purchaseCost || "",
+    ABV: productData?.abv || "",
+    Body: productData?.body || "",
+    Brand: productData?.brand || "",
+    CountryState: productData?.countryState || "",
+    Region: productData?.region || "",
+    Sku: productData?.sku || "",
+    Taste: productData?.taste || "",
+    Type: productData?.type || "",
+    Varietal: productData?.varietal || "",
+    Servings: productData?.servings || "",
+    PurchaseCost: productData?.purchaseCost || "",
   };
 
 
@@ -74,7 +74,7 @@ const Item = ({ productData }) => {
               delay={animationDelay + 600}
               style={styles.description}
             >
-              {productData.description}
+              {productData?.description}
             </TypingText>
             <View style={styles.priceContainer}>
               <TypingText
