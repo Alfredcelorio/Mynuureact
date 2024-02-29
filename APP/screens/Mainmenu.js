@@ -48,6 +48,7 @@ const Product = ({
   loadingStatus,
   setLoadingStatus,
   navigation,
+  setProductDataUpdate
 }) => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const update = async (title, id, status) => {
@@ -114,7 +115,10 @@ const Product = ({
         <>
           <View style={styles.imageWrapper}>
             <TouchableOpacity
-              onPress={() => navigation.navigate("item", { productData, id })}
+              onPress={() => {
+                setProductDataUpdate()
+                navigation.navigate("item", { productData, id })
+              }}
             >
               <Image
                 source={{ uri: image }}
@@ -160,10 +164,9 @@ const Mainmenu = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const [value1, setValue1] = useState(0);
-  const { routerName, setRouterName } = useContext(AuthContext);
+  const { routerName, setRouterName, setProductDataUpdate } = useContext(AuthContext);
   const [searchProductsByCat, setSearchProductsByCat] = useState([]);
   const [searchValue, setSearchValue] = useState("");
-  console.log(searchValue)
   const [restaurant, setRestaurant] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [productsByCat, setProductsByCat] = useState();
@@ -459,6 +462,7 @@ const Mainmenu = () => {
                       navigation={navigation}
                       loadingStatus={loadingStatus}
                       setLoadingStatus={setLoadingStatus}
+                      setProductDataUpdate={setProductDataUpdate}
                     />
                   ))}
                 </View>
@@ -550,6 +554,7 @@ const Mainmenu = () => {
                       navigation={navigation}
                       loadingStatus={loadingStatus}
                       setLoadingStatus={setLoadingStatus}
+                      setProductDataUpdate={setProductDataUpdate}
                     />
                   ))}
                 </View>

@@ -105,6 +105,7 @@ const SettingsScreen = ({ productData, id }) => {
       const time = Timestamp.fromDate(new Date()).toDate();
       const sendUrlImg = image && (await uploadFile(image));
       const obj = {
+        idItem: id,
         name: itemName || productData?.name,
         description: productData?.description,
         price: price || productData?.price,

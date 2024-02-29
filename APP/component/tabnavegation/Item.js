@@ -8,11 +8,9 @@ import {
   Text,
   ScrollView,
   SafeAreaView,
-  TouchableOpacity,
 } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { useRoute } from "@react-navigation/native";
-import { getItemByMultipleCriteria } from "../../services/conx/settings";
 import { AuthContext } from "../../context/context";
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
@@ -32,114 +30,50 @@ Animatable.initializeRegistryWithDefinitions({
 const TypingText = Animatable.createAnimatableComponent(Text);
 
 const Item = ({ productData, id }) => {
-  const { user, routerName, setRouterName, productDataUpdate } =
+  const { productDataUpdate } =
     useContext(AuthContext);
   const route = useRoute();
+  const [filteredProductData, setFilteredProductData] = useState({});
   const [animationDelay, setAnimationDelay] = useState(0);
-  const [abv, setAbv] = useState();
-  const [body, setBody] = useState();
-  const [brand, setBrand] = useState();
-  const [countryState, setCountryState] = useState();
-  const [region, setRegion] = useState();
-  const [sku, setSku] = useState();
-  const [taste, setTaste] = useState();
-  const [type, setType] = useState();
-  const [varietal, setVarietal] = useState();
-  const [servings, setServings] = useState();
-  const [purchaseCost, setPurchaseCost] = useState();
-  const [name, setName] = useState(productDataUpdate?.name);
-  const [price, setPrice] = useState(productDataUpdate?.price);
-  console.log('PRice: ', productDataUpdate?.price)
-  const [img, setImg] = useState(productDataUpdate?.image);
 
-  const filteredProductData = {
-    ABV:
-      productDataUpdate?.abv !== undefined
-        ? productDataUpdate.abv
-        : productData?.abv || "",
-    Body:
-      productDataUpdate?.body !== undefined
-        ? productDataUpdate.body
-        : productData?.body || "",
-    Brand:
-      productDataUpdate?.brand !== undefined
-        ? productDataUpdate.brand
-        : productData?.brand || "",
-    CountryState:
-      productDataUpdate?.countryState !== undefined
-        ? productDataUpdate.countryState
-        : productData?.countryState || "",
-    Region:
-      productDataUpdate?.region !== undefined
-        ? productDataUpdate.region
-        : productData?.region || "",
-    Sku:
-      productDataUpdate?.sku !== undefined
-        ? productDataUpdate.sku
-        : productData?.sku || "",
-    Taste:
-      productDataUpdate?.taste !== undefined
-        ? productDataUpdate.taste
-        : productData?.taste || "",
-    Type:
-      productDataUpdate?.type !== undefined
-        ? productDataUpdate.type
-        : productData?.type || "",
-    Varietal:
-      productDataUpdate?.varietal !== undefined
-        ? productDataUpdate.varietal
-        : productData?.varietal || "",
-    Servings:
-      productDataUpdate?.servings !== undefined
-        ? productDataUpdate.servings
-        : productData?.servings || "",
-    PurchaseCost:
-      productDataUpdate?.purchaseCost !== undefined
-        ? productDataUpdate.purchaseCost
-        : productData?.purchaseCost || "",
-  };
-
-  const fetchData = async () => {
-    try {
-      routerName.map((product) =>
-        product === route.name ? route.name : product
-      );
-
-      const fetch = await getItemByMultipleCriteria(
-        "products",
-        productData?.categoryId,
-        productData?.menuId,
-        productData?.restaurantId,
-        id
-      );
-
-      console.log("ENTER");
-
-      setAbv(fetch?.abv);
-      setBody(fetch?.body);
-      setBrand(fetch?.brand);
-      setCountryState(fetch?.countryState);
-      setRegion(fetch?.region);
-      setSku(fetch?.sku);
-      setTaste(fetch?.taste);
-      setType(fetch?.type);
-      setVarietal(fetch?.varietal);
-      setServings(fetch?.servings);
-      setPurchaseCost(fetch?.purchaseCost);
-      setName(fetch?.name);
-      setPrice(fetch?.price);
-      setImg(fetch?.image);
-
-      console.log("FINISH");
-    } catch (err) {}
-  };
+  useEffect(() => {
+    if (productDataUpdate && productDataUpdate.idItem === id) {
+      setFilteredProductData(prevData => ({
+        ...prevData,
+        ABV: productDataUpdate.abv || "",
+        Body: productDataUpdate.body || "",
+        Brand: productDataUpdate.brand || "",
+        CountryState: productDataUpdate.countryState || "",
+        Region: productDataUpdate.region || "",
+        Sku: productDataUpdate.sku || "",
+        Taste: productDataUpdate.taste || "",
+        Type: productDataUpdate.type || "",
+        Varietal: productDataUpdate.varietal || "",
+        Servings: productDataUpdate.servings || "",
+        PurchaseCost: productDataUpdate.purchaseCost || "",
+      }));
+    } else {
+      setFilteredProductData(prevData => ({
+        ...prevData,
+        ABV: productData.abv || "",
+        Body: productData.body || "",
+        Brand: productData.brand || "",
+        CountryState: productData.countryState || "",
+        Region: productData.region || "",
+        Sku: productData.sku || "",
+        Taste: productData.taste || "",
+        Type: productData.type || "",
+        Varietal: productData.varietal || "",
+        Servings: productData.servings || "",
+        PurchaseCost: productData.purchaseCost || "",
+      }));
+    }
+  }, [productData, productDataUpdate, id]);
 
   useEffect(() => {
     // Set a delay before the animation starts (for a typing effect)
     const delay = 1000; // You can adjust this delay according to your preference
     setAnimationDelay(delay);
-
-    fetchData();
   }, [route.name]);
 
   return (
