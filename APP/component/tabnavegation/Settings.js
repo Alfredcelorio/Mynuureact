@@ -28,7 +28,7 @@ import {
 
 const SettingsScreen = ({ productData, id }) => {
   const route = useRoute();
-  const { user, routerName, setRouterName } = useContext(AuthContext);
+  const { user, routerName, setRouterName, setProductDataUpdate } = useContext(AuthContext);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [availability, setAvailability] = useState(productData?.enabled);
   const [itemName, setItemName] = useState(productData?.name);
@@ -194,6 +194,7 @@ const SettingsScreen = ({ productData, id }) => {
       }
 
       await updateItem(id, obj, "products");
+      setProductDataUpdate(obj);
       const updatedProducts = routerName.map((product) =>
         product === route.name ? route.name : product
       );

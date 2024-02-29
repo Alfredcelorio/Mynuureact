@@ -100,6 +100,27 @@ export const getItemsByConditionGuest = async (value, collections, param) => {
   return getArrayFromCollection(result);
 };
 
+export const getItemByMultipleCriteria = async (collectionName, categoryId, menuId, restaurantId, itemId) => {
+  const colRef = collection(db, collectionName);
+  
+  const q = query(colRef, 
+    where('categoryId', '==', categoryId),
+    where('menuId', '==', menuId),
+    where('restaurantId', '==', restaurantId),
+  );
+  
+  const querySnapshot = await getDocs(q);
+
+  let item = null;
+  querySnapshot.forEach((doc) => {
+    if (doc.id === itemId) {
+      item = doc.data();
+    }
+  });
+
+  return item;
+};
+
 export const getItemsByConditionGuestAdmin = async (value, collections, param) => {
   const colRef = collection(db, collections);
   const result = await getDocs(query(colRef, where(param, '==', value)));

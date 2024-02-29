@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   const [userID, setUserID] = useState();
   const [validationInv, setValidationInv] = useState();
   const [routerName, setRouterName] = useState([]);
+  const [productDataUpdate, setProductDataUpdate] = useState(null);
 
   useEffect(() => {
     const auth = getAuth();
@@ -72,7 +73,16 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ currentUser, setCurrentUser, handleLogin, user, routerName, setRouterName }}
+      value={{
+        currentUser,
+        setCurrentUser,
+        handleLogin,
+        user,
+        routerName,
+        setRouterName,
+        productDataUpdate,
+        setProductDataUpdate,
+      }}
     >
       {children}
     </AuthContext.Provider>
