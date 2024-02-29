@@ -66,8 +66,12 @@ export const createItemCustom = async (obj, collections) => {
 
 // UPDATE
 export const updateItem = async (id, obj, collections) => {
-  const colRef = collection(db, collections);
-  await updateDoc(doc(colRef, id), obj);
+  try {
+    const colRef = collection(db, collections);
+    await updateDoc(doc(colRef, id), obj);
+  } catch(err) {
+    console.log('Err: ', err)
+  }
 };
 
 // READ

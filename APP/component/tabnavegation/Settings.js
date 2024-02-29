@@ -44,6 +44,7 @@ const SettingsScreen = ({ productData, id }) => {
   const [type, setType] = useState(productData?.type);
   const [varietal, setVarietal] = useState(productData?.varietal);
   const [servings, setServings] = useState(productData?.servings);
+  const imgProduct = productData?.image;
   const [image, setImage] = useState(null);
   const [nameImg, setNameImg] = useState("");
 
@@ -102,7 +103,7 @@ const SettingsScreen = ({ productData, id }) => {
       setSubmitLoading(true);
 
       const time = Timestamp.fromDate(new Date()).toDate();
-      const sendUrlImg = image && await uploadFile(image);
+      const sendUrlImg = image && (await uploadFile(image));
       const obj = {
         name: itemName || productData?.name,
         description: productData?.description,
@@ -130,12 +131,7 @@ const SettingsScreen = ({ productData, id }) => {
         position: productData?.position,
         purchaseCost: purchaseCost || productData?.purchaseCost,
         servings: servings || productData?.servings,
-        inventory: [
-          {
-            typeBottles: productData?.inventory?.[0]?.typeBottles || "",
-            quantity: productData?.inventory?.[0]?.quantity || "",
-          },
-        ],
+        inventory: [{ ...productData?.inventory?.[0] }],
       };
 
       const logRestaurant = await getItemsByConditionGuest(
@@ -149,8 +145,8 @@ const SettingsScreen = ({ productData, id }) => {
       let oldObjLog = {};
       let editObjLog = {};
 
-      for (let [key, value] of Object.entries(productData)) {
-        if (initialState[key] !== value) {
+      for (let [key, value] of Object.entries(obj)) {
+        if (key !== "inventory" && initialState[key] !== value) {
           oldObjLog[key] = initialState[key];
           editObjLog[key] = value;
         }
@@ -168,9 +164,11 @@ const SettingsScreen = ({ productData, id }) => {
               nameItem: itemName || productData?.name,
               edit: editObjLog,
               oldValues: oldObjLog,
+              idItem: id
             },
           ],
         };
+
         await createItemCustom(logObjet, "log");
       }
 
@@ -187,32 +185,34 @@ const SettingsScreen = ({ productData, id }) => {
               nameItem: itemName || productData?.name,
               edit: editObjLog,
               oldValues: oldObjLog,
+              idItem: id
             },
           ],
         };
+
         await updateItem(logRestaurant[0]?.id, logObjetUpdate, "log");
       }
 
       await updateItem(id, obj, "products");
       const updatedProducts = routerName.map((product) =>
-      product === route.name ? route.name : product
-    );
-    setRouterName(updatedProducts);
+        product === route.name ? route.name : product
+      );
+      setRouterName(updatedProducts);
       Toast.show({
         type: "success",
         text1: "Success",
         text2: "Access granted",
-        position: 'bottom',
+        position: "bottom",
       });
       setSubmitLoading(false);
     } catch (error) {
-      console.log('ERROR: ', error)
+      console.log("ERROR: ", error);
       Toast.show({
         type: "error",
         text1: "Error",
         text2: `Something seems to have gone wrong when trying to update the file: ${error.message}`,
         text2NumberOfLines: 5,
-        position: 'bottom',
+        position: "bottom",
       });
       setSubmitLoading(false);
     }
@@ -395,9 +395,10 @@ const SettingsScreen = ({ productData, id }) => {
                   style={{ width: 200, height: 200, marginTop: 20 }}
                 />
               ) : (
-                <View style={styles.preview}>
-                  <MaterialIcons name="add-a-photo" size={50} color="white" />
-                </View>
+                <Image
+                  source={{ uri: imgProduct }}
+                  style={{ width: 200, height: 200, marginTop: 20 }}
+                />
               )}
             </TouchableOpacity>
           </View>

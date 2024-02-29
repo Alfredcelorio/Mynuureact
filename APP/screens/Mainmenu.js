@@ -163,6 +163,7 @@ const Mainmenu = () => {
   const { routerName, setRouterName } = useContext(AuthContext);
   const [searchProductsByCat, setSearchProductsByCat] = useState([]);
   const [searchValue, setSearchValue] = useState("");
+  console.log(searchValue)
   const [restaurant, setRestaurant] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [productsByCat, setProductsByCat] = useState();
@@ -294,6 +295,7 @@ const Mainmenu = () => {
   };
 
   const handleSearchEnd = () => {
+    console.log('entra')
     if (selectedMenu && categories) {
       (async () => {
         const data = await getProductsByMenu(selectedMenu);

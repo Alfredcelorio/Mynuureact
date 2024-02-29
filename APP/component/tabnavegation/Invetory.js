@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   StyleSheet,
   SafeAreaView,
@@ -30,12 +30,16 @@ const InventoryScreen = ({ productData, id }) => {
   const inventoryProd = productData?.inventory?.[0];
   const [selectedBar, setSelectedBar] = useState(inventoryProd?.chooseBar);
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [selectedBottles, setSelectedBottles] = useState(
-    inventoryProd?.numbBottles
-  );
-  const [selectedServings, setSelectedServings] = useState(inventoryProd?.servings || '0');
+  const [selectedBottles, setSelectedBottles] = useState(inventoryProd?.quantity);
+  const [selectedServings, setSelectedServings] = useState(inventoryProd?.servings);
 
-  // Example quantities for selection
+  useEffect(() => {
+    const updatedProducts = routerName.map((product) =>
+    product === route.name ? route.name : product
+  );
+  setRouterName(updatedProducts);
+  }, [])
+
   const quantityOptions = Array.from({ length: 20 }, (_, i) => `${i + 1}`);
 
   const handleUpdateInventory = async () => {
@@ -98,7 +102,6 @@ const InventoryScreen = ({ productData, id }) => {
           ],
         };
 
-        console.log('date2: ', logObjet)
         await createItemCustom(logObjet, "logInventory");
       }
 
@@ -122,13 +125,11 @@ const InventoryScreen = ({ productData, id }) => {
             },
           ],
         };
+        console.log('TEST: ', logObjetUpdate)
 
-        console.log('DATA1: ', logObjetUpdate)
         await updateItem(logInventory[0]?.id, logObjetUpdate, "logInventory");
       }
 
-
-      console.log('DATA: ', updatedProductData)
       await updateItem(id, updatedProductData, "products");
       const updatedProducts = routerName.map((product) =>
         product === route.name ? route.name : product
@@ -164,6 +165,7 @@ const InventoryScreen = ({ productData, id }) => {
             </Box>
             <VStack space={5} alignItems="center" style={styles.formContainer}>
               <Select
+                defaultValue={inventoryProd?.chooseBar}
                 selectedValue={selectedBar}
                 minWidth="90%"
                 accessibilityLabel="Choose Bar"
@@ -180,6 +182,7 @@ const InventoryScreen = ({ productData, id }) => {
                 <Select.Item label="Bar 3" value="bar3" />
               </Select>
               <Select
+                defaultValue={inventoryProd?.quantity}
                 selectedValue={selectedBottles}
                 minWidth="90%"
                 accessibilityLabel="Number of Bottles"
@@ -196,6 +199,7 @@ const InventoryScreen = ({ productData, id }) => {
                 ))}
               </Select>
               <Select
+                defaultValue={inventoryProd?.servings}
                 selectedValue={selectedServings}
                 minWidth="90%"
                 accessibilityLabel="Number of Servings"

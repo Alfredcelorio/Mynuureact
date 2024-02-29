@@ -2,36 +2,9 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, SafeAreaView, FlatList } from "react-native";
 import { getItemsByConditionGuest } from "../../services/conx/settings";
 
-const generateMockHistory = () => {
-  const groupedHistory = [];
-  // Example dates
-  const dates = ["2024-02-10", "2024-02-11", "2024-02-12"];
-  dates.forEach((date, index) => {
-    // Add date as a separate item
-    groupedHistory.push({ id: `date-${date}`, date, isDate: true });
-    // Add 3 logs per date
-    for (let i = 0; i < 3; i++) {
-      groupedHistory.push({
-        id: `${date}-${i}`,
-        user: `Alvaro Celorio`,
-        action: i % 2 === 0 ? "added" : "updated",
-        unit: i % 3 === 0 ? "servings" : "bottles",
-        quantity: `${Math.floor(Math.random() * 10) + 1}`,
-        time: `${Math.floor(Math.random() * 11) + 1}:${String(
-          Math.floor(Math.random() * 59) + 10
-        ).padStart(2, "0")} pm`,
-        isDate: false,
-      });
-    }
-  });
-  return groupedHistory;
-};
-
 const SettingsScreen = ({ productData, id }) => {
-  const history = generateMockHistory();
   const [data, setData] = useState([]);
   const [submitLoading, setSubmitLoading] = useState(false);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -41,77 +14,143 @@ const SettingsScreen = ({ productData, id }) => {
           "idRestaurant"
         );
 
-        const [originalLog] = logInventory;
+        const logRestaurant = await getItemsByConditionGuest(
+          productData?.restaurantId,
+          "log",
+          "idRestaurant"
+        );
 
-        originalLog.log.forEach((item) => {
-          item.time = new Date(item.time.seconds * 1000);
-        });
+        const filteredLogInventory = logInventory[0].log
+          .filter((entry) => entry.idItem === id)
+          .map((item) => ({
+            ...item.newData[0],
+            user: item.user,
+            hour: new Date(item.time.seconds * 1000).toLocaleTimeString(
+              "en-US",
+              {
+                hour: "numeric",
+                minute: "numeric",
+                hour12: true,
+              }
+            ),
+            date: new Date(item.time.seconds * 1000)
+              .toISOString()
+              .split("T")[0],
+          }));
 
-        let groupedByDate = originalLog.log.reduce((acc, curr) => {
-          let date = curr.time.toISOString().split("T")[0];
+        const filteredLogRestaurant = logRestaurant[0].log
+          .filter((entry) => entry.idItem === id)
+          .map((item) => ({
+            ...item.edit,
+            user: item.user,
+            hour: new Date(item.time.seconds * 1000).toLocaleTimeString(
+              "en-US",
+              {
+                hour: "numeric",
+                minute: "numeric",
+                hour12: true,
+              }
+            ),
+            date: new Date(item.time.seconds * 1000)
+              .toISOString()
+              .split("T")[0],
+          }));
+
+        const combinedLogs = [
+          ...filteredLogInventory,
+          ...filteredLogRestaurant,
+        ];
+
+        const groupedData = combinedLogs.reduce((acc, curr) => {
+          const { date, hour, ...rest } = curr;
           if (!acc[date]) {
             acc[date] = [];
           }
-          acc[date].push(curr);
+
+          let found = false;
+          acc[date].forEach((obj) => {
+            if (obj.hour === hour) {
+              Object.assign(obj, rest);
+              found = true;
+            }
+          });
+
+          if (!found) {
+            acc[date].push({ hour, ...rest });
+          }
+
           return acc;
         }, {});
 
-        for (let date in groupedByDate) {
-          let combinedNewData = [];
-          groupedByDate[date].forEach((item) => {
-            let time = item.time.toLocaleTimeString("en-US", {
-              hour: "numeric",
-              minute: "numeric",
-              hour12: true,
-            });
-            combinedNewData.push({
-              ...item.newData[0],
-              user: item.user,
-              hour: time,
-            });
-          });
-          groupedByDate[date] = combinedNewData;
-        }
+        const formattedData = Object.entries(groupedData).map(
+          ([date, changes]) => ({
+            [date]: changes,
+          })
+        );
 
-        setData(groupedByDate);
+        const sortedData = formattedData.sort((a, b) => {
+          const dateA = Object.keys(a)[0];
+          const dateB = Object.keys(b)[0];
+          return new Date(dateB) - new Date(dateA);
+        });
 
+        setData(sortedData);
         setSubmitLoading(false);
       } catch (err) {
         console.log("ERROR: ", err);
         setSubmitLoading(false);
       }
     };
+
     fetchData();
   }, []);
 
-  const renderHistoryItem = ({ item }) => {
-    if (item.date) {
+  const renderHistoryItem = ({ item, index }) => {
+    const date = Object.keys(item)[0];
+    let internalIndex = 0; // Índice interno para recorrer los elementos internos de los arrays
+  
+    if (item[date]) {
       return (
-        <View style={styles.dateHeader}>
-          <Text style={styles.dateHeaderText}>{item.date}</Text>
-        </View>
+        <>
+          <View style={styles.dateHeader}>
+            <Text style={styles.dateHeaderText}>{date}</Text>
+          </View>
+          {item[date].map((internalItem) => {
+            return (
+              <View key={internalIndex++} style={styles.historyItem}>
+                <Text style={styles.historyText}>{`${internalItem.user} ${
+                  internalItem.delete
+                    ? `delete item`
+                    : internalItem.enabled
+                    ? `disable item`
+                    : internalItem.price
+                    ? `change price to ${internalItem.price}`
+                    : internalItem.purchaseCost
+                    ? `(preguntar a alvaro para purchaseCost) to ${internalItem.purchaseCost}`
+                    : internalItem.servings
+                    ? `modify servings to ${internalItem.servings}`
+                    : internalItem.quantity
+                    ? `change quantity to ${internalItem.quantity}`
+                    : internalItem.chooseBar
+                    ? `(preguntar a alvaro para chooseBar) to ${internalItem.chooseBar}`
+                    : internalItem.image
+                    ? `change image the item`
+                    : ``
+                } at ${internalItem.hour}`}</Text>
+              </View>
+            );
+          })}
+        </>
       );
+    } else {
+      return null;
     }
-    return (
-      <View style={styles.historyItem}>
-        <Text style={styles.historyText}>{`${item.user} add ${Object.keys(
-          item
-        )
-          .filter((key) => key !== "user" && key !== "hour")
-          .map((key) => `${key}: ${item[key]}`)
-          .join(", ")} at ${item.hour}`}</Text>
-      </View>
-    );
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={Object.entries(data).reduce((acc, [date, items]) => {
-          acc.push({ date });
-          acc.push(...items);
-          return acc;
-        }, [])}
+        data={data}
         renderItem={renderHistoryItem}
         keyExtractor={(item, index) => index.toString()}
         contentContainerStyle={styles.scrollContainer}
@@ -151,66 +190,3 @@ const styles = StyleSheet.create({
 });
 
 export default SettingsScreen;
-
-const test = {
-  id: "dKWKHsJaZj3tE1XGbmji",
-  idRestaurant: "uwZZZ0GtHxf5RiOpLt4oU2ZXjIX2",
-  email: "biltd.88@gmail.com",
-  idItem: "IFxovWzndNCZTOUwPGyi",
-  nameItem: "Last test",
-  log: [
-    {
-      time: " ",
-      type: "new product in log - mobile",
-      user: "Wilson Pernia",
-      newData: [
-        {
-          chooseBar: "bar3",
-        },
-        {
-          numbBottles: "8",
-        },
-      ],
-    },
-    {
-      time: " ",
-      type: "new product in log - mobile",
-      user: "Wilson Pernia",
-      newData: [
-        {
-          chooseBar: "bar3",
-          numbBottles: "8",
-        },
-      ],
-    },
-    {
-      time: " ",
-      type: "new product in log - mobile",
-      user: "Wilson Pernia",
-      newData: [
-        {
-          chooseBar: "bar3",
-        },
-        {
-          numbBottles: "8",
-        },
-        {
-          chooseBar: "bar3",
-        },
-        {
-          numbBottles: "8",
-        },
-      ],
-    },
-    {
-      time: " ",
-      type: "new product in log - mobile",
-      user: "Wilson Pernia",
-      newData: [
-        {
-          numbBottles: "8",
-        },
-      ],
-    },
-  ],
-};
