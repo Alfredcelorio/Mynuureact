@@ -48,7 +48,7 @@ const Product = ({
   loadingStatus,
   setLoadingStatus,
   navigation,
-  setProductDataUpdate
+  setProductDataUpdate,
 }) => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const update = async (title, id, status) => {
@@ -116,8 +116,8 @@ const Product = ({
           <View style={styles.imageWrapper}>
             <TouchableOpacity
               onPress={() => {
-                setProductDataUpdate()
-                navigation.navigate("item", { productData, id })
+                setProductDataUpdate();
+                navigation.navigate("item", { productData, id });
               }}
             >
               <Image
@@ -164,7 +164,8 @@ const Mainmenu = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const [value1, setValue1] = useState(0);
-  const { routerName, setRouterName, setProductDataUpdate } = useContext(AuthContext);
+  const { routerName, setRouterName, setProductDataUpdate } =
+    useContext(AuthContext);
   const [searchProductsByCat, setSearchProductsByCat] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [restaurant, setRestaurant] = useState({});
@@ -237,7 +238,7 @@ const Mainmenu = () => {
   useEffect(() => {
     if (selectedMenu && categories) {
       const numb = value1 + 1;
-      
+
       (async () => {
         const data = await getProductsByMenu(selectedMenu);
         const productsByCategories = categories.reduce((value, nextItem) => {
@@ -259,7 +260,7 @@ const Mainmenu = () => {
 
         setTimeout(() => {
           setProductsByCat(productsByCategories);
-          setValue1(numb)
+          setValue1(numb);
         }, 500);
         setTimeout(() => {
           if (searchFilter !== "") {
@@ -280,7 +281,7 @@ const Mainmenu = () => {
         const fetchRest = await restaurantApi(email, uid);
         const [objetDestruct] = fetchRest;
         setRestaurant(objetDestruct);
-        handleUpdateProduct()
+        handleUpdateProduct();
       } catch (err) {
         throw new Error(err);
       }
@@ -294,11 +295,10 @@ const Mainmenu = () => {
     const updatedProducts = routerName.map((product) =>
       product === route.name ? route.name : product
     );
-    setRouterName(updatedProducts)
+    setRouterName(updatedProducts);
   };
 
   const handleSearchEnd = () => {
-    console.log('entra')
     if (selectedMenu && categories) {
       (async () => {
         const data = await getProductsByMenu(selectedMenu);
@@ -327,7 +327,7 @@ const Mainmenu = () => {
 
   const handleSearchChange = (target) => {
     if (target === "") {
-      setSearchFilter(target);
+      setSearchFilter("");
       setSearchValue("");
       setSearchProductsByCat([]);
       return handleSearchEnd();
@@ -396,52 +396,60 @@ const Mainmenu = () => {
           <Icon name="bars" size={30} color="white" />
         </TouchableOpacity> */}
 
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#FFF" />
-          </View>
-        ) : searchProductsByCat.length !== 0 ? (
-          <ScrollView>
-            <LinearGradient colors={["#000", "white"]} style={styles.gradient}>
-              <View style={styles.logoContainer}>
-                <View style={styles.logoWrapper}>
-                  <Image
-                    source={{
-                      uri: `${restaurant?.logo}`,
-                    }}
-                    style={styles.logo}
-                  />
-                </View>
-              </View>
-            </LinearGradient>
-            <View style={styles.topBar}>
-              <Text style={styles.headerText}>
-                Welcome to {restaurant?.restaurantName}
-              </Text>
+{isLoading ? (
+  <View style={styles.loadingContainer}>
+    <ActivityIndicator size="large" color="#FFF" />
+  </View>
+) : (
+  <>
+    {(searchProductsByCat.length !== 0 && searchFilter !== "") ||
+    (searchProductsByCat.length === 0 && searchFilter !== "") ? (
+      <ScrollView>
+        <LinearGradient colors={["#000", "white"]} style={styles.gradient}>
+          <View style={styles.logoContainer}>
+            <View style={styles.logoWrapper}>
+              <Image
+                source={{ uri: `${restaurant?.logo}` }}
+                style={styles.logo}
+              />
             </View>
-            <View style={styles.searchBarContainer}>
-              <Text style={styles.headerText}> This is your drink menu</Text>
+          </View>
+        </LinearGradient>
+        <View style={styles.topBar}>
+          <Text style={styles.headerText}>
+            Welcome to {restaurant?.restaurantName}
+          </Text>
+        </View>
+        <View style={styles.searchBarContainer}>
+              <Text style={styles.headerText}>This is your inventory</Text>
 
-              <TouchableOpacity
-                onPress={navigateToNoimagesmenu}
-                style={styles.buttonContainerChange}
-              >
-                <Text style={styles.noImageButtonText}>Change meu</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => navigation.navigate("Scaninventory")} // Use the correct screen name
-                style={styles.buttonContainer}
-              >
-                <Text style={styles.buttonText}>Scan Inventory</Text>
-              </TouchableOpacity>
+              <View style={styles.buttonsContainer}>
+                {/* Change Menu Button */}
+                <TouchableOpacity
+                  onPress={navigateToNoimagesmenu}
+                  style={[styles.button, { marginRight: 8 }]}
+                >
+                  <Text style={styles.buttonText}>Change Menu</Text>
+                </TouchableOpacity>
+
+                {/* Scan Inventory Button */}
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("Scaninventory")}
+                  style={styles.buttonContainer}
+                >
+                  <Text style={styles.buttonText}>Scan Inventory</Text>
+                </TouchableOpacity>
+              </View>
               <TextInput
                 style={styles.searchBar}
                 placeholder="Search..."
                 placeholderTextColor="#aaa"
                 value={searchValue}
-                onChangeText={(e) => handleSearchChange(e)}
+                onChangeText={handleSearchChange}
               />
             </View>
+        {searchFilter !== "" && searchProductsByCat.length !== 0 && (
+          <>
             {searchProductsByCat.map((category, index) => (
               <View key={index}>
                 <Text style={styles.categoryText}>{category.name}</Text>
@@ -468,100 +476,104 @@ const Mainmenu = () => {
                 </View>
               </View>
             ))}
-          </ScrollView>
-        ) : (
-          <FlatList
-            data={
-              searchProductsByCat.length !== 0
-                ? searchProductsByCat
-                : productsByCat
-            }
-            keyExtractor={(item, index) => index.toString()}
-            onEndReached={handleSearchEnd}
-            onEndReachedThreshold={0.5}
-            ListFooterComponent={() =>
-              isLoading ? <ActivityIndicator /> : null
-            }
-            ListHeaderComponent={() => (
-              <>
-                <LinearGradient
-                  colors={["#000", "white"]}
-                  style={styles.gradient}
-                >
-                  <View style={styles.logoContainer}>
-                    <View style={styles.logoWrapper}>
-                      <Image
-                        source={{
-                          uri: `${restaurant?.logo}`,
-                        }}
-                        style={styles.logo}
-                      />
-                    </View>
-                  </View>
-                </LinearGradient>
-                <View style={styles.topBar}>
-                  <Text style={styles.headerText}>
-                    Welcome to {restaurant?.restaurantName}
-                  </Text>
-                </View>
-                <View style={styles.searchBarContainer}>
-                  <Text style={styles.headerText}> This is your inventory</Text>
-
-                  <View style={styles.buttonsContainer}>
-                    {/* Change Menu Button */}
-                    <TouchableOpacity
-                      onPress={navigateToNoimagesmenu}
-                      style={[styles.button, { marginRight: 8 }]} // Add marginRight for spacing between buttons
-                    >
-                      <Text style={styles.buttonText}>Change Menu</Text>
-                    </TouchableOpacity>
-
-                    {/* Scan Inventory Button */}
-                    <TouchableOpacity
-                      onPress={() => navigation.navigate("Scaninventory")} // Use the correct screen name
-                      style={styles.buttonContainer}
-                    >
-                      <Text style={styles.buttonText}>Scan Inventory</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <TextInput
-                    style={styles.searchBar}
-                    placeholder="Search..."
-                    placeholderTextColor="#aaa"
-                    value={searchValue}
-                    onChangeText={(e) => handleSearchChange(e)}
+          </>
+        )}
+        {searchFilter !== "" && searchProductsByCat.length === 0 && (
+          <>
+            <View>
+              <Text style={styles.notExistProduct}>
+                No products found with this name
+              </Text>
+              <View style={styles.productRow}></View>
+            </View>
+          </>
+        )}
+      </ScrollView>
+    ) : (
+      <FlatList
+        data={searchProductsByCat.length !== 0 ? searchProductsByCat : productsByCat}
+        keyExtractor={(item, index) => index.toString()}
+        onEndReached={handleSearchEnd}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={isLoading ? <ActivityIndicator /> : null}
+        ListHeaderComponent={
+          <>
+            <LinearGradient colors={["#000", "white"]} style={styles.gradient}>
+              <View style={styles.logoContainer}>
+                <View style={styles.logoWrapper}>
+                  <Image
+                    source={{ uri: `${restaurant?.logo}` }}
+                    style={styles.logo}
                   />
                 </View>
-              </>
-            )}
-            renderItem={({ item, index }) => (
-              <View key={index}>
-                <Text style={styles.categoryText}>{item.name}</Text>
-                <View style={styles.productRow}>
-                  {item.products?.map((product, i) => (
-                    <Product
-                      key={i}
-                      productData={product}
-                      image={product.image}
-                      title={product.name}
-                      price={product.price}
-                      status={product.enabled}
-                      deleteItem={deleteItem}
-                      setDeleteItem={setDeleteItem}
-                      id={product.id}
-                      searchValue={searchValue}
-                      handleSearchChange={handleSearchChange}
-                      navigation={navigation}
-                      loadingStatus={loadingStatus}
-                      setLoadingStatus={setLoadingStatus}
-                      setProductDataUpdate={setProductDataUpdate}
-                    />
-                  ))}
-                </View>
               </View>
-            )}
-          />
+            </LinearGradient>
+            <View style={styles.topBar}>
+              <Text style={styles.headerText}>
+                Welcome to {restaurant?.restaurantName}
+              </Text>
+            </View>
+            <View style={styles.searchBarContainer}>
+              <Text style={styles.headerText}>This is your inventory</Text>
+
+              <View style={styles.buttonsContainer}>
+                {/* Change Menu Button */}
+                <TouchableOpacity
+                  onPress={navigateToNoimagesmenu}
+                  style={[styles.button, { marginRight: 8 }]}
+                >
+                  <Text style={styles.buttonText}>Change Menu</Text>
+                </TouchableOpacity>
+
+                {/* Scan Inventory Button */}
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("Scaninventory")}
+                  style={styles.buttonContainer}
+                >
+                  <Text style={styles.buttonText}>Scan Inventory</Text>
+                </TouchableOpacity>
+              </View>
+              <TextInput
+                style={styles.searchBar}
+                placeholder="Search..."
+                placeholderTextColor="#aaa"
+                value={searchValue}
+                onChangeText={handleSearchChange}
+              />
+            </View>
+          </>
+        }
+        renderItem={({ item, index }) => (
+          <View key={index}>
+            <Text style={styles.categoryText}>{item.name}</Text>
+            <View style={styles.productRow}>
+              {item.products?.map((product, i) => (
+                <Product
+                  key={i}
+                  productData={product}
+                  image={product.image}
+                  title={product.name}
+                  price={product.price}
+                  status={product.enabled}
+                  deleteItem={deleteItem}
+                  setDeleteItem={setDeleteItem}
+                  id={product.id}
+                  searchValue={searchValue}
+                  handleSearchChange={handleSearchChange}
+                  navigation={navigation}
+                  loadingStatus={loadingStatus}
+                  setLoadingStatus={setLoadingStatus}
+                  setProductDataUpdate={setProductDataUpdate}
+                />
+              ))}
+            </View>
+          </View>
         )}
+      />
+    )}
+  </>
+)}
+
 
         <View style={styles.bannerContainer}>
           <Image
@@ -667,6 +679,14 @@ const styles = StyleSheet.create({
     fontSize: 35,
     fontWeight: "500",
     marginBottom: 10,
+    color: "#FFF",
+    textAlign: "center",
+  },
+  notExistProduct: {
+    marginTop: 30,
+    fontSize: 15,
+    fontWeight: "500",
+    marginBottom: 2,
     color: "#FFF",
     textAlign: "center",
   },

@@ -124,7 +124,7 @@ const SettingsScreen = ({ productData, id }) => {
                     : internalItem.enabled
                     ? `disable item`
                     : internalItem.price
-                    ? `change price to ${internalItem.price}`
+                    ? `changed price to ${internalItem.price}`
                     : internalItem.purchaseCost
                     ? `(preguntar a alvaro para purchaseCost) to ${internalItem.purchaseCost}`
                     : internalItem.servings
