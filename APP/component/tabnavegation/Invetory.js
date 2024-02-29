@@ -125,7 +125,6 @@ const InventoryScreen = ({ productData, id }) => {
             },
           ],
         };
-        console.log('TEST: ', logObjetUpdate)
 
         await updateItem(logInventory[0]?.id, logObjetUpdate, "logInventory");
       }
