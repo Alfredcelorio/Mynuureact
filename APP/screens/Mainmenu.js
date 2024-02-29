@@ -319,7 +319,7 @@ const Mainmenu = () => {
           return value;
         }, []);
 
-        setProductsByCat((prevData) => [...prevData, ...productsByCategories]);
+        setProductsByCat(productsByCategories);
         setPage((prevPage) => prevPage + 1);
       })();
     }
