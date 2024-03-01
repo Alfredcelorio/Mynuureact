@@ -8,6 +8,9 @@ const SettingsScreen = ({ productData, id }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+
+        console.log('PROP: ', productData?.restaurantId)
+
         const logInventory = await getItemsByConditionGuest(
           productData?.restaurantId,
           "logInventory",

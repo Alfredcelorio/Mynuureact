@@ -129,9 +129,9 @@ const SettingsScreen = ({ productData, id }) => {
           availability !== productData?.enabled
             ? availability
             : productData?.enabled,
-        position: productData?.position,
-        purchaseCost: purchaseCost || productData?.purchaseCost,
-        servings: servings || productData?.servings,
+        position: productData?.position || productData?.positionInCategory,
+        purchaseCost: purchaseCost || productData?.purchaseCost || '',
+        servings: servings || productData?.servings || '',
         inventory: [{ ...productData?.inventory?.[0] }],
       };
 
@@ -169,7 +169,7 @@ const SettingsScreen = ({ productData, id }) => {
             },
           ],
         };
-
+        console.log('POsition: ', logObjetUpdate)
         await createItemCustom(logObjet, "log");
       }
 
@@ -191,10 +191,12 @@ const SettingsScreen = ({ productData, id }) => {
           ],
         };
 
+        console.log('POsition: ', logObjetUpdate)
         await updateItem(logRestaurant[0]?.id, logObjetUpdate, "log");
       }
 
       await updateItem(id, obj, "products");
+
       setProductDataUpdate(obj);
       const updatedProducts = routerName.map((product) =>
         product === route.name ? route.name : product
