@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
+import { NativeBaseProvider } from 'native-base';
+import { Box, Input } from 'native-base';
 import {
   View,
   Text,
@@ -223,6 +225,7 @@ const SettingsScreen = ({ productData, id }) => {
   };
 
   return (
+    <NativeBaseProvider>
     <>
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -235,16 +238,25 @@ const SettingsScreen = ({ productData, id }) => {
           )}
         </View>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Item Name</Text>
-            <TextInput
-              style={styles.settingInput}
-              value={itemName}
-              onChangeText={setItemName}
-              placeholder="Enter item name"
-              placeholderTextColor="#ccc"
-            />
-          </View>
+        <Box style={styles.settingItem}>
+         <Input
+              size="2xl"
+            placeholder="Enter item name"
+           w="100%"
+          value={itemName}
+          onChangeText={(text) => setItemName(text)}      
+         _input={{
+          color: 'blueGray.400', 
+           }}
+        _light={{
+      _placeholder: { color: 'blueGray.400' }, 
+ }}
+       _dark={{
+      _placeholder: { color: 'blueGray.50' }, 
+    }}
+  />
+</Box>
+
           <View style={styles.settingItem}>
             <Text style={styles.settingLabel}>Price</Text>
             <TextInput
@@ -410,6 +422,7 @@ const SettingsScreen = ({ productData, id }) => {
       </SafeAreaView>
       <Toast setRef={(ref) => Toast.setRef(ref)} />
     </>
+    </NativeBaseProvider>
   );
 };
 
@@ -427,7 +440,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
     padding: 10,
-    backgroundColor: "#222",
+    
     borderRadius: 10,
   },
   settingLabel: {

@@ -389,12 +389,7 @@ const Mainmenu = () => {
         </View>
       </Modal>
       <SafeAreaView style={styles.container}>
-        {/* <TouchableOpacity
-          onPress={toggleMenuVisibility}
-          style={styles.menuIcon}
-        >
-          <Icon name="bars" size={30} color="white" />
-        </TouchableOpacity> */}
+      
 
 {isLoading ? (
   <View style={styles.loadingContainer}>
