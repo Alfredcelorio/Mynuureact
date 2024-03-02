@@ -432,13 +432,7 @@ const Mainmenu = () => {
                   <Text style={styles.buttonText}>Change Menu</Text>
                 </TouchableOpacity>
 
-                {/* Scan Inventory Button */}
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("Scaninventory")}
-                  style={styles.buttonContainer}
-                >
-                  <Text style={styles.buttonText}>Scan Inventory</Text>
-                </TouchableOpacity>
+               
               </View>
               <TextInput
                 style={styles.searchBar}
@@ -530,7 +524,6 @@ const Mainmenu = () => {
                   onPress={() => navigation.navigate("Scaninventory")}
                   style={styles.buttonContainer}
                 >
-                  <Text style={styles.buttonText}>Scan Inventory</Text>
                 </TouchableOpacity>
               </View>
               <TextInput
@@ -640,8 +633,8 @@ const styles = StyleSheet.create({
     backgroundColor: "black",
     padding: 10,
     borderRadius: 10,
-    margin: 5,
-    alignItems: "center",
+    margin: 0,
+    alignItems: "left",
   },
   topBar: {
     flexDirection: "row",
@@ -726,9 +719,10 @@ const styles = StyleSheet.create({
     padding: Platform.OS === "ios" ? 10 : 5,
     borderRadius: 10,
     margin: 5,
-    alignItems: "center",
+    alignItems: "left",
   },
   buttonText: {
+    alignItems: "left",
     color: "#FFF",
     fontSize: 15,
   },
@@ -794,8 +788,8 @@ const styles = StyleSheet.create({
 
   buttonsContainer: {
     flexDirection: "row", // Aligns buttons horizontally
-    justifyContent: "center", // Aligns container to the right
-    padding: 10, // Adjust padding as needed
+    justifyContent: "left", // Aligns container to the right
+    padding: 0, // Adjust padding as needed
   },
   button: {
     backgroundColor: "#000", // Button background color

@@ -1,15 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, SafeAreaView, FlatList } from "react-native";
+import { View, Text, StyleSheet, SafeAreaView, FlatList, RefreshControl } from "react-native";
 import { getItemsByConditionGuest } from "../../services/conx/settings";
 
 const SettingsScreen = ({ productData, id }) => {
   const [data, setData] = useState([]);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false); // Add this line
+
+
+  const onRefresh = () => {
+    fetchData(); // Call fetchData within onRefresh to refresh the list
+  };
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-
+        setRefreshing(true);
         console.log('PROP: ', productData?.restaurantId)
+
+        
 
         const logInventory = await getItemsByConditionGuest(
           productData?.restaurantId,
@@ -123,21 +133,21 @@ const SettingsScreen = ({ productData, id }) => {
               <View key={internalIndex++} style={styles.historyItem}>
                 <Text style={styles.historyText}>{`${internalItem.user} ${
                   internalItem.delete
-                    ? `delete item`
+                    ? `deleted item`
                     : internalItem.enabled
-                    ? `disable item`
+                    ? `disabled item`
                     : internalItem.price
                     ? `changed price to ${internalItem.price}`
                     : internalItem.purchaseCost
-                    ? `(preguntar a alvaro para purchaseCost) to ${internalItem.purchaseCost}`
+                    ? `Change the purchase cost  to ${internalItem.purchaseCost} usd`
                     : internalItem.servings
-                    ? `modify servings to ${internalItem.servings}`
+                    ? `updated the amount servings to ${internalItem.servings}`
                     : internalItem.quantity
-                    ? `change quantity to ${internalItem.quantity}`
+                    ? `changed the amount of bottles  to ${internalItem.quantity}`
                     : internalItem.chooseBar
-                    ? `(preguntar a alvaro para chooseBar) to ${internalItem.chooseBar}`
+                    ? `updated the bar to  ${internalItem.chooseBar}`
                     : internalItem.image
-                    ? `change image the item`
+                    ? `changed the product image `
                     : ``
                 } at ${internalItem.hour}`}</Text>
               </View>
