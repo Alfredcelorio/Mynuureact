@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { NativeBaseProvider } from 'native-base';
-import { Box, Input } from 'native-base';
+import { Box, Input, FormControl, Button  } from 'native-base';
 import {
   View,
   Text,
@@ -10,7 +10,6 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
-  Button,
   Image,
   Platform,
   ActivityIndicator,
@@ -232,154 +231,222 @@ const SettingsScreen = ({ productData, id }) => {
           {submitLoading ? (
             <ActivityIndicator size="large" color="#808080" />
           ) : (
-            <TouchableOpacity onPress={onFinish} style={styles.saveButton}>
-              <Text style={styles.saveButtonText}>Save</Text>
-            </TouchableOpacity>
+            <Box alignItems="center" w="100%" px="2.5%">
+            <Button onPress={onFinish} size="lg" w="95%">
+              Save
+            </Button>
+          </Box>
           )}
         </View>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Box style={styles.settingItem}>
-         <Input
-              size="2xl"
-            placeholder="Enter item name"
-           w="100%"
-          value={itemName}
-          onChangeText={(text) => setItemName(text)}      
-         _input={{
-          color: 'blueGray.400', 
-           }}
-        _light={{
-      _placeholder: { color: 'blueGray.400' }, 
- }}
-       _dark={{
-      _placeholder: { color: 'blueGray.50' }, 
-    }}
-  />
-</Box>
+        <FormControl>
+        
+         <Box style={styles.settingItem}>
+         <FormControl.Label>Item name</FormControl.Label>
+            <Input
+               size="lg"
+               placeholder="Enter item name"
+               w="95%"
+               value={itemName}
+               onChangeText={(text) => setItemName(text)}
+                 _input={{
+                      color: 'blueGray.400',
+                   }}
+                   _light={{
+                    _placeholder: { color: 'blueGray.400' },
+                          }}
+                    _dark={{
+                   _placeholder: { color: 'blueGray.50' },
+                     }}
+                    />
+                    </Box>
+                 </FormControl>
+                 <FormControl>
+  <Box style={styles.settingItem}>
+    <FormControl.Label>Price</FormControl.Label>
+    <Input
+      size="lg"
+      placeholder="Enter price"
+      w="95%"
+      keyboardType="numeric"
+      value={price}
+      onChangeText={setPrice}
+      _input={{ color: 'blueGray.400' }}
+      _light={{ _placeholder: { color: 'blueGray.400' } }}
+      _dark={{ _placeholder: { color: 'blueGray.50' } }}
+    />
+  </Box>
+</FormControl>
 
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Price</Text>
-            <TextInput
-              style={styles.settingInput}
-              value={price}
-              onChangeText={setPrice}
-              placeholder="Enter price"
-              keyboardType="numeric"
-              placeholderTextColor="#ccc"
-            />
-          </View>
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Purchase Cost</Text>
-            <TextInput
-              style={styles.settingInput}
-              value={purchaseCost}
-              onChangeText={setPurchaseCost}
-              placeholder="Enter purchase cost"
-              keyboardType="numeric"
-              placeholderTextColor="#ccc"
-            />
-          </View>
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Servings</Text>
-            <TextInput
-              style={styles.settingInput}
-              value={servings}
-              onChangeText={setServings}
-              placeholder="Servings"
-              keyboardType="numeric"
-              placeholderTextColor="#ccc"
-            />
-          </View>
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>ABV</Text>
-            <TextInput
-              style={styles.settingInput}
-              value={abv}
-              onChangeText={setAbv}
-              placeholder="ABV"
-              placeholderTextColor="#ccc"
-            />
-          </View>
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Body</Text>
-            <TextInput
-              style={styles.settingInput}
-              value={body}
-              onChangeText={setBody}
-              placeholder="Body"
-              placeholderTextColor="#ccc"
-            />
-          </View>
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Brand</Text>
-            <TextInput
-              style={styles.settingInput}
-              value={brand}
-              onChangeText={setBrand}
-              placeholder="Brand"
-              placeholderTextColor="#ccc"
-            />
-          </View>
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Country/State</Text>
-            <TextInput
-              style={styles.settingInput}
-              value={countryState}
-              onChangeText={setCountryState}
-              placeholder="Country/State"
-              placeholderTextColor="#ccc"
-            />
-          </View>
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Region</Text>
-            <TextInput
-              style={styles.settingInput}
-              value={region}
-              onChangeText={setRegion}
-              placeholder="Region"
-              placeholderTextColor="#ccc"
-            />
-          </View>
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>SKU</Text>
-            <TextInput
-              style={styles.settingInput}
-              value={sku}
-              onChangeText={setSku}
-              placeholder="SKU"
-              placeholderTextColor="#ccc"
-            />
-          </View>
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Taste</Text>
-            <TextInput
-              style={styles.settingInput}
-              value={taste}
-              onChangeText={setTaste}
-              placeholder="Taste"
-              placeholderTextColor="#ccc"
-            />
-          </View>
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Type</Text>
-            <TextInput
-              style={styles.settingInput}
-              value={type}
-              onChangeText={setType}
-              placeholder="Type"
-              placeholderTextColor="#ccc"
-            />
-          </View>
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Varietal</Text>
-            <TextInput
-              style={styles.settingInput}
-              value={varietal}
-              onChangeText={setVarietal}
-              placeholder="Varietal"
-              placeholderTextColor="#ccc"
-            />
-          </View>
+<FormControl>
+  <Box style={styles.settingItem}>
+    <FormControl.Label>Purchase Cost</FormControl.Label>
+    <Input
+      size="lg"
+      placeholder="Enter purchase cost"
+      w="95%"
+      keyboardType="numeric"
+      value={purchaseCost}
+      onChangeText={setPurchaseCost}
+      _input={{ color: 'blueGray.400' }}
+      _light={{ _placeholder: { color: 'blueGray.400' } }}
+      _dark={{ _placeholder: { color: 'blueGray.50' } }}
+    />
+  </Box>
+</FormControl>
+
+<FormControl>
+  <Box style={styles.settingItem}>
+    <FormControl.Label>Servings</FormControl.Label>
+    <Input
+      size="lg"
+      placeholder="Servings"
+      w="95%"
+      keyboardType="numeric"
+      value={servings}
+      onChangeText={setServings}
+      _input={{ color: 'blueGray.400' }}
+      _light={{ _placeholder: { color: 'blueGray.400' } }}
+      _dark={{ _placeholder: { color: 'blueGray.50' } }}
+    />
+  </Box>
+</FormControl>
+
+<FormControl>
+  <Box style={styles.settingItem}>
+    <FormControl.Label>ABV</FormControl.Label>
+    <Input
+      size="lg"
+      placeholder="ABV"
+      w="95%"
+      value={abv}
+      onChangeText={setAbv}
+      _input={{ color: 'blueGray.400' }}
+      _light={{ _placeholder: { color: 'blueGray.400' } }}
+      _dark={{ _placeholder: { color: 'blueGray.50' } }}
+    />
+  </Box>
+</FormControl>
+
+<FormControl>
+  <Box style={styles.settingItem}>
+    <FormControl.Label>Body</FormControl.Label>
+    <Input
+      size="lg"
+      placeholder="Body"
+      w="95%"
+      value={body}
+      onChangeText={setBody}
+      _input={{ color: 'blueGray.400' }}
+      
+    />
+  </Box>
+</FormControl>
+
+<FormControl>
+  <Box style={styles.settingItem}>
+    <FormControl.Label>Brand</FormControl.Label>
+    <Input
+      size="lg"
+      placeholder="Brand"
+      w="95%"
+      value={brand}
+      onChangeText={setBrand}
+      _input={{ color: 'blueGray.400' }}
+ 
+    />
+  </Box>
+</FormControl>
+
+<FormControl>
+  <Box style={styles.settingItem}>
+    <FormControl.Label>Country/State</FormControl.Label>
+    <Input
+      size="lg"
+      placeholder="Country/State"
+      w="95%"
+      value={countryState}
+      onChangeText={setCountryState}
+      _input={{ color: 'blueGray.400' }}
+      
+    />
+  </Box>
+</FormControl>
+
+<FormControl>
+  <Box style={styles.settingItem}>
+    <FormControl.Label>Region</FormControl.Label>
+    <Input
+      size="lg"
+      placeholder="Region"
+      w="95%"
+      value={region}
+      onChangeText={setRegion}
+      _input={{ color: 'blueGray.400' }}
+   
+    />
+  </Box>
+</FormControl>
+
+<FormControl>
+  <Box style={styles.settingItem}>
+    <FormControl.Label>SKU</FormControl.Label>
+    <Input
+      size="lg"
+      placeholder="SKU"
+      w="95%"
+      value={sku}
+      onChangeText={setSku}
+      _input={{ color: 'blueGray.400' }}
+     
+    />
+  </Box>
+</FormControl>
+
+<FormControl>
+  <Box style={styles.settingItem}>
+    <FormControl.Label>Taste</FormControl.Label>
+    <Input
+      size="lg"
+      placeholder="Taste"
+      w="95%"
+      value={taste}
+      onChangeText={setTaste}
+      _input={{ color: 'blueGray.400' }}
+  
+    />
+  </Box>
+</FormControl>
+
+<FormControl>
+  <Box style={styles.settingItem}>
+    <FormControl.Label>Type</FormControl.Label>
+    <Input
+      size="lg"
+      placeholder="Type"
+      w="95%"
+      value={type}
+      onChangeText={setType}
+      _input={{ color: 'blueGray.400' }}
+     
+    />
+  </Box>
+</FormControl>
+
+<FormControl>
+  <Box style={styles.settingItem}>
+    <FormControl.Label>Varietal</FormControl.Label>
+    <Input
+      size="lg"
+      placeholder="Varietal"
+      w="95%"
+      value={varietal}
+      onChangeText={setVarietal}
+      _input={{ color: 'blueGray.400' }}
+     
+    />
+  </Box>
+</FormControl> 
           <View style={styles.settingItem}>
             <Text style={styles.settingLabel}>Availability</Text>
             <Switch
@@ -397,13 +464,17 @@ const SettingsScreen = ({ productData, id }) => {
               marginTop: 20,
             }}
           >
-            <Button
-              style={{
-                marginBottom: 20,
-              }}
-              title="Upload image from gallery"
-              onPress={pickImage}
-            />
+             <Box alignItems="center" w="100%" px="2.5%" mb="5">
+           <Button
+            onPress={pickImage}
+             size="lg"
+             variant="outline"
+           w="95%"
+             marginBottom="5" // Equivalent to 20 in NativeBase's default scale, you can adjust as needed
+               >
+                Upload image from gallery
+             </Button>
+               </Box>
             <TouchableOpacity onPress={takePhoto} style={styles.container}>
               {image ? (
                 <Image
@@ -429,19 +500,16 @@ const SettingsScreen = ({ productData, id }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "black",
   },
   scrollContainer: {
     padding: 20,
   },
   settingItem: {
-    flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
-    padding: 10,
-    
-    borderRadius: 10,
+   
+   
   },
   settingLabel: {
     fontSize: 18,
@@ -458,23 +526,13 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "center",
     alignItems: "center",
-    paddingRight: 20,
-    paddingTop: 10,
+    paddingTop: 20,
     paddingBottom: 10,
     backgroundColor: "black", // Match your theme
   },
-  saveButton: {
-    backgroundColor: "black", // A green color
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 5,
-  },
-  saveButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-  },
+  
   changeImageButton: {
     backgroundColor: "blue", // Or any color that fits your design
     paddingHorizontal: 20,
