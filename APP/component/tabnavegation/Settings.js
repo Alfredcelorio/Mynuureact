@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useContext } from "react";
 import { NativeBaseProvider } from 'native-base';
-import { Box, Input, FormControl, Button  } from 'native-base';
+import { Box, Input, FormControl, Button, HStack, Switch  } from 'native-base';
 import {
   View,
   Text,
-  Switch,
   StyleSheet,
   SafeAreaView,
   ScrollView,
@@ -447,15 +446,16 @@ const SettingsScreen = ({ productData, id }) => {
     />
   </Box>
 </FormControl> 
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Availability</Text>
-            <Switch
-              value={availability}
-              onValueChange={setAvailability}
-              trackColor={{ false: "#767577", true: "#81b0ff" }}
-              thumbColor={availability ? "#f5dd4b" : "#f4f3f4"}
-            />
-          </View>
+       <View style={styles.settingItem}>
+      <HStack alignItems="center" space={4} marginTop={5}>
+        <Text style={styles.settingLabel}>Availability</Text>
+        <Switch
+          size="sm"
+          value={availability}
+          onToggle={() => setAvailability(!availability)}
+        />
+      </HStack>
+    </View>
           <View
             style={{
               flex: 1,
@@ -479,12 +479,12 @@ const SettingsScreen = ({ productData, id }) => {
               {image ? (
                 <Image
                   source={{ uri: image }}
-                  style={{ width: 200, height: 200, marginTop: 20 }}
+                  style={{ width: 400, height: 400, marginTop: 20 }}
                 />
               ) : (
                 <Image
                   source={{ uri: imgProduct }}
-                  style={{ width: 200, height: 200, marginTop: 20 }}
+                  style={{ width: 400, height: 400, marginTop: 20 }}
                 />
               )}
             </TouchableOpacity>
@@ -508,8 +508,6 @@ const styles = StyleSheet.create({
   settingItem: {
     justifyContent: "space-between",
     alignItems: "center",
-   
-   
   },
   settingLabel: {
     fontSize: 18,

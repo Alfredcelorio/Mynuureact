@@ -266,6 +266,8 @@ const styles = StyleSheet.create({
   formContainer: {
     marginTop: 10,
     width: "100%",
+    
+
   },
 });
 
