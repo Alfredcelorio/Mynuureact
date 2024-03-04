@@ -138,15 +138,15 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "500",
+    fontSize: 30,
+    fontWeight: "700",
     color: "white",
     marginTop: 20,
     textAlign: "center",
   },
   price: {
-    fontSize: 19,
-    fontWeight: "400",
+    fontSize: 22,
+    fontWeight: "700",
     color: "white",
     marginTop: 10,
     textAlign: "center",
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: 20,
     borderWidth: 2,
-    borderColor: "white", // bold border color
+  
     padding: 14,
   },
 
@@ -174,6 +174,7 @@ const styles = StyleSheet.create({
     fontFamily: "Metropolis-Regular",
     fontSize: 16,
     fontWeight: "400",
+    marginTop: 3,
     color: "white",
   },
   goBackButton: {
