@@ -68,7 +68,7 @@ export default function App() {
     <NativeBaseProvider>
       <ScrollView style={styles.scrollView}>
       <View style={styles.container}>
-        <Text style={styles.header}>Bar Cost Caalculator</Text>
+        <Text style={styles.header}>Bar Cost Calculator</Text>
         <View style={styles.progressContainer}>
           <ProgressCircle
             style={styles.progressCircle}

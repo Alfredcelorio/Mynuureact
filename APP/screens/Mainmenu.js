@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../context/context";
+import { VStack, Input, Icon, Heading } from 'native-base';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {
   View,
   Text,
@@ -15,6 +17,7 @@ import {
   Modal,
   Alert,
   FlatList,
+  Button,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -28,11 +31,13 @@ import {
 } from "../services/productsList/products";
 import { getMenus } from "../services/productsList/menus";
 import { getRestaurant } from "../services/productsList/restaurant";
-import Icon from "react-native-vector-icons/FontAwesome"; // Import FontAwesome or other icon sets
 import greenCircle from "../../assets/greenCircle.png";
 import redCircle from "../../assets/redCircle.png";
 
+
+
 const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
+
 
 const Product = ({
   productData,
@@ -49,6 +54,16 @@ const Product = ({
   setLoadingStatus,
   navigation,
   setProductDataUpdate,
+  bottles,
+  setBottles,
+  isInventoryModalVisible,
+  setIsInventoryModalVisible,
+  newBottleCount,
+  setNewBottleCount,
+  handleSaveInventoryUpdate,
+  newServingCount,          // Add this line
+  setNewServingCount,       // And this line
+
 }) => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const update = async (title, id, status) => {
@@ -79,7 +94,18 @@ const Product = ({
     }
   };
 
-  const handleIconPress = (title, id, status) => {
+  const openInventoryModal = () => {
+    setIsInventoryModalVisible(true);
+  };
+
+  
+  const updateInventory = () => {
+    if (bottles > 0) {
+      setBottles(prevBottles => prevBottles - 1);
+    }
+  };
+
+  const handleIconPress = (title, id, status) => {ma
     if (status) {
       Alert.alert(
         `Deactivate item ${title}`,
@@ -143,10 +169,38 @@ const Product = ({
             )}
           </View>
           <Text style={styles.productTitle}>{title}</Text>
+      
           {description && (
             <Text style={styles.productDescription}>{description}</Text>
           )}
           <Text style={styles.productPrice}>{price}</Text>
+          <TouchableOpacity onPress={openInventoryModal}>
+          <Text style={styles.productPrice}>{bottles} bottles left </Text>
+</TouchableOpacity>
+<Modal
+   visible={isInventoryModalVisible}
+   onRequestClose={() => setIsInventoryModalVisible(false)}
+ >
+  {/* Modal content with inputs for new bottle and serving counts */}
+  <View style={styles.modalContent}>
+    <TextInput 
+      value={newBottleCount} 
+      onChangeText={setNewBottleCount} 
+      placeholder="Enter new bottle count" 
+    />
+    <TextInput 
+      value={newServingCount} 
+      onChangeText={setNewServingCount} 
+      placeholder="Enter new serving count" 
+    />
+    <Button title="Save" onPress={handleSaveInventoryUpdate} />
+    {/* ...other modal content */}
+  </View>
+</Modal>
+
+
+
+
         </>
       ) : (
         <></>
@@ -179,14 +233,41 @@ const Mainmenu = () => {
   const [searchFilter, setSearchFilter] = useState("");
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [page, setPage] = useState(1);
+  const [bottles, setBottles] = useState(8);
+  const [isInventoryModalVisible, setIsInventoryModalVisible] = useState(false);
+  const [newBottleCount, setNewBottleCount] = useState('');
+  const [newServingCount, setNewServingCount] = useState('');
+  const [servings, setServings] = useState(0);
+  const openInventoryModal = () => {
+    setIsInventoryModalVisible(true);
+  };
+
+
 
   const toggleMenuVisibility = () => {
     setIsModalVisible(!isModalVisible);
   };
 
+
+  
+  // Function to close the modal and potentially update the bottle and serving counts
+  const handleSaveInventoryUpdate = () => {
+    const bottleCount = parseInt(newBottleCount, 10);
+    const servingCount = parseInt(newServingCount, 10);
+  
+    if (!isNaN(bottleCount) && !isNaN(servingCount)) {
+      setBottles(bottleCount);
+      setServings(servingCount); // This will now work as the setServings function is defined
+    }
+  
+    setIsInventoryModalVisible(false);
+  };
+
   const navigateToNoimagesmenu = () => {
     setIsModalVisible(true);
   };
+
+  
 
   const handleMenuSelect = (menu) => {
     if (menu.id === selectedMenu) return setIsModalVisible(false);
@@ -196,6 +277,9 @@ const Mainmenu = () => {
     setSearchValue("");
     setSearchProductsByCat("");
   };
+
+  
+
 
   useEffect(() => {
     (async () => {
@@ -416,7 +500,7 @@ const Mainmenu = () => {
           </Text>
         </View>
         <View style={styles.searchBarContainer}>
-              <Text style={styles.headerText}>This is your inventory</Text>
+              <Text style={styles.headerText}> Todays bar worth is 20054 usd</Text>
 
               <View style={styles.buttonsContainer}>
                 {/* Change Menu Button */}
@@ -460,6 +544,17 @@ const Mainmenu = () => {
                       loadingStatus={loadingStatus}
                       setLoadingStatus={setLoadingStatus}
                       setProductDataUpdate={setProductDataUpdate}
+                      bottles={bottles}
+                      setBottles={setBottles}
+                      isInventoryModalVisible={isInventoryModalVisible}
+                      setIsInventoryModalVisible={setIsInventoryModalVisible}
+                      openInventoryModal={openInventoryModal}
+                      newBottleCount={newBottleCount}
+                      setNewBottleCount={setNewBottleCount}
+                      newServingCount={newServingCount}
+                      setNewServingCount={setNewServingCount}
+                      handleSaveInventoryUpdate={handleSaveInventoryUpdate}
+
                     />
                   ))}
                 </View>
@@ -483,7 +578,7 @@ const Mainmenu = () => {
         data={searchProductsByCat.length !== 0 ? searchProductsByCat : productsByCat}
         keyExtractor={(item, index) => index.toString()}
         onEndReached={handleSearchEnd}
-        onEndReachedThreshold={0.5}
+        onEndReachedThreshold={0.1}
         ListFooterComponent={isLoading ? <ActivityIndicator /> : null}
         ListHeaderComponent={
           <>
@@ -503,7 +598,7 @@ const Mainmenu = () => {
               </Text>
             </View>
             <View style={styles.searchBarContainer}>
-              <Text style={styles.headerText}>This is your inventory</Text>
+              <Text style={styles.headerText}>Todays bar worth is 20054 usd </Text>
 
               <View style={styles.buttonsContainer}>
                 {/* Change Menu Button */}
@@ -514,7 +609,7 @@ const Mainmenu = () => {
                   <Text style={styles.buttonText}>Change Menu</Text>
                 </TouchableOpacity>
 
-                {/* Scan Inventory Button */}
+           
                 <TouchableOpacity
                   onPress={() => navigation.navigate("Scaninventory")}
                   style={styles.buttonContainer}
@@ -523,7 +618,7 @@ const Mainmenu = () => {
               </View>
               <TextInput
                 style={styles.searchBar}
-                placeholder="Search..."
+                placeholder="Search liquor and wine..."
                 placeholderTextColor="#aaa"
                 value={searchValue}
                 onChangeText={handleSearchChange}
@@ -536,7 +631,7 @@ const Mainmenu = () => {
             <Text style={styles.categoryText}>{item.name}</Text>
             <View style={styles.productRow}>
               {item.products?.map((product, i) => (
-                <Product
+                  <Product
                   key={i}
                   productData={product}
                   image={product.image}
@@ -552,6 +647,17 @@ const Mainmenu = () => {
                   loadingStatus={loadingStatus}
                   setLoadingStatus={setLoadingStatus}
                   setProductDataUpdate={setProductDataUpdate}
+                  bottles={bottles}
+                  setBottles={setBottles}
+                  isInventoryModalVisible={isInventoryModalVisible}
+                  setIsInventoryModalVisible={setIsInventoryModalVisible}
+                  openInventoryModal={openInventoryModal}
+                  newBottleCount={newBottleCount}
+                  setNewBottleCount={setNewBottleCount}
+                  newServingCount={newServingCount}
+                  setNewServingCount={setNewServingCount}
+                  handleSaveInventoryUpdate={handleSaveInventoryUpdate}
+
                 />
               ))}
             </View>
@@ -632,7 +738,7 @@ const styles = StyleSheet.create({
     alignItems: "left",
   },
   topBar: {
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 10,
@@ -640,11 +746,11 @@ const styles = StyleSheet.create({
   headerText: {
     fontFamily: "Metropolis-SemiBold",
     color: "#FFF",
-    fontSize: 28,
+    fontSize: 18,
     fontWeight: "600",
     lineHeight: 28,
     letterSpacing: -0.165,
-    textAlign: "left",
+    textAlign: "center",
   },
   searchBarContainer: {
     padding: 5,
@@ -769,13 +875,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingRight: 10, // Adjust padding as necessary
   },
-  /* buttonContainer: {
-    backgroundColor: "black",
-    padding: 10,
-    borderRadius: 10,
-    margin: 5,
-    alignItems: "center",
-  }, */
+
   buttonText: {
     color: "#FFF",
     fontSize: 15,
@@ -795,6 +895,15 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#FFF", // Text color
   },
+  modalContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'white', // Example background color
+    padding: 20, // Example padding
+    // You can add more styles as needed
+  },
+ 
 });
 
 // add # of bottles/ servings lets

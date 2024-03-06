@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, StyleSheet, TouchableOpacity, Switch, FlatList, TextInput, Button } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const GuestProfile = () => {
-  const [isVip, setIsVip] = useState(false);
-  const [isBlacklisted, setIsBlacklisted] = useState(false);
+const GuestProfile = (props) => {
+  const dataProps = props?.route?.params?.guest;
+  const formattedLastVisit = props?.route?.params?.formattedLastVisit;
+  const formattedFirstVisit = props?.route?.params?.formattedFirstVisit;
+  const [isVip, setIsVip] = useState(dataProps?.vip);
+  const [isBlacklisted, setIsBlacklisted] = useState(dataProps?.blackListed);
   const [notes, setNotes] = useState([{ id: '1', date: '01/07/2023', content: 'likes coffee black' }]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newNoteContent, setNewNoteContent] = useState('');
-  const [firstVisit, setFirstVisit] = useState('01/01/2022'); // Example date
-  const [lastVisit, setLastVisit] = useState('12/31/2022'); // Example date
+  const [firstVisit, setFirstVisit] = useState('');
+  const [lastVisit, setLastVisit] = useState('');
+   // Example date
 
 
+   
   const addNote = () => {
     const newNote = { id: String(notes.length + 1), date: new Date().toLocaleDateString(), content: newNoteContent };
     setNotes([...notes, newNote]);
@@ -26,6 +31,19 @@ const GuestProfile = () => {
     </View>
   );
 
+  useEffect(() => {
+    if (dataProps) {
+      // Assume dataProps.firstVisit and dataProps.lastVisit are the objects with seconds
+      const firstVisitDate = new Date(dataProps.firstVisit.seconds * 1000);
+      const lastVisitDate = new Date(dataProps.lastVisit.seconds * 1000);
+
+      // Convert to a human-readable date string format
+      setFirstVisit(firstVisitDate.toLocaleDateString());
+      setLastVisit(lastVisitDate.toLocaleDateString());
+    }
+  }, [dataProps]);
+
+  
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -33,16 +51,16 @@ const GuestProfile = () => {
       </View>
 
       
-      <View style={styles.infoContainer}>
-        <Text style={styles.settingsTitle}>Contact</Text>
-        <Text style={styles.infoText}>+13058046310</Text>
-      </View>
       <View style={styles.visitInfoContainer}>
-         <Text style={styles.visitInfoLabel}>First Visit:</Text>
-         <Text style={styles.visitInfoValue}>{firstVisit}</Text>
-        <Text style={styles.visitInfoLabel}>Last Visit:</Text>
-        <Text style={styles.visitInfoValue}>{lastVisit}</Text>
-        </View>
+  <View style={styles.visitInfoRow}>
+    <Text style={styles.visitInfoLabel}>First Visit:</Text>
+    <Text style={styles.visitInfoValue}>{firstVisit}</Text>
+  </View>
+  <View style={styles.visitInfoRow}>
+    <Text style={styles.visitInfoLabel}>Last Visit:</Text>
+    <Text style={styles.visitInfoValue}>{lastVisit}</Text>
+  </View>
+</View>
          <View style={styles.settings}>
           <Text style={styles.settingsTitle}>Settings</Text>
           <View style={styles.settingItem}>
@@ -227,8 +245,8 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     marginTop: 20,
     marginBottom: 20,
-    paddingHorizontal: 15,
-    paddingBottom: 15,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
     paddingTop: 10,
     backgroundColor: '#FFFFFF', // Light background for contrast
     borderRadius: 10,
@@ -237,23 +255,28 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
-    alignItems: 'center', // Center items for a clean look
   },
   
   visitInfoLabel: {
     fontFamily: "Metropolis-Bold",
     fontSize: 16,
-    color: '#333', // Dark color for the label for readability
-  
+    color: '#333',
+    paddingRight: 5, 
   },
   
   visitInfoValue: {
     fontFamily: "Metropolis-Regular",
     fontSize: 14,
-    color: '#666', // Slightly lighter color for the value to differentiate from the label
-    marginLeft: 5,
-    marginRight: 5,
+    color: '#666',
+    paddingLeft: 5, // to match the paddingRight of label if needed
   },
+  visitInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    width: '100%', // Ensure it occupies the full width available
+  },
+  
   
 });
   

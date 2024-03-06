@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { View, Text, FlatList, StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { getItemsByConditionGuest, getItemsByConditionGuestAdmin } from '../services/auth/auth';
+import { AuthContext } from '../context/context';
 
 // Sample data for guests
 const guests = [
@@ -29,17 +31,38 @@ const guests = [
 ];
 
 export default function GuestPages() {
+  const { user } = useContext(AuthContext);
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
+  const [data, setData] = useState([]);
+  console.log('DATA: ', data)
+
+  const fetchData = async () => {
+    try {
+      const data = await getItemsByConditionGuestAdmin(
+        user?.uid,
+        "guests",
+        "restaurantId"
+      );
+      setData(data);
+    } catch (error) {
+      console.log('ERR: ', error);
+    }
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, [show]);
 
   const formatDate = (date) => {
-    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+    return `${date?.getMonth() + 1}/${date?.getDate()}/${date?.getFullYear()}`;
   };
 
   
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShow(Platform.OS === 'ios'); // Hide picker only on iOS after selection
+    console.log(selectedDate, date);
     setDate(currentDate);
   };
 
@@ -49,19 +72,54 @@ export default function GuestPages() {
 
   const navigation = useNavigation();
 
+  const handleCancel = () => {
 
-  const renderItem = ({ item }) => (
+  }
+
+
+  const renderItem = ({ item }) => {
+    // lastVisit
+    const lastVisitDate = new Date(
+      item?.lastVisit?.seconds * 1000 + item?.lastVisit?.nanoseconds / 1000000
+    );
+    const formattedLastVisit = `${lastVisitDate?.toLocaleTimeString(
+      'en-US',
+      { hour: '2-digit', minute: '2-digit' }
+    )}`;
+    const lastVisit = `${
+      lastVisitDate?.getMonth() + 1
+    }/${lastVisitDate?.getDate()}/${lastVisitDate?.getFullYear()}`;
+
+    // first visit
+    const  firstVisitDate = new Date(
+      item.firstVisit?.seconds * 1000 +
+      item.firstVisit?.nanoseconds / 1000000
+    );
+    const  formattedFirstVisit = `${firstVisitDate?.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    })}`;
+    const firstVisit = `${
+      firstVisitDate?.getMonth() + 1}
+      /${firstVisitDate?.getDate()}/${firstVisitDate?.getFullYear()}`;
+
+    return (
     <TouchableOpacity
       onPress={() => {
-        navigation.navigate('GuestProfile', { guestName: item.name }); // Navigate to the GuestProfile screen with guestName as a parameter
+        navigation.navigate('GuestProfile', { 
+          guest: item,
+          formattedLastVisit: lastVisit,
+          formattedFirstVisit: firstVisit
+        }); // Navigate to the GuestProfile screen with guestName as a parameter
       }}
     >
       <View style={styles.itemContainer}>
-        <Text style={styles.timeText}>{item.time}</Text>
+        <Text style={styles.timeText}>{formattedLastVisit}</Text>
         <Text style={styles.nameText}>{item.name}</Text>
       </View>
     </TouchableOpacity>
-  );
+  )
+}
   
 
   return (
@@ -74,12 +132,13 @@ export default function GuestPages() {
           testID="dateTimePicker"
           value={date}
           mode="date"
-          display="inline" // Correct display prop
+          display="default" // Correct display prop
           onChange={onChange}
+          onCancel={handleCancel}
         />
       )}
       <FlatList
-        data={guests}
+        data={data}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
