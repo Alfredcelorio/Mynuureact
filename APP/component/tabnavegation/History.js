@@ -130,7 +130,6 @@ const SettingsScreen = ({ productData, id }) => {
             <Text style={styles.dateHeaderText}>{date}</Text>
           </View>
           {reversedUpdates.map((internalItem) => {
-            console.log("RENDER: ", reversedUpdates)
             return (
               <View key={internalIndex++} style={styles.historyItem}>
                 <Text style={styles.historyText}>{`${internalItem.user} ${

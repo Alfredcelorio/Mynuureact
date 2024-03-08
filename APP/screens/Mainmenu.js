@@ -152,7 +152,6 @@ const Product = React.memo(
                 <Image
                   source={{
                     uri: image,
-                    cache: "only-if-cached",
                   }}
                   style={styles.productImage}
                   resizeMode="cover"

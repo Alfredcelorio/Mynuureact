@@ -151,7 +151,7 @@ const SettingsScreen = ({ productData, id }) => {
 
       for (let [key, value] of Object.entries(obj)) {
         if (key !== "inventory" && initialState[key] !== value) {
-          oldObjLog[key] = initialState[key];
+          oldObjLog[key] = initialState[key] ? initialState[key] : null;
           editObjLog[key] = value;
         }
       }

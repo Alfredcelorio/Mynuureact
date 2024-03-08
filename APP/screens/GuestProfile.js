@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    flex: 1.15,
+    flex: 0.15,
     alignItems: 'center',
     justifyContent: 'center',
   },
