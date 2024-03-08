@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, StyleSheet, TouchableOpacity, Switch, FlatList, TextInput, Button } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { updateItem } from '../services/conx/settings';
+import Toast from "react-native-toast-message";
 
 const GuestProfile = (props) => {
   const dataProps = props?.route?.params?.guest;
@@ -8,20 +10,109 @@ const GuestProfile = (props) => {
   const formattedFirstVisit = props?.route?.params?.formattedFirstVisit;
   const [isVip, setIsVip] = useState(dataProps?.vip);
   const [isBlacklisted, setIsBlacklisted] = useState(dataProps?.blackListed);
-  const [notes, setNotes] = useState([{ id: '1', date: '01/07/2023', content: 'likes coffee black' }]);
+  const [notes, setNotes] = useState(dataProps?.listNotes || []);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newNoteContent, setNewNoteContent] = useState('');
   const [firstVisit, setFirstVisit] = useState('');
   const [lastVisit, setLastVisit] = useState('');
-   // Example date
 
+  const addNote = async () => {
+    try {
+      const newNote = {
+        id: notes.length,
+        date: new Date().toLocaleDateString(),
+        content: newNoteContent,
+      };
+  
+      setNotes([...notes, newNote]);
+  
+      const updatedData = {
+        ...dataProps,
+        vip: isVip || dataProps?.vip || false,
+        blackListed: isBlacklisted || dataProps?.blackListed || false,
+        listNotes: [...notes, newNote],
+      };
+  
+      await updateItem(dataProps.id, updatedData, 'guests');
 
-   
-  const addNote = () => {
-    const newNote = { id: String(notes.length + 1), date: new Date().toLocaleDateString(), content: newNoteContent };
-    setNotes([...notes, newNote]);
-    setNewNoteContent('');
-    setIsModalVisible(false);
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Guest successfully updated",
+        position: "bottom",
+      });
+  
+      setNewNoteContent('');
+      setIsModalVisible(false);
+
+    } catch (erro) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: `Something seems to have gone wrong when trying to update the file: ${error.message}`,
+        text2NumberOfLines: 5,
+        position: "bottom",
+      });
+      setIsModalVisible(false);
+    }
+  };
+
+  const toggleVip = async () => {
+    try {
+      const newVipStatus = !isVip;
+      setIsVip(newVipStatus);
+    
+      const updatedData = {
+        ...dataProps,
+        vip: newVipStatus,
+      };
+    
+      await updateItem(dataProps.id, updatedData, 'guests');
+
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Guest successfully updated",
+        position: "bottom",
+      });
+      
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: `Something seems to have gone wrong when trying to update the file: ${error.message}`,
+        text2NumberOfLines: 5,
+        position: "bottom",
+      });
+    }
+  };
+  
+  const toggleBlacklisted = async () => {
+    try {
+      const newBlacklistedStatus = !isBlacklisted;
+      setIsBlacklisted(newBlacklistedStatus);
+    
+      const updatedData = {
+        ...dataProps,
+        blackListed: newBlacklistedStatus,
+      };
+    
+      await updateItem(dataProps.id, updatedData, 'guests');
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Guest successfully updated",
+        position: "bottom",
+      });
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: `Something seems to have gone wrong when trying to update the file: ${error.message}`,
+        text2NumberOfLines: 5,
+        position: "bottom",
+      });
+    }
   };
 
   const renderNote = ({ item }) => (
@@ -33,48 +124,46 @@ const GuestProfile = (props) => {
 
   useEffect(() => {
     if (dataProps) {
-      // Assume dataProps.firstVisit and dataProps.lastVisit are the objects with seconds
       const firstVisitDate = new Date(dataProps.firstVisit.seconds * 1000);
       const lastVisitDate = new Date(dataProps.lastVisit.seconds * 1000);
 
-      // Convert to a human-readable date string format
       setFirstVisit(firstVisitDate.toLocaleDateString());
       setLastVisit(lastVisitDate.toLocaleDateString());
     }
   }, [dataProps]);
 
-  
   return (
+    <>
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.name}>Alvaro Celorio</Text>
+        <Text style={styles.name}>{dataProps?.name}</Text>
       </View>
 
-      
       <View style={styles.visitInfoContainer}>
-  <View style={styles.visitInfoRow}>
-    <Text style={styles.visitInfoLabel}>First Visit:</Text>
-    <Text style={styles.visitInfoValue}>{firstVisit}</Text>
-  </View>
-  <View style={styles.visitInfoRow}>
-    <Text style={styles.visitInfoLabel}>Last Visit:</Text>
-    <Text style={styles.visitInfoValue}>{lastVisit}</Text>
-  </View>
-</View>
-         <View style={styles.settings}>
-          <Text style={styles.settingsTitle}>Settings</Text>
-          <View style={styles.settingItem}>
+        <View style={styles.visitInfoRow}>
+          <Text style={styles.visitInfoLabel}>First Visit:</Text>
+          <Text style={styles.visitInfoValue}>{firstVisit}</Text>
+        </View>
+        <View style={styles.visitInfoRow}>
+          <Text style={styles.visitInfoLabel}>Last Visit:</Text>
+          <Text style={styles.visitInfoValue}>{lastVisit}</Text>
+        </View>
+      </View>
+
+      <View style={styles.settings}>
+        <Text style={styles.settingsTitle}>Settings</Text>
+        <View style={styles.settingItem}>
           <Text style={styles.settingLabel}>VIP</Text>
           <Switch
             value={isVip}
-            onValueChange={() => setIsVip(previousState => !previousState)}
+            onValueChange={toggleVip}
           />
         </View>
         <View style={styles.settingItem}>
-        <Text style={styles.settingLabel}>Blacklist</Text>
+          <Text style={styles.settingLabel}>Blacklist</Text>
           <Switch
             value={isBlacklisted}
-            onValueChange={() => setIsBlacklisted(previousState => !previousState)}
+            onValueChange={toggleBlacklisted}
           />
         </View>
       </View>
@@ -82,9 +171,9 @@ const GuestProfile = (props) => {
       <View style={styles.notes}>
         <Text style={styles.notesTitle}>Notes</Text>
         <FlatList
-          data={notes}
+          data={notes.sort((a, b) => a.id - b.id)}
           renderItem={renderNote}
-          keyExtractor={item => item.id}
+          keyExtractor={item => item.id.toString()}
         />
         <TouchableOpacity style={styles.addButton} onPress={() => setIsModalVisible(true)}>
           <Icon name="plus" size={20} color="#FFF" />
@@ -108,6 +197,8 @@ const GuestProfile = (props) => {
         </Modal>
       </View>
     </View>
+    <Toast setRef={(ref) => Toast.setRef(ref)} />
+    </>
   );
 };
 
@@ -119,7 +210,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    flex: 0.15,
+    flex: 1.15,
     alignItems: 'center',
     justifyContent: 'center',
   },

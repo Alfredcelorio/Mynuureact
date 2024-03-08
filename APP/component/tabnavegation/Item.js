@@ -10,7 +10,7 @@ import {
   SafeAreaView,
 } from "react-native";
 import * as Animatable from "react-native-animatable";
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useFocusEffect  } from "@react-navigation/native";
 import { AuthContext } from "../../context/context";
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
@@ -36,45 +36,43 @@ const Item = ({ productData, id }) => {
   const [filteredProductData, setFilteredProductData] = useState({});
   const [animationDelay, setAnimationDelay] = useState(0);
 
-  useEffect(() => {
-    if (productDataUpdate && productDataUpdate.idItem === id) {
-      setFilteredProductData(prevData => ({
-        ...prevData,
-        ABV: productDataUpdate.abv || "",
-        Body: productDataUpdate.body || "",
-        Brand: productDataUpdate.brand || "",
-        CountryState: productDataUpdate.countryState || "",
-        Region: productDataUpdate.region || "",
-        Sku: productDataUpdate.sku || "",
-        Taste: productDataUpdate.taste || "",
-        Type: productDataUpdate.type || "",
-        Varietal: productDataUpdate.varietal || "",
-        Servings: productDataUpdate.servings || "",
-        PurchaseCost: productDataUpdate.purchaseCost || "",
-      }));
-    } else {
-      setFilteredProductData(prevData => ({
-        ...prevData,
-        ABV: productData.abv || "",
-        Body: productData.body || "",
-        Brand: productData.brand || "",
-        CountryState: productData.countryState || "",
-        Region: productData.region || "",
-        Sku: productData.sku || "",
-        Taste: productData.taste || "",
-        Type: productData.type || "",
-        Varietal: productData.varietal || "",
-        Servings: productData.servings || "",
-        PurchaseCost: productData.purchaseCost || "",
-      }));
-    }
-  }, [productData, productDataUpdate, id]);
-
-  useEffect(() => {
-    // Set a delay before the animation starts (for a typing effect)
-    const delay = 1000; // You can adjust this delay according to your preference
-    setAnimationDelay(delay);
-  }, [route.name]);
+  useFocusEffect(
+    React.useCallback(() => {
+      const delay = 1000;
+      setAnimationDelay(delay);
+      if (productDataUpdate && productDataUpdate.idItem === id) {
+        setFilteredProductData(prevData => ({
+          ...prevData,
+          ABV: productDataUpdate.abv || "",
+          Body: productDataUpdate.body || "",
+          Brand: productDataUpdate.brand || "",
+          CountryState: productDataUpdate.countryState || "",
+          Region: productDataUpdate.region || "",
+          Sku: productDataUpdate.sku || "",
+          Taste: productDataUpdate.taste || "",
+          Type: productDataUpdate.type || "",
+          Varietal: productDataUpdate.varietal || "",
+          Servings: productDataUpdate.servings || "",
+          PurchaseCost: productDataUpdate.purchaseCost || "",
+        }));
+      } else {
+        setFilteredProductData(prevData => ({
+          ...prevData,
+          ABV: productData.abv || "",
+          Body: productData.body || "",
+          Brand: productData.brand || "",
+          CountryState: productData.countryState || "",
+          Region: productData.region || "",
+          Sku: productData.sku || "",
+          Taste: productData.taste || "",
+          Type: productData.type || "",
+          Varietal: productData.varietal || "",
+          Servings: productData.servings || "",
+          PurchaseCost: productData.purchaseCost || "",
+        }));
+      }
+    }, [])
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -96,7 +94,7 @@ const Item = ({ productData, id }) => {
           <TypingText
             animation="typingFade"
             duration={1000}
-            delay={animationDelay + 600}
+            delay={animationDelay}
             style={styles.description}
           >
             {productData?.description}
@@ -104,8 +102,8 @@ const Item = ({ productData, id }) => {
           <View style={styles.priceContainer}>
             <TypingText
               animation="typingFade"
-              duration={4000}
-              delay={animationDelay + 900}
+              duration={1000}
+              delay={animationDelay}
               style={styles.price}
             >
               {productDataUpdate?.price || productData?.price}

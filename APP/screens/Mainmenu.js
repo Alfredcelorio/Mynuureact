@@ -1,7 +1,13 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, {
+  useEffect,
+  useState,
+  useContext,
+  useMemo,
+  useCallback,
+} from "react";
 import { AuthContext } from "../context/context";
-import { VStack, Input, Icon, Heading } from 'native-base';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { VStack, Input, Icon, Heading } from "native-base";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import {
   View,
   Text,
@@ -20,7 +26,11 @@ import {
   Button,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import {
+  useNavigation,
+  useRoute,
+  useFocusEffect,
+} from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { restaurantApi } from "../config/api/auth";
@@ -33,188 +43,179 @@ import { getMenus } from "../services/productsList/menus";
 import { getRestaurant } from "../services/productsList/restaurant";
 import greenCircle from "../../assets/greenCircle.png";
 import redCircle from "../../assets/redCircle.png";
-
-
+import FastImage from "react-native-fast-image";
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
 
+const Product = React.memo(
+  ({
+    productData,
+    image,
+    title,
+    description,
+    price,
+    status,
+    id,
+    navigation,
+    setProductDataUpdate,
+    bottles,
+    isInventoryModalVisible,
+    setIsInventoryModalVisible,
+    newBottleCount,
+    setNewBottleCount,
+    handleSaveInventoryUpdate,
+    newServingCount,
+    setNewServingCount,
+    openInventoryModal,
+    setLoadingStatus,
+    setDeleteItem,
+    searchValue,
+    handleSearchChange,
+  }) => {
+    const [updateLoading, setUpdateLoading] = useState(false);
 
-const Product = ({
-  productData,
-  image,
-  title,
-  description,
-  price,
-  status,
-  id,
-  setDeleteItem,
-  searchValue,
-  handleSearchChange,
-  loadingStatus,
-  setLoadingStatus,
-  navigation,
-  setProductDataUpdate,
-  bottles,
-  setBottles,
-  isInventoryModalVisible,
-  setIsInventoryModalVisible,
-  newBottleCount,
-  setNewBottleCount,
-  handleSaveInventoryUpdate,
-  newServingCount,          // Add this line
-  setNewServingCount,       // And this line
+    const update = useCallback(
+      async (title, id, status) => {
+        setUpdateLoading(true);
+        setLoadingStatus(true);
+        try {
+          await updateItem(id, { enabled: !status }, "products");
+          setDeleteItem((prevDeleteItem) => !prevDeleteItem);
 
-}) => {
-  const [updateLoading, setUpdateLoading] = useState(false);
-  const update = async (title, id, status) => {
-    setUpdateLoading(true);
-    setLoadingStatus(true);
-    try {
-      await updateItem(id, { enabled: !status }, "products");
-      setDeleteItem((prevDeleteItem) => !prevDeleteItem);
+          if (searchValue) {
+            handleSearchChange(searchValue);
+          }
+          setTimeout(() => {
+            Toast.show({
+              type: "success",
+              text1: "Success",
+              text2: "Update full",
+            });
+            setUpdateLoading(false);
+          }, 1001);
+        } catch (error) {
+          Toast.show({
+            type: "error",
+            text1: "Error",
+            text2: "Error when trying to update item status",
+          });
+          throw new Error(error);
+        }
+      },
+      [searchValue, handleSearchChange]
+    );
 
-      if (searchValue) {
-        handleSearchChange(searchValue);
-      }
-      setTimeout(() => {
-        Toast.show({
-          type: "success",
-          text1: "Success",
-          text2: "Update full",
-        });
-        setUpdateLoading(false);
-      }, 1001);
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Error when trying to update item status",
-      });
-      throw new Error(error);
-    }
-  };
+    const handleIconPress = useCallback(
+      (title, id, status) => {
+        if (status) {
+          Alert.alert(
+            `Deactivate item ${title}`,
+            "If you deactivate this inventory item, it will disappear from your menu until you activate it again from the administrator.",
+            [
+              {
+                text: "Back",
+                onPress: () => console.log("Back pressed"),
+                style: "cancel",
+              },
+              { text: "Continue", onPress: () => update(title, id, status) },
+            ]
+          );
+        } else {
+          Alert.alert(
+            `Activate item ${title}`,
+            "If you activate this inventory item, it will appear in your menu.",
+            [
+              {
+                text: "Back",
+                onPress: () => console.log("Back pressed"),
+                style: "cancel",
+              },
+              { text: "Continue", onPress: () => update(title, id, status) },
+            ]
+          );
+        }
+      },
+      [update]
+    );
 
-  const openInventoryModal = () => {
-    setIsInventoryModalVisible(true);
-  };
-
-  
-  const updateInventory = () => {
-    if (bottles > 0) {
-      setBottles(prevBottles => prevBottles - 1);
-    }
-  };
-
-  const handleIconPress = (title, id, status) => {ma
-    if (status) {
-      Alert.alert(
-        `Deactivate item ${title}`,
-        "If you deactivate this inventory item, it will disappear from your menu until you activate it again from the administrator.",
-        [
-          {
-            text: "Back",
-            onPress: () => console.log("Back pressed"),
-            style: "cancel",
-          },
-          { text: "Continue", onPress: () => update(title, id, status) },
-        ]
-      );
-    } else {
-      Alert.alert(
-        `Activate item ${title}`,
-        "If you activate this inventory item, it will appear in your menu.",
-        [
-          {
-            text: "Back",
-            onPress: () => console.log("Back pressed"),
-            style: "cancel",
-          },
-          { text: "Continue", onPress: () => update(title, id, status) },
-        ]
-      );
-    }
-  };
-
-  return (
-    <View style={styles.productContainer}>
-      {productData.length !== 0 ? (
-        <>
-          <View style={styles.imageWrapper}>
-            <TouchableOpacity
-              onPress={() => {
-                setProductDataUpdate();
-                navigation.navigate("item", { productData, id });
-              }}
-            >
-              <Image
-                source={{ uri: image }}
-                style={styles.productImage}
-                resizeMode="cover"
-              />
-            </TouchableOpacity>
-            {!updateLoading ? (
+    return (
+      <View style={styles.productContainer}>
+        {productData.length !== 0 && (
+          <>
+            <View style={styles.imageWrapper}>
               <TouchableOpacity
-                style={styles.statusIconWrapper}
-                onPress={() => handleIconPress(title, id, status)}
+                onPress={() => {
+                  setProductDataUpdate();
+                  navigation.navigate("item", { productData, id });
+                }}
               >
                 <Image
-                  source={status ? greenCircle : redCircle}
-                  style={{ width: 20, height: 20 }}
+                  source={{
+                    uri: image,
+                    cache: "only-if-cached",
+                  }}
+                  style={styles.productImage}
+                  resizeMode="cover"
                 />
               </TouchableOpacity>
-            ) : (
-              <View style={styles.loadingStatus}>
-                <ActivityIndicator size="large" color="#808080" />
-              </View>
+              {!updateLoading ? (
+                <TouchableOpacity
+                  style={styles.statusIconWrapper}
+                  onPress={() => handleIconPress(title, id, status)}
+                >
+                  <Image
+                    source={status ? greenCircle : redCircle}
+                    style={{ width: 20, height: 20 }}
+                  />
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.loadingStatus}>
+                  <ActivityIndicator size="large" color="#808080" />
+                </View>
+              )}
+            </View>
+            <Text style={styles.productTitle}>{title}</Text>
+
+            {description && (
+              <Text style={styles.productDescription}>{description}</Text>
             )}
-          </View>
-          <Text style={styles.productTitle}>{title}</Text>
-      
-          {description && (
-            <Text style={styles.productDescription}>{description}</Text>
-          )}
-          <Text style={styles.productPrice}>{price}</Text>
-          <TouchableOpacity onPress={openInventoryModal}>
-          <Text style={styles.productPrice}>{bottles} bottles left </Text>
-</TouchableOpacity>
-<Modal
-   visible={isInventoryModalVisible}
-   onRequestClose={() => setIsInventoryModalVisible(false)}
- >
-  {/* Modal content with inputs for new bottle and serving counts */}
-  <View style={styles.modalContent}>
-    <TextInput 
-      value={newBottleCount} 
-      onChangeText={setNewBottleCount} 
-      placeholder="Enter new bottle count" 
-    />
-    <TextInput 
-      value={newServingCount} 
-      onChangeText={setNewServingCount} 
-      placeholder="Enter new serving count" 
-    />
-    <Button title="Save" onPress={handleSaveInventoryUpdate} />
-    {/* ...other modal content */}
-  </View>
-</Modal>
-
-
-
-
-        </>
-      ) : (
-        <></>
-      )}
-    </View>
-  );
-};
+            <Text style={styles.productPrice}>{price}</Text>
+            <TouchableOpacity onPress={openInventoryModal}>
+              <Text style={styles.productPrice}>{bottles} bottles left </Text>
+            </TouchableOpacity>
+            <Modal
+              visible={isInventoryModalVisible}
+              onRequestClose={() => setIsInventoryModalVisible(false)}
+            >
+              <View style={styles.modalContent}>
+                <TextInput
+                  value={newBottleCount}
+                  onChangeText={setNewBottleCount}
+                  placeholder="Enter new bottle count"
+                />
+                <TextInput
+                  value={newServingCount}
+                  onChangeText={setNewServingCount}
+                  placeholder="Enter new serving count"
+                />
+                <Button title="Save" onPress={handleSaveInventoryUpdate} />
+              </View>
+            </Modal>
+          </>
+        )}
+      </View>
+    );
+  }
+);
 
 const isIpad =
   Platform.OS === "ios" &&
   ((windowWidth >= 768 && windowHeight >= 1024) || // iPad Pro 12.9" or similar
     (windowWidth >= 768 && windowHeight >= 768));
 
-const Mainmenu = () => {
+const PAGE_SIZE = 10;
+
+const Mainmenu = React.memo(() => {
   const navigation = useNavigation();
   const route = useRoute();
   const [value1, setValue1] = useState(0);
@@ -235,39 +236,48 @@ const Mainmenu = () => {
   const [page, setPage] = useState(1);
   const [bottles, setBottles] = useState(8);
   const [isInventoryModalVisible, setIsInventoryModalVisible] = useState(false);
-  const [newBottleCount, setNewBottleCount] = useState('');
-  const [newServingCount, setNewServingCount] = useState('');
+  const [newBottleCount, setNewBottleCount] = useState("");
+  const [newServingCount, setNewServingCount] = useState("");
+  const [noProductsFound, setNoProductsFound] = useState(false);
   const [servings, setServings] = useState(0);
+
+  const [pageNumber, setPageNumber] = useState(1);
+  const [lastDoc, setLastDoc] = useState(null);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (searchFilter !== "" && searchProductsByCat.length === 0) {
+        setNoProductsFound(true);
+      } else {
+        setNoProductsFound(false);
+      }
+    }, [searchFilter, searchProductsByCat])
+  );
+
   const openInventoryModal = () => {
     setIsInventoryModalVisible(true);
   };
-
-
 
   const toggleMenuVisibility = () => {
     setIsModalVisible(!isModalVisible);
   };
 
-
-  
   // Function to close the modal and potentially update the bottle and serving counts
   const handleSaveInventoryUpdate = () => {
     const bottleCount = parseInt(newBottleCount, 10);
     const servingCount = parseInt(newServingCount, 10);
-  
+
     if (!isNaN(bottleCount) && !isNaN(servingCount)) {
       setBottles(bottleCount);
       setServings(servingCount); // This will now work as the setServings function is defined
     }
-  
+
     setIsInventoryModalVisible(false);
   };
 
   const navigateToNoimagesmenu = () => {
     setIsModalVisible(true);
   };
-
-  
 
   const handleMenuSelect = (menu) => {
     if (menu.id === selectedMenu) return setIsModalVisible(false);
@@ -278,28 +288,10 @@ const Mainmenu = () => {
     setSearchProductsByCat("");
   };
 
-  
-
-
-  useEffect(() => {
-    (async () => {
-      const email = await AsyncStorage.getItem("email");
-      const [data] = await getRestaurant(email);
-
-      if (data) {
-        if (data?.fontFamily) {
-          document.querySelector("body").style.fontFamily = data?.fontFamily;
-        }
-
-        setRestaurant(data);
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      const email = await AsyncStorage.getItem("email");
-      try {
+  useFocusEffect(
+    React.useCallback(() => {
+      (async () => {
+        const email = await AsyncStorage.getItem("email");
         const [data] = await getRestaurant(email);
 
         if (data) {
@@ -307,73 +299,107 @@ const Mainmenu = () => {
             document.querySelector("body").style.fontFamily = data?.fontFamily;
           }
 
-          const allMenus = await getMenus(data?.id);
-          const allCategories = await getCategories(data?.id);
-
-          setMenus(allMenus);
-          setCategories(allCategories);
+          setRestaurant(data);
         }
-      } catch (err) {
-        console.log("ERR:", err);
-      }
-    })();
-  }, [route.name, productsByCat, deleteItem, productsByCat]);
+      })();
+    }, [])
+  );
 
-  useEffect(() => {
-    if (selectedMenu && categories) {
-      const numb = value1 + 1;
-
+  useFocusEffect(
+    React.useCallback(() => {
       (async () => {
-        const data = await getProductsByMenu(selectedMenu);
-        const productsByCategories = categories.reduce((value, nextItem) => {
-          const products = data.filter(
-            (item) => item?.categoryId === nextItem?.id
+        const email = await AsyncStorage.getItem("email");
+        try {
+          const [data] = await getRestaurant(email);
+
+          if (data) {
+            if (data?.fontFamily) {
+              document.querySelector("body").style.fontFamily =
+                data?.fontFamily;
+            }
+
+            const allMenus = await getMenus(data?.id);
+            const allCategories = await getCategories(
+              data?.id,
+              PAGE_SIZE,
+              pageNumber
+            );
+
+            setMenus(allMenus);
+            setCategories(allCategories);
+          }
+        } catch (err) {
+          console.log("ERR:", err);
+        }
+      })();
+    }, [deleteItem])
+  );
+
+  useEffect( ()=> {
+      if (selectedMenu && categories) {
+        const numb = value1 + 1;
+
+        (async () => {
+          const data = await getProductsByMenu(
+            selectedMenu,
+            PAGE_SIZE,
+            lastDoc
           );
 
-          products.sort((a, b) => {
-            if (a.position > b.position) return 1;
-            if (a.position < b.position) return -1;
-            return 0;
-          });
+          const productsByCategories = categories.reduce((value, nextItem) => {
+            const products = data.filter(
+              (item) => item?.categoryId === nextItem?.id
+            );
 
-          const category = { ...nextItem, products };
-          if (category.products.length) value.push(category);
+            products.sort((a, b) => {
+              if (a.position > b.position) return 1;
+              if (a.position < b.position) return -1;
+              return 0;
+            });
 
-          return value;
-        }, []);
+            const category = { ...nextItem, products };
+            if (category.products.length) value.push(category);
 
-        setTimeout(() => {
-          setProductsByCat(productsByCategories);
-          setValue1(numb);
-        }, 500);
-        setTimeout(() => {
-          if (searchFilter !== "") {
-            handleSearchChange(searchFilter);
-          }
-          setIsLoading(false);
-          setLoadingStatus(false);
-        }, 800);
-      })();
-    }
-  }, [selectedMenu, deleteItem, loadingStatus, isLoading, routerName]);
+            return value;
+          }, []);
 
-  useEffect(() => {
-    const initViewRestaurant = async () => {
-      try {
-        const email = await AsyncStorage.getItem("email");
-        const uid = await AsyncStorage.getItem("uid");
-        const fetchRest = await restaurantApi(email, uid);
-        const [objetDestruct] = fetchRest;
-        setRestaurant(objetDestruct);
-        handleUpdateProduct();
-      } catch (err) {
-        throw new Error(err);
+          setTimeout(() => {
+            /* if (data.length > 0) {
+              setLastDoc(lastVisible);
+            } */
+            setProductsByCat(productsByCategories);
+            setValue1(numb);
+          }, 500);
+          setTimeout(() => {
+            if (searchFilter !== "") {
+              handleSearchChange(searchFilter);
+            }
+            setIsLoading(false);
+            setLoadingStatus(false);
+          }, 800);
+        })();
       }
-    };
+    }, [selectedMenu, deleteItem, loadingStatus, isLoading])
 
-    initViewRestaurant();
-    setIsLoading(true);
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      const initViewRestaurant = async () => {
+        try {
+          const email = await AsyncStorage.getItem("email");
+          const uid = await AsyncStorage.getItem("uid");
+          const fetchRest = await restaurantApi(email, uid);
+          const [objetDestruct] = fetchRest;
+          setRestaurant(objetDestruct);
+          handleUpdateProduct();
+        } catch (err) {
+          throw new Error(err);
+        }
+      };
+
+      initViewRestaurant();
+      setIsLoading(true);
+    }, [])
+  );
 
   const handleUpdateProduct = () => {
     const updatedProducts = routerName.map((product) =>
@@ -385,7 +411,8 @@ const Mainmenu = () => {
   const handleSearchEnd = () => {
     if (selectedMenu && categories) {
       (async () => {
-        const data = await getProductsByMenu(selectedMenu);
+        setPageNumber((prevPageNumber) => prevPageNumber + 1);
+        const data = await getProductsByMenu(selectedMenu, PAGE_SIZE, lastDoc);
         const productsByCategories = categories?.reduce((value, nextItem) => {
           const products = data?.filter(
             (item) => item?.categoryId === nextItem?.id
@@ -414,7 +441,8 @@ const Mainmenu = () => {
       setSearchFilter("");
       setSearchValue("");
       setSearchProductsByCat([]);
-      return handleSearchEnd();
+      handleSearchEnd();
+      return;
     }
     setSearchFilter(target);
     const value = target || searchFilter;
@@ -442,6 +470,46 @@ const Mainmenu = () => {
       setSearchProductsByCat(data);
     } else setSearchProductsByCat(undefined);
   };
+
+  const headerMemo = useMemo(() => {
+    return (
+      <>
+        <LinearGradient colors={["#000", "white"]} style={styles.gradient}>
+          <View style={styles.logoContainer}>
+            <View style={styles.logoWrapper}>
+              <Image
+                source={{ uri: `${restaurant?.logo}` }}
+                style={styles.logo}
+              />
+            </View>
+          </View>
+        </LinearGradient>
+        <View style={styles.topBar}>
+          <Text style={styles.headerText}>
+            Welcome to {restaurant?.restaurantName}
+          </Text>
+        </View>
+        <View style={styles.searchBarContainer}>
+          <Text style={styles.headerText}>Todays bar worth is 20054 usd </Text>
+
+          <View style={styles.buttonsContainer}>
+            {/* Change Menu Button */}
+            <TouchableOpacity
+              onPress={navigateToNoimagesmenu}
+              style={[styles.button, { marginRight: 8 }]}
+            >
+              <Text style={styles.buttonText}>Change Menu</Text>
+            </TouchableOpacity>
+
+            {/* <TouchableOpacity
+              onPress={() => navigation.navigate("Scaninventory")}
+              style={styles.buttonContainer}
+            ></TouchableOpacity> */}
+          </View>
+        </View>
+      </>
+    );
+  }, [restaurant]);
 
   return (
     <>
@@ -473,201 +541,96 @@ const Mainmenu = () => {
         </View>
       </Modal>
       <SafeAreaView style={styles.container}>
-      
-
-{isLoading ? (
-  <View style={styles.loadingContainer}>
-    <ActivityIndicator size="large" color="#FFF" />
-  </View>
-) : (
-  <>
-    {(searchProductsByCat.length !== 0 && searchFilter !== "") ||
-    (searchProductsByCat.length === 0 && searchFilter !== "") ? (
-      <ScrollView>
-        <LinearGradient colors={["#000", "white"]} style={styles.gradient}>
-          <View style={styles.logoContainer}>
-            <View style={styles.logoWrapper}>
-              <Image
-                source={{ uri: `${restaurant?.logo}` }}
-                style={styles.logo}
-              />
-            </View>
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#FFF" />
           </View>
-        </LinearGradient>
-        <View style={styles.topBar}>
-          <Text style={styles.headerText}>
-            Welcome to {restaurant?.restaurantName}
-          </Text>
-        </View>
-        <View style={styles.searchBarContainer}>
-              <Text style={styles.headerText}> Todays bar worth is 20054 usd</Text>
-
-              <View style={styles.buttonsContainer}>
-                {/* Change Menu Button */}
-                <TouchableOpacity
-                  onPress={navigateToNoimagesmenu}
-                  style={[styles.button, { marginRight: 8 }]}
-                >
-                  <Text style={styles.buttonText}>Change Menu</Text>
-                </TouchableOpacity>
-
-               
-              </View>
-              <TextInput
-                style={styles.searchBar}
-                placeholder="Search..."
-                placeholderTextColor="#aaa"
-                value={searchValue}
-                onChangeText={handleSearchChange}
-              />
-            </View>
-        {searchFilter !== "" && searchProductsByCat.length !== 0 && (
+        ) : (
           <>
-            {searchProductsByCat.map((category, index) => (
-              <View key={index}>
-                <Text style={styles.categoryText}>{category.name}</Text>
-                <View style={styles.productRow}>
-                  {category.products?.map((product, i) => (
-                    <Product
-                      key={i}
-                      productData={product}
-                      image={product.image}
-                      title={product.name}
-                      price={product.price}
-                      status={product.enabled}
-                      deleteItem={deleteItem}
-                      setDeleteItem={setDeleteItem}
-                      id={product.id}
-                      searchValue={searchValue}
-                      handleSearchChange={handleSearchChange}
-                      navigation={navigation}
-                      loadingStatus={loadingStatus}
-                      setLoadingStatus={setLoadingStatus}
-                      setProductDataUpdate={setProductDataUpdate}
-                      bottles={bottles}
-                      setBottles={setBottles}
-                      isInventoryModalVisible={isInventoryModalVisible}
-                      setIsInventoryModalVisible={setIsInventoryModalVisible}
-                      openInventoryModal={openInventoryModal}
-                      newBottleCount={newBottleCount}
-                      setNewBottleCount={setNewBottleCount}
-                      newServingCount={newServingCount}
-                      setNewServingCount={setNewServingCount}
-                      handleSaveInventoryUpdate={handleSaveInventoryUpdate}
-
-                    />
-                  ))}
-                </View>
-              </View>
-            ))}
-          </>
-        )}
-        {searchFilter !== "" && searchProductsByCat.length === 0 && (
-          <>
-            <View>
-              <Text style={styles.notExistProduct}>
-                No products found with this name
-              </Text>
-              <View style={styles.productRow}></View>
-            </View>
-          </>
-        )}
-      </ScrollView>
-    ) : (
-      <FlatList
-        data={searchProductsByCat.length !== 0 ? searchProductsByCat : productsByCat}
-        keyExtractor={(item, index) => index.toString()}
-        onEndReached={handleSearchEnd}
-        onEndReachedThreshold={0.1}
-        ListFooterComponent={isLoading ? <ActivityIndicator /> : null}
-        ListHeaderComponent={
-          <>
-            <LinearGradient colors={["#000", "white"]} style={styles.gradient}>
-              <View style={styles.logoContainer}>
-                <View style={styles.logoWrapper}>
-                  <Image
-                    source={{ uri: `${restaurant?.logo}` }}
-                    style={styles.logo}
+            <FlatList
+              data={
+                searchProductsByCat.length !== 0
+                  ? searchProductsByCat
+                  : productsByCat
+              }
+              keyExtractor={(item, index) => index.toString()}
+              onEndReachedThreshold={0.1}
+              ListFooterComponent={isLoading ? <ActivityIndicator /> : null}
+              ListHeaderComponent={
+                <>
+                  {headerMemo}
+                  <TextInput
+                    style={styles.searchBar}
+                    placeholder="Search liquor and wine..."
+                    placeholderTextColor="#aaa"
+                    value={searchValue}
+                    onChangeText={handleSearchChange}
                   />
-                </View>
+                </>
+              }
+              windowSize={1}
+              initialNumToRender={1}
+              maxToRenderPerBatch={1}
+              renderItem={({ item, index }) => (
+                <>
+                  {searchFilter !== "" && searchProductsByCat.length === 0 ? (
+                    <>
+                      <View></View>
+                    </>
+                  ) : (
+                    <View key={index}>
+                      <Text style={styles.categoryText}>{item.name}</Text>
+                      <View style={styles.productRow}>
+                        <>
+                          {item.products?.map((product, i) => (
+                            <Product
+                              key={i}
+                              productData={product}
+                              image={product.image}
+                              title={product.name}
+                              price={product.price}
+                              status={product.enabled}
+                              deleteItem={deleteItem}
+                              setDeleteItem={setDeleteItem}
+                              id={product.id}
+                              searchValue={searchValue}
+                              handleSearchChange={handleSearchChange}
+                              navigation={navigation}
+                              loadingStatus={loadingStatus}
+                              setLoadingStatus={setLoadingStatus}
+                              setProductDataUpdate={setProductDataUpdate}
+                              bottles={bottles}
+                              setBottles={setBottles}
+                              isInventoryModalVisible={isInventoryModalVisible}
+                              setIsInventoryModalVisible={
+                                setIsInventoryModalVisible
+                              }
+                              openInventoryModal={openInventoryModal}
+                              newBottleCount={newBottleCount}
+                              setNewBottleCount={setNewBottleCount}
+                              newServingCount={newServingCount}
+                              setNewServingCount={setNewServingCount}
+                              handleSaveInventoryUpdate={
+                                handleSaveInventoryUpdate
+                              }
+                            />
+                          ))}
+                        </>
+                      </View>
+                    </View>
+                  )}
+                </>
+              )}
+            />
+            {noProductsFound && (
+              <View>
+                <Text style={styles.notExistProduct}>
+                  No products found with this name
+                </Text>
               </View>
-            </LinearGradient>
-            <View style={styles.topBar}>
-              <Text style={styles.headerText}>
-                Welcome to {restaurant?.restaurantName}
-              </Text>
-            </View>
-            <View style={styles.searchBarContainer}>
-              <Text style={styles.headerText}>Todays bar worth is 20054 usd </Text>
-
-              <View style={styles.buttonsContainer}>
-                {/* Change Menu Button */}
-                <TouchableOpacity
-                  onPress={navigateToNoimagesmenu}
-                  style={[styles.button, { marginRight: 8 }]}
-                >
-                  <Text style={styles.buttonText}>Change Menu</Text>
-                </TouchableOpacity>
-
-           
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("Scaninventory")}
-                  style={styles.buttonContainer}
-                >
-                </TouchableOpacity>
-              </View>
-              <TextInput
-                style={styles.searchBar}
-                placeholder="Search liquor and wine..."
-                placeholderTextColor="#aaa"
-                value={searchValue}
-                onChangeText={handleSearchChange}
-              />
-            </View>
+            )}
           </>
-        }
-        renderItem={({ item, index }) => (
-          <View key={index}>
-            <Text style={styles.categoryText}>{item.name}</Text>
-            <View style={styles.productRow}>
-              {item.products?.map((product, i) => (
-                  <Product
-                  key={i}
-                  productData={product}
-                  image={product.image}
-                  title={product.name}
-                  price={product.price}
-                  status={product.enabled}
-                  deleteItem={deleteItem}
-                  setDeleteItem={setDeleteItem}
-                  id={product.id}
-                  searchValue={searchValue}
-                  handleSearchChange={handleSearchChange}
-                  navigation={navigation}
-                  loadingStatus={loadingStatus}
-                  setLoadingStatus={setLoadingStatus}
-                  setProductDataUpdate={setProductDataUpdate}
-                  bottles={bottles}
-                  setBottles={setBottles}
-                  isInventoryModalVisible={isInventoryModalVisible}
-                  setIsInventoryModalVisible={setIsInventoryModalVisible}
-                  openInventoryModal={openInventoryModal}
-                  newBottleCount={newBottleCount}
-                  setNewBottleCount={setNewBottleCount}
-                  newServingCount={newServingCount}
-                  setNewServingCount={setNewServingCount}
-                  handleSaveInventoryUpdate={handleSaveInventoryUpdate}
-
-                />
-              ))}
-            </View>
-          </View>
         )}
-      />
-    )}
-  </>
-)}
-
 
         <View style={styles.bannerContainer}>
           <Image
@@ -681,7 +644,7 @@ const Mainmenu = () => {
       <Toast setRef={(ref) => Toast.setRef(ref)} />
     </>
   );
-};
+});
 
 const styles = StyleSheet.create({
   menuModalContainer: {
@@ -897,13 +860,12 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white', // Example background color
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "white", // Example background color
     padding: 20, // Example padding
     // You can add more styles as needed
   },
- 
 });
 
 // add # of bottles/ servings lets

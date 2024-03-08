@@ -4,6 +4,7 @@ import {
   SafeAreaView,
   ScrollView,
   ActivityIndicator,
+  View,
 } from "react-native";
 import {
   NativeBaseProvider,
@@ -19,6 +20,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Timestamp } from "firebase/firestore";
 import Toast from "react-native-toast-message";
 import { AuthContext } from "../../context/context";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   updateItem,
   getItemsByConditionGuest,
@@ -30,15 +32,21 @@ const InventoryScreen = ({ productData, id }) => {
   const inventoryProd = productData?.inventory?.[0];
   const [selectedBar, setSelectedBar] = useState(inventoryProd?.chooseBar);
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [selectedBottles, setSelectedBottles] = useState(inventoryProd?.quantity);
-  const [selectedServings, setSelectedServings] = useState(inventoryProd?.servings);
-
-  useEffect(() => {
-    const updatedProducts = routerName.map((product) =>
-    product === route.name ? route.name : product
+  const [selectedBottles, setSelectedBottles] = useState(
+    inventoryProd?.quantity
   );
-  setRouterName(updatedProducts);
-  }, [])
+  const [selectedServings, setSelectedServings] = useState(
+    inventoryProd?.servings
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const updatedProducts = routerName.map((product) =>
+        product === route.name ? route.name : product
+      );
+      setRouterName(updatedProducts);
+    }, [])
+  );
 
   const quantityOptions = Array.from({ length: 20 }, (_, i) => `${i + 1}`);
 
@@ -48,9 +56,9 @@ const InventoryScreen = ({ productData, id }) => {
       const time = Timestamp.fromDate(new Date()).toDate();
       const updatedInventory = {
         ...inventoryProd,
-        chooseBar: selectedBar,
-        quantity: selectedBottles,
-        servings: selectedServings,
+        chooseBar: selectedBar || null,
+        quantity: selectedBottles || null,
+        servings: selectedServings || null,
       };
 
       const updatedProductData = {
@@ -103,6 +111,14 @@ const InventoryScreen = ({ productData, id }) => {
         };
 
         await createItemCustom(logObjet, "logInventory");
+
+        Toast.show({
+          type: "success",
+          text1: "Success",
+          text2: "Access granted",
+          position: "bottom",
+          style: { backgroundColor: "black", zIndex: 1000 },
+        });
       }
 
       const filteredOldData =
@@ -127,7 +143,17 @@ const InventoryScreen = ({ productData, id }) => {
         };
 
         await updateItem(logInventory[0]?.id, logObjetUpdate, "logInventory");
+
+        Toast.show({
+          type: "success",
+          text1: "Success",
+          text2: "Access granted",
+          position: "bottom",
+          style: { backgroundColor: "black", zIndex: 1000 },
+        });
       }
+
+      console.log('updatedProductData: ', updatedProductData)
 
       await updateItem(id, updatedProductData, "products");
       const updatedProducts = routerName.map((product) =>
@@ -139,6 +165,7 @@ const InventoryScreen = ({ productData, id }) => {
         text1: "Success",
         text2: "Access granted",
         position: "bottom",
+        style: { backgroundColor: "black", zIndex: 1000 },
       });
       setSubmitLoading(false);
     } catch (error) {
@@ -149,16 +176,18 @@ const InventoryScreen = ({ productData, id }) => {
         text2: `Something seems to have gone wrong when trying to update the file: ${error.message}`,
         text2NumberOfLines: 5,
         position: "bottom",
+        style: { backgroundColor: "black" },
       });
       setSubmitLoading(false);
     }
   };
 
   return (
-    <>
-      <NativeBaseProvider>
+    <NativeBaseProvider>
+      <>
         <SafeAreaView style={styles.container}>
           <ScrollView contentContainerStyle={styles.scrollView}>
+            <Toast setRef={(ref) => Toast.setRef(ref)} />
             <Box style={styles.header}>
               <Text style={styles.headerText}>Inventory Management</Text>
             </Box>
@@ -238,9 +267,9 @@ const InventoryScreen = ({ productData, id }) => {
             </VStack>
           </ScrollView>
         </SafeAreaView>
-      </NativeBaseProvider>
-      <Toast setRef={(ref) => Toast.setRef(ref)} />
-    </>
+        <Toast setRef={(ref) => Toast.setRef(ref)} />
+      </>
+    </NativeBaseProvider>
   );
 };
 
@@ -266,8 +295,6 @@ const styles = StyleSheet.create({
   formContainer: {
     marginTop: 10,
     width: "100%",
-    
-
   },
 });
 

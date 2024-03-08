@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
-import { NativeBaseProvider } from 'native-base';
-import { Box, Input, FormControl, Button, HStack, Switch  } from 'native-base';
+import { NativeBaseProvider } from "native-base";
+import { Box, Input, FormControl, Button, HStack, Switch } from "native-base";
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { Timestamp } from "firebase/firestore";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useFocusEffect } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { AuthContext } from "../../context/context";
 import Toast from "react-native-toast-message";
@@ -28,7 +28,8 @@ import {
 
 const SettingsScreen = ({ productData, id }) => {
   const route = useRoute();
-  const { user, routerName, setRouterName, setProductDataUpdate } = useContext(AuthContext);
+  const { user, routerName, setRouterName, setProductDataUpdate } =
+    useContext(AuthContext);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [availability, setAvailability] = useState(productData?.enabled);
   const [itemName, setItemName] = useState(productData?.name);
@@ -48,17 +49,19 @@ const SettingsScreen = ({ productData, id }) => {
   const [image, setImage] = useState(null);
   const [nameImg, setNameImg] = useState("");
 
-  useEffect(() => {
-    (async () => {
-      if (Platform.OS !== "web") {
-        const { status } =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== "granted") {
-          alert("Sorry, we need media library permissions to do this!");
+  useFocusEffect(
+    React.useCallback(() => {
+      (async () => {
+        if (Platform.OS !== "web") {
+          const { status } =
+            await ImagePicker.requestMediaLibraryPermissionsAsync();
+          if (status !== "granted") {
+            alert("Sorry, we need media library permissions to do this!");
+          }
         }
-      }
-    })();
-  }, []);
+      })();
+    }, [])
+  );
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -130,8 +133,8 @@ const SettingsScreen = ({ productData, id }) => {
             ? availability
             : productData?.enabled,
         position: productData?.position || productData?.positionInCategory,
-        purchaseCost: purchaseCost || productData?.purchaseCost || '',
-        servings: servings || productData?.servings || '',
+        purchaseCost: purchaseCost || productData?.purchaseCost || "",
+        servings: servings || productData?.servings || "",
         inventory: [{ ...productData?.inventory?.[0] }],
       };
 
@@ -165,11 +168,10 @@ const SettingsScreen = ({ productData, id }) => {
               nameItem: itemName || productData?.name,
               edit: editObjLog,
               oldValues: oldObjLog,
-              idItem: id
+              idItem: id,
             },
           ],
         };
-        console.log('POsition: ', logObjetUpdate)
         await createItemCustom(logObjet, "log");
       }
 
@@ -186,12 +188,11 @@ const SettingsScreen = ({ productData, id }) => {
               nameItem: itemName || productData?.name,
               edit: editObjLog,
               oldValues: oldObjLog,
-              idItem: id
+              idItem: id,
             },
           ],
         };
 
-        console.log('POsition: ', logObjetUpdate)
         await updateItem(logRestaurant[0]?.id, logObjetUpdate, "log");
       }
 
@@ -224,275 +225,266 @@ const SettingsScreen = ({ productData, id }) => {
 
   return (
     <NativeBaseProvider>
-    <>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          {submitLoading ? (
-            <ActivityIndicator size="large" color="#808080" />
-          ) : (
-            <Box alignItems="center" w="100%" px="2.5%">
-            <Button onPress={onFinish} size="lg" w="95%">
-              Save
-            </Button>
-          </Box>
-          )}
-        </View>
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <FormControl>
-        
-         <Box style={styles.settingItem}>
-         <FormControl.Label>Item name</FormControl.Label>
-            <Input
-               size="lg"
-               placeholder="Enter item name"
-               w="95%"
-               value={itemName}
-               onChangeText={(text) => setItemName(text)}
-                 _input={{
-                      color: 'blueGray.400',
-                   }}
-                   _light={{
-                    _placeholder: { color: 'blueGray.400' },
-                          }}
-                    _dark={{
-                   _placeholder: { color: 'blueGray.50' },
-                     }}
-                    />
-                    </Box>
-                 </FormControl>
-                 <FormControl>
-  <Box style={styles.settingItem}>
-    <FormControl.Label>Price</FormControl.Label>
-    <Input
-      size="lg"
-      placeholder="Enter price"
-      w="95%"
-      keyboardType="numeric"
-      value={price}
-      onChangeText={setPrice}
-      _input={{ color: 'blueGray.400' }}
-      _light={{ _placeholder: { color: 'blueGray.400' } }}
-      _dark={{ _placeholder: { color: 'blueGray.50' } }}
-    />
-  </Box>
-</FormControl>
-
-<FormControl>
-  <Box style={styles.settingItem}>
-    <FormControl.Label>Purchase Cost</FormControl.Label>
-    <Input
-      size="lg"
-      placeholder="Enter purchase cost"
-      w="95%"
-      keyboardType="numeric"
-      value={purchaseCost}
-      onChangeText={setPurchaseCost}
-      _input={{ color: 'blueGray.400' }}
-      _light={{ _placeholder: { color: 'blueGray.400' } }}
-      _dark={{ _placeholder: { color: 'blueGray.50' } }}
-    />
-  </Box>
-</FormControl>
-
-<FormControl>
-  <Box style={styles.settingItem}>
-    <FormControl.Label>Servings</FormControl.Label>
-    <Input
-      size="lg"
-      placeholder="Servings"
-      w="95%"
-      keyboardType="numeric"
-      value={servings}
-      onChangeText={setServings}
-      _input={{ color: 'blueGray.400' }}
-      _light={{ _placeholder: { color: 'blueGray.400' } }}
-      _dark={{ _placeholder: { color: 'blueGray.50' } }}
-    />
-  </Box>
-</FormControl>
-
-<FormControl>
-  <Box style={styles.settingItem}>
-    <FormControl.Label>ABV</FormControl.Label>
-    <Input
-      size="lg"
-      placeholder="ABV"
-      w="95%"
-      value={abv}
-      onChangeText={setAbv}
-      _input={{ color: 'blueGray.400' }}
-      _light={{ _placeholder: { color: 'blueGray.400' } }}
-      _dark={{ _placeholder: { color: 'blueGray.50' } }}
-    />
-  </Box>
-</FormControl>
-
-<FormControl>
-  <Box style={styles.settingItem}>
-    <FormControl.Label>Body</FormControl.Label>
-    <Input
-      size="lg"
-      placeholder="Body"
-      w="95%"
-      value={body}
-      onChangeText={setBody}
-      _input={{ color: 'blueGray.400' }}
-      
-    />
-  </Box>
-</FormControl>
-
-<FormControl>
-  <Box style={styles.settingItem}>
-    <FormControl.Label>Brand</FormControl.Label>
-    <Input
-      size="lg"
-      placeholder="Brand"
-      w="95%"
-      value={brand}
-      onChangeText={setBrand}
-      _input={{ color: 'blueGray.400' }}
- 
-    />
-  </Box>
-</FormControl>
-
-<FormControl>
-  <Box style={styles.settingItem}>
-    <FormControl.Label>Country/State</FormControl.Label>
-    <Input
-      size="lg"
-      placeholder="Country/State"
-      w="95%"
-      value={countryState}
-      onChangeText={setCountryState}
-      _input={{ color: 'blueGray.400' }}
-      
-    />
-  </Box>
-</FormControl>
-
-<FormControl>
-  <Box style={styles.settingItem}>
-    <FormControl.Label>Region</FormControl.Label>
-    <Input
-      size="lg"
-      placeholder="Region"
-      w="95%"
-      value={region}
-      onChangeText={setRegion}
-      _input={{ color: 'blueGray.400' }}
-   
-    />
-  </Box>
-</FormControl>
-
-<FormControl>
-  <Box style={styles.settingItem}>
-    <FormControl.Label>SKU</FormControl.Label>
-    <Input
-      size="lg"
-      placeholder="SKU"
-      w="95%"
-      value={sku}
-      onChangeText={setSku}
-      _input={{ color: 'blueGray.400' }}
-     
-    />
-  </Box>
-</FormControl>
-
-<FormControl>
-  <Box style={styles.settingItem}>
-    <FormControl.Label>Taste</FormControl.Label>
-    <Input
-      size="lg"
-      placeholder="Taste"
-      w="95%"
-      value={taste}
-      onChangeText={setTaste}
-      _input={{ color: 'blueGray.400' }}
-  
-    />
-  </Box>
-</FormControl>
-
-<FormControl>
-  <Box style={styles.settingItem}>
-    <FormControl.Label>Type</FormControl.Label>
-    <Input
-      size="lg"
-      placeholder="Type"
-      w="95%"
-      value={type}
-      onChangeText={setType}
-      _input={{ color: 'blueGray.400' }}
-     
-    />
-  </Box>
-</FormControl>
-
-<FormControl>
-  <Box style={styles.settingItem}>
-    <FormControl.Label>Varietal</FormControl.Label>
-    <Input
-      size="lg"
-      placeholder="Varietal"
-      w="95%"
-      value={varietal}
-      onChangeText={setVarietal}
-      _input={{ color: 'blueGray.400' }}
-     
-    />
-  </Box>
-</FormControl> 
-       <View style={styles.settingItem}>
-      <HStack alignItems="center" space={4} marginTop={5}>
-        <Text style={styles.settingLabel}>Availability</Text>
-        <Switch
-          size="sm"
-          value={availability}
-          onToggle={() => setAvailability(!availability)}
-        />
-      </HStack>
-    </View>
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: 20,
-            }}
-          >
-             <Box alignItems="center" w="100%" px="2.5%" mb="5">
-           <Button
-            onPress={pickImage}
-             size="lg"
-             variant="outline"
-           w="95%"
-             marginBottom="5" // Equivalent to 20 in NativeBase's default scale, you can adjust as needed
-               >
-                Upload image from gallery
-             </Button>
-               </Box>
-            <TouchableOpacity onPress={takePhoto} style={styles.container}>
-              {image ? (
-                <Image
-                  source={{ uri: image }}
-                  style={{ width: 400, height: 400, marginTop: 20 }}
-                />
-              ) : (
-                <Image
-                  source={{ uri: imgProduct }}
-                  style={{ width: 400, height: 400, marginTop: 20 }}
-                />
-              )}
-            </TouchableOpacity>
+      <>
+        <SafeAreaView style={styles.container}>
+          <View style={styles.header}>
+            {submitLoading ? (
+              <ActivityIndicator size="large" color="#808080" />
+            ) : (
+              <Box alignItems="center" w="100%" px="2.5%">
+                <Button onPress={onFinish} size="lg" w="95%">
+                  Save
+                </Button>
+              </Box>
+            )}
           </View>
-        </ScrollView>
-      </SafeAreaView>
-      <Toast setRef={(ref) => Toast.setRef(ref)} />
-    </>
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <FormControl>
+              <Box style={styles.settingItem}>
+                <FormControl.Label>Item name</FormControl.Label>
+                <Input
+                  size="lg"
+                  placeholder="Enter item name"
+                  w="95%"
+                  value={itemName}
+                  onChangeText={(text) => setItemName(text)}
+                  _input={{
+                    color: "blueGray.400",
+                  }}
+                  _light={{
+                    _placeholder: { color: "blueGray.400" },
+                  }}
+                  _dark={{
+                    _placeholder: { color: "blueGray.50" },
+                  }}
+                />
+              </Box>
+            </FormControl>
+            <FormControl>
+              <Box style={styles.settingItem}>
+                <FormControl.Label>Price</FormControl.Label>
+                <Input
+                  size="lg"
+                  placeholder="Enter price"
+                  w="95%"
+                  keyboardType="numeric"
+                  value={price}
+                  onChangeText={setPrice}
+                  _input={{ color: "blueGray.400" }}
+                  _light={{ _placeholder: { color: "blueGray.400" } }}
+                  _dark={{ _placeholder: { color: "blueGray.50" } }}
+                />
+              </Box>
+            </FormControl>
+
+            <FormControl>
+              <Box style={styles.settingItem}>
+                <FormControl.Label>Purchase Cost</FormControl.Label>
+                <Input
+                  size="lg"
+                  placeholder="Enter purchase cost"
+                  w="95%"
+                  keyboardType="numeric"
+                  value={purchaseCost}
+                  onChangeText={setPurchaseCost}
+                  _input={{ color: "blueGray.400" }}
+                  _light={{ _placeholder: { color: "blueGray.400" } }}
+                  _dark={{ _placeholder: { color: "blueGray.50" } }}
+                />
+              </Box>
+            </FormControl>
+
+            <FormControl>
+              <Box style={styles.settingItem}>
+                <FormControl.Label>Servings</FormControl.Label>
+                <Input
+                  size="lg"
+                  placeholder="Servings"
+                  w="95%"
+                  keyboardType="numeric"
+                  value={servings}
+                  onChangeText={setServings}
+                  _input={{ color: "blueGray.400" }}
+                  _light={{ _placeholder: { color: "blueGray.400" } }}
+                  _dark={{ _placeholder: { color: "blueGray.50" } }}
+                />
+              </Box>
+            </FormControl>
+
+            <FormControl>
+              <Box style={styles.settingItem}>
+                <FormControl.Label>ABV</FormControl.Label>
+                <Input
+                  size="lg"
+                  placeholder="ABV"
+                  w="95%"
+                  value={abv}
+                  onChangeText={setAbv}
+                  _input={{ color: "blueGray.400" }}
+                  _light={{ _placeholder: { color: "blueGray.400" } }}
+                  _dark={{ _placeholder: { color: "blueGray.50" } }}
+                />
+              </Box>
+            </FormControl>
+
+            <FormControl>
+              <Box style={styles.settingItem}>
+                <FormControl.Label>Body</FormControl.Label>
+                <Input
+                  size="lg"
+                  placeholder="Body"
+                  w="95%"
+                  value={body}
+                  onChangeText={setBody}
+                  _input={{ color: "blueGray.400" }}
+                />
+              </Box>
+            </FormControl>
+
+            <FormControl>
+              <Box style={styles.settingItem}>
+                <FormControl.Label>Brand</FormControl.Label>
+                <Input
+                  size="lg"
+                  placeholder="Brand"
+                  w="95%"
+                  value={brand}
+                  onChangeText={setBrand}
+                  _input={{ color: "blueGray.400" }}
+                />
+              </Box>
+            </FormControl>
+
+            <FormControl>
+              <Box style={styles.settingItem}>
+                <FormControl.Label>Country/State</FormControl.Label>
+                <Input
+                  size="lg"
+                  placeholder="Country/State"
+                  w="95%"
+                  value={countryState}
+                  onChangeText={setCountryState}
+                  _input={{ color: "blueGray.400" }}
+                />
+              </Box>
+            </FormControl>
+
+            <FormControl>
+              <Box style={styles.settingItem}>
+                <FormControl.Label>Region</FormControl.Label>
+                <Input
+                  size="lg"
+                  placeholder="Region"
+                  w="95%"
+                  value={region}
+                  onChangeText={setRegion}
+                  _input={{ color: "blueGray.400" }}
+                />
+              </Box>
+            </FormControl>
+
+            <FormControl>
+              <Box style={styles.settingItem}>
+                <FormControl.Label>SKU</FormControl.Label>
+                <Input
+                  size="lg"
+                  placeholder="SKU"
+                  w="95%"
+                  value={sku}
+                  onChangeText={setSku}
+                  _input={{ color: "blueGray.400" }}
+                />
+              </Box>
+            </FormControl>
+
+            <FormControl>
+              <Box style={styles.settingItem}>
+                <FormControl.Label>Taste</FormControl.Label>
+                <Input
+                  size="lg"
+                  placeholder="Taste"
+                  w="95%"
+                  value={taste}
+                  onChangeText={setTaste}
+                  _input={{ color: "blueGray.400" }}
+                />
+              </Box>
+            </FormControl>
+
+            <FormControl>
+              <Box style={styles.settingItem}>
+                <FormControl.Label>Type</FormControl.Label>
+                <Input
+                  size="lg"
+                  placeholder="Type"
+                  w="95%"
+                  value={type}
+                  onChangeText={setType}
+                  _input={{ color: "blueGray.400" }}
+                />
+              </Box>
+            </FormControl>
+
+            <FormControl>
+              <Box style={styles.settingItem}>
+                <FormControl.Label>Varietal</FormControl.Label>
+                <Input
+                  size="lg"
+                  placeholder="Varietal"
+                  w="95%"
+                  value={varietal}
+                  onChangeText={setVarietal}
+                  _input={{ color: "blueGray.400" }}
+                />
+              </Box>
+            </FormControl>
+            <View style={styles.settingItem}>
+              <HStack alignItems="center" space={4} marginTop={5}>
+                <Text style={styles.settingLabel}>Availability</Text>
+                <Switch
+                  size="sm"
+                  value={availability}
+                  onToggle={() => setAvailability(!availability)}
+                />
+              </HStack>
+            </View>
+            <View
+              style={{
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: 20,
+              }}
+            >
+              <Box alignItems="center" w="100%" px="2.5%" mb="5">
+                <Button
+                  onPress={pickImage}
+                  size="lg"
+                  variant="outline"
+                  w="95%"
+                  marginBottom="5" // Equivalent to 20 in NativeBase's default scale, you can adjust as needed
+                >
+                  Upload image from gallery
+                </Button>
+              </Box>
+              <TouchableOpacity onPress={takePhoto} style={styles.container}>
+                {image ? (
+                  <Image
+                    source={{ uri: image }}
+                    style={{ width: 400, height: 400, marginTop: 20 }}
+                  />
+                ) : (
+                  <Image
+                    source={{ uri: imgProduct }}
+                    style={{ width: 400, height: 400, marginTop: 20 }}
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+        <Toast setRef={(ref) => Toast.setRef(ref)} />
+      </>
     </NativeBaseProvider>
   );
 };
@@ -530,7 +522,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     backgroundColor: "black", // Match your theme
   },
-  
+
   changeImageButton: {
     backgroundColor: "blue", // Or any color that fits your design
     paddingHorizontal: 20,

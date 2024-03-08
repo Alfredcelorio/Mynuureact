@@ -1,134 +1,136 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, SafeAreaView, FlatList, RefreshControl } from "react-native";
+import { View, Text, StyleSheet, SafeAreaView, FlatList, RefreshControl, ActivityIndicator } from "react-native";
 import { getItemsByConditionGuest } from "../../services/conx/settings";
+import { useFocusEffect } from "@react-navigation/native";
 
 const SettingsScreen = ({ productData, id }) => {
   const [data, setData] = useState([]);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false); // Add this line
 
-
-  const onRefresh = () => {
-    fetchData(); // Call fetchData within onRefresh to refresh the list
-  };
-
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setRefreshing(true);
-        console.log('PROP: ', productData?.restaurantId)
-
-        
-
-        const logInventory = await getItemsByConditionGuest(
-          productData?.restaurantId,
-          "logInventory",
-          "idRestaurant"
-        );
-
-        const logRestaurant = await getItemsByConditionGuest(
-          productData?.restaurantId,
-          "log",
-          "idRestaurant"
-        );
-
-        const filteredLogInventory = logInventory[0].log
-          .filter((entry) => entry.idItem === id)
-          .map((item) => ({
-            ...item.newData[0],
-            user: item.user,
-            hour: new Date(item.time.seconds * 1000).toLocaleTimeString(
-              "en-US",
-              {
-                hour: "numeric",
-                minute: "numeric",
-                hour12: true,
-              }
-            ),
-            date: new Date(item.time.seconds * 1000)
-              .toISOString()
-              .split("T")[0],
-          }));
-
-        const filteredLogRestaurant = logRestaurant[0].log
-          .filter((entry) => entry.idItem === id)
-          .map((item) => ({
-            ...item.edit,
-            user: item.user,
-            hour: new Date(item.time.seconds * 1000).toLocaleTimeString(
-              "en-US",
-              {
-                hour: "numeric",
-                minute: "numeric",
-                hour12: true,
-              }
-            ),
-            date: new Date(item.time.seconds * 1000)
-              .toISOString()
-              .split("T")[0],
-          }));
-
-        const combinedLogs = [
-          ...filteredLogInventory,
-          ...filteredLogRestaurant,
-        ];
-
-        const groupedData = combinedLogs.reduce((acc, curr) => {
-          const { date, hour, ...rest } = curr;
-          if (!acc[date]) {
-            acc[date] = [];
-          }
-
-          let found = false;
-          acc[date].forEach((obj) => {
-            if (obj.hour === hour) {
-              Object.assign(obj, rest);
-              found = true;
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        try {
+          setRefreshing(true);
+  
+          const logInventory = await getItemsByConditionGuest(
+            productData?.restaurantId,
+            "logInventory",
+            "idRestaurant"
+          );
+  
+          const logRestaurant = await getItemsByConditionGuest(
+            productData?.restaurantId,
+            "log",
+            "idRestaurant"
+          );
+  
+          const filteredLogInventory = logInventory[0].log
+            .filter((entry) => entry.idItem === id)
+            .map((item) => ({
+              ...item.newData[0],
+              user: item.user,
+              hour: new Date(item.time.seconds * 1000).toLocaleTimeString(
+                "en-US",
+                {
+                  hour: "numeric",
+                  minute: "numeric",
+                  hour12: true,
+                }
+              ),
+              date: new Date(item.time.seconds * 1000)
+                .toISOString()
+                .split("T")[0],
+            }));
+  
+          const filteredLogRestaurant = logRestaurant[0].log
+            .filter((entry) => entry.idItem === id)
+            .map((item) => ({
+              ...item.edit,
+              user: item.user,
+              hour: new Date(item.time.seconds * 1000).toLocaleTimeString(
+                "en-US",
+                {
+                  hour: "numeric",
+                  minute: "numeric",
+                  hour12: true,
+                }
+              ),
+              date: new Date(item.time.seconds * 1000)
+                .toISOString()
+                .split("T")[0],
+            }));
+  
+          const combinedLogs = [
+            ...filteredLogInventory,
+            ...filteredLogRestaurant,
+          ];
+  
+          const groupedData = combinedLogs.reduce((acc, curr) => {
+            const { date, hour, ...rest } = curr;
+            if (!acc[date]) {
+              acc[date] = [];
             }
+  
+            let found = false;
+            acc[date].forEach((obj) => {
+              if (obj.hour === hour) {
+                Object.assign(obj, rest);
+                found = true;
+              }
+            });
+  
+            if (!found) {
+              acc[date].push({ hour, ...rest });
+            }
+  
+            return acc;
+          }, {});
+  
+          const formattedData = Object.entries(groupedData).map(
+            ([date, changes]) => ({
+              [date]: changes,
+            })
+          );
+  
+          const sortedData = formattedData.sort((a, b) => {
+            const dateA = Object.keys(a)[0];
+            const dateB = Object.keys(b)[0];
+            return new Date(dateB) - new Date(dateA);
           });
+  
+          setData(sortedData);
+          setSubmitLoading(false);
+        } catch (err) {
+          console.log("ERROR: ", err);
+          setSubmitLoading(false);
+        }
+      };
+  
+      fetchData();
 
-          if (!found) {
-            acc[date].push({ hour, ...rest });
-          }
-
-          return acc;
-        }, {});
-
-        const formattedData = Object.entries(groupedData).map(
-          ([date, changes]) => ({
-            [date]: changes,
-          })
-        );
-
-        const sortedData = formattedData.sort((a, b) => {
-          const dateA = Object.keys(a)[0];
-          const dateB = Object.keys(b)[0];
-          return new Date(dateB) - new Date(dateA);
-        });
-
-        setData(sortedData);
-        setSubmitLoading(false);
-      } catch (err) {
-        console.log("ERROR: ", err);
-        setSubmitLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+      return () => {
+        <><ActivityIndicator/></>
+      };
+    }, [])
+  );
 
   const renderHistoryItem = ({ item, index }) => {
     const date = Object.keys(item)[0];
-    let internalIndex = 0; // Índice interno para recorrer los elementos internos de los arrays
+    let internalIndex = 0;
   
     if (item[date]) {
+
+      const reversedUpdates = [...item[date]].reverse();
+    
       return (
         <>
           <View style={styles.dateHeader}>
             <Text style={styles.dateHeaderText}>{date}</Text>
           </View>
-          {item[date].map((internalItem) => {
+          {reversedUpdates.map((internalItem) => {
+            console.log("RENDER: ", reversedUpdates)
             return (
               <View key={internalIndex++} style={styles.historyItem}>
                 <Text style={styles.historyText}>{`${internalItem.user} ${
@@ -148,7 +150,7 @@ const SettingsScreen = ({ productData, id }) => {
                     ? `updated the bar to  ${internalItem.chooseBar}`
                     : internalItem.image
                     ? `changed the product image `
-                    : ``
+                    : `changed value in the product`
                 } at ${internalItem.hour}`}</Text>
               </View>
             );
@@ -158,15 +160,17 @@ const SettingsScreen = ({ productData, id }) => {
     } else {
       return null;
     }
-  };
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
         data={data}
-        renderItem={renderHistoryItem}
+        renderItem={
+          data ? renderHistoryItem : <ActivityIndicator />}
         keyExtractor={(item, index) => index.toString()}
         contentContainerStyle={styles.scrollContainer}
+        ListFooterComponent={submitLoading ? <ActivityIndicator /> : null}
       />
     </SafeAreaView>
   );

@@ -32,9 +32,7 @@ Animatable.initializeRegistryWithDefinitions({
 
 const TopTab = createMaterialTopTabNavigator();
 
-function TopTabNavigator() {
-  const route = useRoute();
-  const { productData, id } = route.params;
+const TopTabNavigator = React.memo(({ productData, id }) => {
   return (
     <TopTab.Navigator
       initialRouteName="Item"
@@ -59,12 +57,14 @@ function TopTabNavigator() {
       </TopTab.Screen>
     </TopTab.Navigator>
   );
-}
+});
 
 const ProductScreen = () => {
+  const route = useRoute();
+  const { productData, id } = route.params;
   return (
     <SafeAreaView style={styles.container}>
-      <TopTabNavigator />
+      <TopTabNavigator productData={productData} id={id} />
     </SafeAreaView>
   );
 };

@@ -58,10 +58,15 @@ export const createItem = async (obj, collections, id) => {
 
 // CREATE NEW OBJECT IN COLLECTION
 export const createItemCustom = async (obj, collections) => {
-  const data = await addDoc(collection(db, collections), {
-    ...obj,
-  });
-  return data.id;
+  try {
+    const data = await addDoc(collection(db, collections), {
+      ...obj,
+    });
+    return data.id;
+  } catch (error) {
+    console.log("Error: ", error);
+    throw error
+  }
 };
 
 // UPDATE
@@ -71,6 +76,7 @@ export const updateItem = async (id, obj, collections) => {
     await updateDoc(doc(colRef, id), obj);
   } catch(err) {
     console.log('Err: ', err)
+    throw err
   }
 };
 
