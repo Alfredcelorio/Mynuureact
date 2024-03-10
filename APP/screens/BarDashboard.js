@@ -22,7 +22,6 @@ export default function App() {
     const monthKey = formatMonthKey(currentMonth);
     const purchaseWithDate = {
       amount: Number(newPurchase),
-      date: new Date().toLocaleDateString() // Stores the current date as a string
     };
     const updatedPurchases = {
       ...purchases,

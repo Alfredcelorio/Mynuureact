@@ -140,7 +140,7 @@ const SettingsScreen = ({ productData, id }) => {
                     : internalItem.price
                     ? `changed price to ${internalItem.price}`
                     : internalItem.purchaseCost
-                    ? `Change the purchase cost  to ${internalItem.purchaseCost} usd`
+                    ? `changed the purchase cost  to ${internalItem.purchaseCost} usd`
                     : internalItem.servings
                     ? `updated the amount servings to ${internalItem.servings}`
                     : internalItem.quantity
