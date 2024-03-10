@@ -153,8 +153,6 @@ const InventoryScreen = ({ productData, id }) => {
         });
       }
 
-      console.log('updatedProductData: ', updatedProductData)
-
       await updateItem(id, updatedProductData, "products");
       const updatedProducts = routerName.map((product) =>
         product === route.name ? route.name : product

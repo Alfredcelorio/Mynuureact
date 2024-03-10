@@ -132,7 +132,7 @@ const SettingsScreen = ({ productData, id }) => {
           availability !== productData?.enabled
             ? availability
             : productData?.enabled,
-        position: productData?.position || productData?.positionInCategory,
+        position: productData?.position,
         purchaseCost: purchaseCost || productData?.purchaseCost || "",
         servings: servings || productData?.servings || "",
         inventory: [{ ...productData?.inventory?.[0] }],
@@ -149,11 +149,20 @@ const SettingsScreen = ({ productData, id }) => {
       let oldObjLog = {};
       let editObjLog = {};
 
+      let isModified = false;
+
       for (let [key, value] of Object.entries(obj)) {
         if (key !== "inventory" && initialState[key] !== value) {
-          oldObjLog[key] = initialState[key] ? initialState[key] : null;
+          oldObjLog[key] = initialState[key] || null;
           editObjLog[key] = value;
+          isModified = true;
         }
+        if (key === "idItem" && initialState["id"] !== undefined) {
+          oldObjLog["idItem"] = initialState["id"];
+        }
+      }
+      if (!isModified) {
+        editObjLog["reset"] = "has reverted to the values that were before editing them";
       }
 
       if (logRestaurant?.length === 0) {
@@ -172,6 +181,7 @@ const SettingsScreen = ({ productData, id }) => {
             },
           ],
         };
+
         await createItemCustom(logObjet, "log");
       }
 
