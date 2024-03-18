@@ -75,8 +75,6 @@ const SettingsScreen = ({ productData, id }) => {
             ...(filteredLogRestaurant || []),
           ];
 
-          console.log("combinedLogs: ", combinedLogs);
-
           const groupedData = combinedLogs.reduce((acc, curr) => {
             const { date, hour, ...rest } = curr;
             if (!acc[date]) {
@@ -97,8 +95,6 @@ const SettingsScreen = ({ productData, id }) => {
               return aTime - bTime;
             });
           });
-
-          console.log("groupedData: ", groupedData);
 
           const formattedData = Object.entries(groupedData).map(
             ([date, changes]) => ({

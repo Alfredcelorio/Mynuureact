@@ -46,7 +46,6 @@ export default function GuestPages() {
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShow(Platform.OS === "ios");
-    // console.log(selectedDate, date);
     setDate(currentDate);
   };
 
@@ -59,8 +58,6 @@ export default function GuestPages() {
   const handleCancel = () => {};
 
   const filterDataByDate = (data, date) => {
-    // console.log('DATA 1: ', data)
-    // console.log('DATE 2: ', date)
     return data.filter((item) => {
       const lastVisitDate = new Date(
         item?.lastVisit?.seconds * 1000 + item?.lastVisit?.nanoseconds / 1000000
