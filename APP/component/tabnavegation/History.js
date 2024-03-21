@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
@@ -10,8 +10,11 @@ import {
 } from "react-native";
 import { getItemsByConditionGuest } from "../../services/conx/settings";
 import { useFocusEffect } from "@react-navigation/native";
+import { AuthContext } from "../../context/context";
 
 const SettingsScreen = ({ productData, id }) => {
+  const { user } = useContext(AuthContext);
+  console.log;
   const [data, setData] = useState([]);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false); // Add this line
@@ -90,8 +93,14 @@ const SettingsScreen = ({ productData, id }) => {
             groupedData[date].sort((a, b) => {
               const [aHour, aMinute, aPeriod] = a.hour.split(/[:\s]/);
               const [bHour, bMinute, bPeriod] = b.hour.split(/[:\s]/);
-              const aTime = ((aHour % 12) + (aPeriod.toLowerCase() === 'pm' ? 12 : 0)) * 60 + Number(aMinute);
-              const bTime = ((bHour % 12) + (bPeriod.toLowerCase() === 'pm' ? 12 : 0)) * 60 + Number(bMinute);
+              const aTime =
+                ((aHour % 12) + (aPeriod.toLowerCase() === "pm" ? 12 : 0)) *
+                  60 +
+                Number(aMinute);
+              const bTime =
+                ((bHour % 12) + (bPeriod.toLowerCase() === "pm" ? 12 : 0)) *
+                  60 +
+                Number(bMinute);
               return aTime - bTime;
             });
           });
@@ -178,7 +187,12 @@ const SettingsScreen = ({ productData, id }) => {
 
             return (
               <View key={internalIndex++} style={styles.historyItem}>
-                <Text style={styles.historyText}>{`${internalItem.user} ${
+                <Text style={styles.historyText}>{`${
+                  internalItem.user ||
+                  user.providerData[0].displayName ||
+                  user.email ||
+                  "Guest"
+                } ${
                   knownChanges > 0
                     ? internalItem.delete
                       ? `deleted item`
