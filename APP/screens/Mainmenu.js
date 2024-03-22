@@ -71,6 +71,7 @@ const Product = React.memo(
     setDeleteItem,
     searchValue,
     handleSearchChange,
+    inventory,
   }) => {
     const [updateLoading, setUpdateLoading] = useState(false);
 
@@ -179,9 +180,13 @@ const Product = React.memo(
               <Text style={styles.productDescription}>{description}</Text>
             )}
             <Text style={styles.productPrice}>{price}</Text>
-            <TouchableOpacity onPress={openInventoryModal}>
-              <Text style={styles.productPrice}>{bottles} bottles left </Text>
-            </TouchableOpacity>
+            {inventory?.[0]?.quantity && (
+              <TouchableOpacity onPress={openInventoryModal}>
+                <Text style={styles.productPrice}>
+                  {inventory?.[0]?.quantity} bottles left{" "}
+                </Text>
+              </TouchableOpacity>
+            )}
             <Modal
               visible={isInventoryModalVisible}
               onRequestClose={() => setIsInventoryModalVisible(false)}
@@ -239,7 +244,7 @@ const Mainmenu = React.memo(() => {
   const [newServingCount, setNewServingCount] = useState("");
   const [noProductsFound, setNoProductsFound] = useState(false);
   const [servings, setServings] = useState(0);
-
+  const [totalMoney, setTotalMoney] = useState("");
   const [pageNumber, setPageNumber] = useState(1);
   const [lastDoc, setLastDoc] = useState(null);
 
@@ -334,51 +339,52 @@ const Mainmenu = React.memo(() => {
     }, [deleteItem])
   );
 
-  useEffect( ()=> {
-      if (selectedMenu && categories) {
-        const numb = value1 + 1;
+  useEffect(() => {
+    if (selectedMenu && categories) {
+      const numb = value1 + 1;
 
-        (async () => {
-          const data = await getProductsByMenu(
-            selectedMenu,
-            PAGE_SIZE,
-            lastDoc
+      (async () => {
+        const { data, quantities, totalMoneyBar } = await getProductsByMenu(
+          selectedMenu,
+          PAGE_SIZE,
+          lastDoc
+        );
+
+        const productsByCategories = categories.reduce((value, nextItem) => {
+          const products = data.filter(
+            (item) => item?.categoryId === nextItem?.id
           );
 
-          const productsByCategories = categories.reduce((value, nextItem) => {
-            const products = data.filter(
-              (item) => item?.categoryId === nextItem?.id
-            );
+          products.sort((a, b) => {
+            if (a.position > b.position) return 1;
+            if (a.position < b.position) return -1;
+            return 0;
+          });
 
-            products.sort((a, b) => {
-              if (a.position > b.position) return 1;
-              if (a.position < b.position) return -1;
-              return 0;
-            });
+          const category = { ...nextItem, products };
+          if (category.products.length) value.push(category);
 
-            const category = { ...nextItem, products };
-            if (category.products.length) value.push(category);
+          return value;
+        }, []);
 
-            return value;
-          }, []);
-
-          setTimeout(() => {
-            /* if (data.length > 0) {
+        setTimeout(() => {
+          /* if (data.length > 0) {
               setLastDoc(lastVisible);
             } */
-            setProductsByCat(productsByCategories);
-            setValue1(numb);
-          }, 500);
-          setTimeout(() => {
-            if (searchFilter !== "") {
-              handleSearchChange(searchFilter);
-            }
-            setIsLoading(false);
-            setLoadingStatus(false);
-          }, 800);
-        })();
-      }
-    }, [selectedMenu, deleteItem, loadingStatus, isLoading])
+          setProductsByCat(productsByCategories);
+          setTotalMoney(totalMoneyBar);
+          setValue1(numb);
+        }, 500);
+        setTimeout(() => {
+          if (searchFilter !== "") {
+            handleSearchChange(searchFilter);
+          }
+          setIsLoading(false);
+          setLoadingStatus(false);
+        }, 800);
+      })();
+    }
+  }, [selectedMenu, deleteItem, loadingStatus, isLoading]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -489,7 +495,9 @@ const Mainmenu = React.memo(() => {
           </Text>
         </View>
         <View style={styles.searchBarContainer}>
-          <Text style={styles.headerText}>Todays bar worth is 20054 usd </Text>
+          <Text style={styles.headerText}>
+            Todays bar worth is {totalMoney} usd{" "}
+          </Text>
 
           <View style={styles.buttonsContainer}>
             {/* Change Menu Button */}
@@ -508,7 +516,7 @@ const Mainmenu = React.memo(() => {
         </View>
       </>
     );
-  }, [restaurant]);
+  }, [restaurant, totalMoney]);
 
   return (
     <>
@@ -612,6 +620,7 @@ const Mainmenu = React.memo(() => {
                               handleSaveInventoryUpdate={
                                 handleSaveInventoryUpdate
                               }
+                              inventory={product.inventory}
                             />
                           ))}
                         </>

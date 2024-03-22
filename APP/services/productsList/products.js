@@ -63,10 +63,36 @@ export const getProductsByMenu = async (menuId) => {
       id: docum?.id,
       ...docum.data(),
     }));
-    return data;
+
+    const { quantities, totalMoneyBar } = extractQuantities(data);
+
+    // console.log("Quantities:", quantities);
+    // console.log("Total Money Bar:", totalMoneyBar);
+
+    return { data, quantities, totalMoneyBar };
   } catch (error) {
-    return null;
+    return { data: null, quantities: [], totalMoneyBar: 0 };
   }
+};
+
+const extractQuantities = (data) => {
+  let quantities = [];
+  let totalMoneyBar = 0;
+
+  data.forEach((item) => {
+    if (item.inventory && item.inventory.length > 0) {
+      item.inventory.forEach((inventoryItem) => {
+        const quantity = inventoryItem.quantity
+          ? parseInt(inventoryItem.quantity)
+          : 0;
+        const price = parseFloat(item.price);
+        const total = quantity * price;
+        quantities.push({ quantity, price, total });
+        totalMoneyBar += total;
+      });
+    }
+  });
+  return { quantities, totalMoneyBar };
 };
 
 export const updateLikedProducts = async (data) => {
@@ -83,8 +109,8 @@ export const updateLikedProducts = async (data) => {
 export const updateItem = async (id, obj, collections) => {
   try {
     const docs = await updateDoc(doc(collection(db, collections), id), obj);
-    return docs
+    return docs;
   } catch (error) {
-    throw new Error(error)
+    throw new Error(error);
   }
 };

@@ -3,7 +3,7 @@
     "owner": "mynuu",
     "name": "MynuuAppReg",
     "slug": "Mynuu-Production",
-    "version": "3.2.4",
+    "version": "3.2.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -27,7 +27,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "buildNumber": "3.2.4",
+      "buildNumber": "3.2.5",
       "supportsTablet": true,
       "bundleIdentifier": "com.bundle.mynuu",
       "infoPlist": {
