@@ -82,16 +82,15 @@ const extractQuantities = (data) => {
   data.forEach((item) => {
     if (item.inventory && item.inventory.length > 0) {
       item.inventory.forEach((inventoryItem) => {
-        const quantity = inventoryItem.quantity
-          ? parseInt(inventoryItem.quantity)
-          : 0;
-        const price = parseFloat(item.price);
-        const total = quantity * price;
-        quantities.push({ quantity, price, total });
+        const quantity = inventoryItem.quantity ? parseInt(inventoryItem.quantity) : 0;
+        const purchaseCost = item.purchaseCost ? parseFloat(item.purchaseCost) : 0;
+        const total = quantity * purchaseCost;
+        quantities.push({ quantity, purchaseCost, total });
         totalMoneyBar += total;
       });
     }
   });
+
   return { quantities, totalMoneyBar };
 };
 
